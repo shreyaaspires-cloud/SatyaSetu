@@ -1,0 +1,4 @@
+# Ignore all files and subfolders in this hackathon workspace
+*
+# Allow tracking the gitignore itself
+!.gitignore
