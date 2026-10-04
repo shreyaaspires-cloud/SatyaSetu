@@ -21,8 +21,12 @@
   - [x] W1-F: Implement system enums and constants (`app/core/constants.py`)
   - [x] Unit test suite: `tests/unit/test_contracts.py` (12/12 passing; total 20/20 unit tests passing)
 
-- [ ] **Wave 2: Ingestion Layer Migration and Thread-Pool Offloading**
-- [ ] **Wave 3: Security Hardening (SSRF Guard, Auth Guard, Rate Limiting)**
+- [x] **Wave 2 (Phase 1b): Security Layer with SSRF Guard**
+  - [x] W2-A: Implement `is_public_http_url`, `safe_get`, and `twilio_media_auth` (`app/core/security.py`)
+  - [x] W2-B: Implement abuse test suite `tests/abuse/test_ssrf.py` (29/29 passing)
+  - [x] Verified rejection of private IPs, loopback, cloud metadata (169.254.169.254), DNS rebinding, and redirect manipulation.
+
+- [ ] **Wave 3: Ingestion Feature Migration (Phase 1c)**
 - [ ] **Wave 4: NLP Pipeline (Language Detection, Translation, KeyBERT)**
 - [ ] **Wave 5: Evidence Retrieval Orchestrator (Google Fact Check, Web, Wiki)**
 - [ ] **Wave 6: Verification and Stance Scoring Engine**
