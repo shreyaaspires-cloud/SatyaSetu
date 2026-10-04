@@ -35,7 +35,14 @@
   - [x] W3-F: Extracted text sanitizer with Defect D6 fix (`app/features/ingestion/sanitize.py`)
   - [x] W3-G: Created ingestion orchestrator returning IngestedMessage (`app/features/ingestion/service.py`)
   - [x] W3-H: Created unit test suite `tests/unit/test_ingestion_detect.py` (7/7 passing; total 56/56 tests passing across repo)
-- [ ] **Wave 4: NLP Pipeline (Language Detection, Translation, KeyBERT)**
+- [x] **Wave 4 (Phase 1d + Phase 4): NLP Feature Split and Demo Hacks Removed**
+  - [x] W4-A: Created language and script detector with Hinglish heuristic (`app/features/nlp/language.py`)
+  - [x] W4-B: Migrated translation with Defect D7 demo hack removed and Hinglish support (`app/features/nlp/translation.py`)
+  - [x] W4-C: Migrated KeyBERT keyphrase extraction (`app/features/nlp/keywords.py`)
+  - [x] W4-D: Implemented sentence splitting, forward pressure detection, and claim extraction (`app/features/nlp/claims.py`)
+  - [x] W4-E: Implemented check-worthiness scorer (`app/features/nlp/worthiness.py`)
+  - [x] W4-F: Created test fixtures (`tests/fixtures/samples.yaml`, `tests/fixtures/worthiness.yaml`)
+  - [x] W4-G: Created unit test suites `tests/unit/test_language.py`, `tests/unit/test_claims.py`, `tests/unit/test_worthiness.py` (13/13 passing; total 69/69 tests passing across repo)
 - [ ] **Wave 5: Evidence Retrieval Orchestrator (Google Fact Check, Web, Wiki)**
 - [ ] **Wave 6: Verification and Stance Scoring Engine**
 - [ ] **Wave 7: Explanation Generator and WhatsApp Message Formatter**

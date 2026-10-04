@@ -1,0 +1,22 @@
+# Samples fixture for SatyaSetu test suite
+pm_kisan_forward:
+  text: "यह मैसेज फॉरवर्ड करो, PM Kisan का पैसा मिलेगा"
+  language: "hi"
+  expected_has_forward_pressure: true
+  expected_topic: "PM Kisan"
+
+lemon_water_cancer:
+  text: "Drinking lemon water cures cancer instantly without chemotherapy"
+  language: "en"
+  expected_has_forward_pressure: false
+  expected_claim: "Drinking lemon water cures cancer instantly without chemotherapy"
+
+marathi_covid_cure:
+  text: "हे औषध घरी बनवा, Corona बरा होईल"
+  language: "mr"
+  expected_has_forward_pressure: false
+
+hinglish_forward:
+  text: "Yeh message sabhi WhatsApp groups me share karo, Modi ji free recharge de rahe hain"
+  language: "hi-Latn"
+  expected_has_forward_pressure: true
