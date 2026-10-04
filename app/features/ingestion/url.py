@@ -9,7 +9,10 @@ import logging
 import re
 from typing import Optional, TypedDict
 
-from newspaper import Article
+try:
+    from newspaper import Article
+except (ImportError, Exception):
+    Article = None  # type: ignore
 
 from app.core.security import is_public_http_url, safe_get
 
@@ -73,24 +76,25 @@ def extract_text_from_url(url: str) -> URLResult:
         logger.warning("Rejected invalid or non-public URL in url_service: %s", url)
         return URLResult(text="", title="", source_url=url, extraction_method="empty")
 
-    try:
-        article = Article(url, request_timeout=REQUEST_TIMEOUT)
-        article.download()
-        article.parse()
+    if Article is not None:
+        try:
+            article = Article(url, request_timeout=REQUEST_TIMEOUT)
+            article.download()
+            article.parse()
 
-        title = (article.title or "").strip()
-        body = (article.text or "").strip()
+            title = (article.title or "").strip()
+            body = (article.text or "").strip()
 
-        if body:
-            logger.info("Successfully extracted article via newspaper3k (%d chars)", len(body))
-            return URLResult(
-                text=body[:MAX_TEXT_CHARS],
-                title=title,
-                source_url=url,
-                extraction_method="newspaper",
-            )
-    except Exception as exc:
-        logger.warning("newspaper3k failed for %s: %s. Trying OG fallback...", url, exc)
+            if body:
+                logger.info("Successfully extracted article via newspaper3k (%d chars)", len(body))
+                return URLResult(
+                    text=body[:MAX_TEXT_CHARS],
+                    title=title,
+                    source_url=url,
+                    extraction_method="newspaper",
+                )
+        except Exception as exc:
+            logger.warning("newspaper3k failed for %s: %s. Trying OG fallback...", url, exc)
 
     # Fallback to Open Graph description
     og_text = fetch_og_description(url)

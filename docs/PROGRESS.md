@@ -43,9 +43,43 @@
   - [x] W4-E: Implemented check-worthiness scorer (`app/features/nlp/worthiness.py`)
   - [x] W4-F: Created test fixtures (`tests/fixtures/samples.yaml`, `tests/fixtures/worthiness.yaml`)
   - [x] W4-G: Created unit test suites `tests/unit/test_language.py`, `tests/unit/test_claims.py`, `tests/unit/test_worthiness.py` (13/13 passing; total 69/69 tests passing across repo)
-- [ ] **Wave 5: Evidence Retrieval Orchestrator (Google Fact Check, Web, Wiki)**
-- [ ] **Wave 6: Verification and Stance Scoring Engine**
-- [ ] **Wave 7: Explanation Generator and WhatsApp Message Formatter**
-- [ ] **Wave 8: Thin-Path Integration and End-to-End Orchestration**
-- [ ] **Wave 9: Evaluation Suite and Security Verification**
-- [ ] **Wave 10: Presentation Preparation and Demo Hardening**
+- [x] **Wave 5: Evidence Retrieval Orchestrator (Google Fact Check, Web, Wiki)**
+  - [x] W5-A: Google Fact Check Tools API client with rating normalisation (`app/features/retrieval/factcheck_google.py`)
+  - [x] W5-B: Wikipedia API client (`app/features/retrieval/wikipedia.py`)
+  - [x] W5-C: Web search fallback via Brave / Tavily (`app/features/retrieval/search_web.py`)
+  - [x] W5-D: Claim rating normalisation (`app/features/retrieval/ratings.py`)
+  - [x] W5-E: Multi-source evidence orchestrator with in-memory caching (`app/features/retrieval/orchestrator.py`)
+  - [x] W5-F: Unit test suite for retrieval (`tests/unit/test_retrieval.py`) (13/13 passing)
+
+- [x] **Wave 6: Verification and Stance Scoring Engine**
+  - [x] W6-A: Stance detection with RoBERTa-large-MNLI and lexical fallback (`app/features/verification/stance.py`)
+  - [x] W6-B: Overall verdict derivation and claim verification service (`app/features/verification/service.py`)
+  - [x] W6-C: Unit test suite for verification (`tests/unit/test_verification.py`) (12/12 passing)
+
+- [x] **Wave 7: Explanation Generator and WhatsApp Message Formatter**
+  - [x] W7-A: Structured explanation generator with Gemini API and template fallback (`app/features/explanation/generator.py`)
+  - [x] W7-B: User-facing WhatsApp message formatter with back-translation (`app/features/explanation/formatter.py`)
+  - [x] W7-C: TwiML reply generator (`app/core/twiml.py`)
+  - [x] W7-D: Unit test suite for explanation & formatting (`tests/unit/test_explanation.py`) (12/12 passing)
+
+- [x] **Wave 8: Thin-Path Integration and End-to-End Orchestration**
+  - [x] W8-A: Pipeline orchestrator `run_pipeline` connecting Ingestion -> NLP -> Retrieval -> Verification -> Explanation (`app/pipeline.py`)
+  - [x] W8-B: FastAPI webhook router with in-memory sliding window rate limiter (`app/routers/webhook.py`)
+  - [x] W8-C: FastAPI health check router with uptime & memory diagnostics (`app/routers/health.py`)
+  - [x] W8-D: Clean application entry point (`app_main.py`)
+  - [x] W8-E: Unit test suite for pipeline (`tests/unit/test_pipeline.py`) (9/9 passing)
+
+- [x] **Wave 9: Evaluation Suite and Security Verification**
+  - [x] W9-A: End-to-end integration smoke tests (`tests/integration/test_smoke.py`) (6/6 passing)
+  - [x] W9-B: Rate-limiting abuse test suite (`tests/abuse/test_rate_limit.py`) (6/6 passing)
+  - [x] W9-C: IP-based sliding window rate limiter middleware with graceful HTTP 429s (`app_main.py`)
+  - [x] W9-D: Strict input validation and sanitization review (HTML/control characters stripping)
+  - [x] W9-E: OWASP security verification (PII redaction, SSRF safe_get, zero hardcoded keys)
+
+- [x] **Wave 10: Presentation Preparation and Demo Hardening**
+  - [x] W10-A: Cloud deployment Procfile for Render / Railway / Heroku (`Procfile`)
+  - [x] W10-B: Multi-stage, non-root Dockerfile with health checks (`Dockerfile`)
+  - [x] W10-C: Interactive CLI demo tool with latency and stage breakdowns (`scripts/demo_cli.py`)
+  - [x] W10-D: Updated documentation (`docs/PROGRESS.md`, `docs/BUILD_STATUS.md`)
+
+

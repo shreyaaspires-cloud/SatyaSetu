@@ -9,7 +9,10 @@ import io
 import logging
 from typing import Any, Optional, TypedDict
 
-import fitz  # PyMuPDF
+try:
+    import pymupdf as fitz  # Modern PyMuPDF import
+except ImportError:
+    import fitz  # Fallback for older PyMuPDF versions
 
 from app.core.security import safe_get, twilio_media_auth
 from app.features.ingestion.ocr import CONFIDENCE_THRESHOLD, get_ocr_reader

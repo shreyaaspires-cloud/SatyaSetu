@@ -22,6 +22,13 @@ sys.modules.setdefault("torch", MagicMock())
 sys.modules.setdefault("transformers", MagicMock())
 sys.modules.setdefault("keybert", MagicMock())
 
+from pathlib import Path
+
+# Add legacy/ to sys.path so characterisation tests can verify archived code
+legacy_dir = Path(__file__).resolve().parent.parent.parent / "legacy"
+if str(legacy_dir) not in sys.path:
+    sys.path.insert(0, str(legacy_dir))
+
 from pipelines.verify_pipeline import (
     _detect_input_type,
     _hash_phone,
