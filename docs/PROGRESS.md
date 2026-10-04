@@ -26,7 +26,15 @@
   - [x] W2-B: Implement abuse test suite `tests/abuse/test_ssrf.py` (29/29 passing)
   - [x] Verified rejection of private IPs, loopback, cloud metadata (169.254.169.254), DNS rebinding, and redirect manipulation.
 
-- [ ] **Wave 3: Ingestion Feature Migration (Phase 1c)**
+- [x] **Wave 3 (Phase 1c): Ingestion Feature Migration**
+  - [x] W3-A: Migrated EasyOCR extractor with safe_get and configurable languages (`app/features/ingestion/ocr.py`)
+  - [x] W3-B: Migrated Whisper ASR extractor with ffmpeg check and safe_get (`app/features/ingestion/asr.py`)
+  - [x] W3-C: Migrated PyMuPDF PDF extractor with OCR fallback (`app/features/ingestion/pdf.py`)
+  - [x] W3-D: Migrated newspaper3k URL scraper with SSRF protection and OG fallback (`app/features/ingestion/url.py`)
+  - [x] W3-E: Extracted input type detector (`app/features/ingestion/detect.py`)
+  - [x] W3-F: Extracted text sanitizer with Defect D6 fix (`app/features/ingestion/sanitize.py`)
+  - [x] W3-G: Created ingestion orchestrator returning IngestedMessage (`app/features/ingestion/service.py`)
+  - [x] W3-H: Created unit test suite `tests/unit/test_ingestion_detect.py` (7/7 passing; total 56/56 tests passing across repo)
 - [ ] **Wave 4: NLP Pipeline (Language Detection, Translation, KeyBERT)**
 - [ ] **Wave 5: Evidence Retrieval Orchestrator (Google Fact Check, Web, Wiki)**
 - [ ] **Wave 6: Verification and Stance Scoring Engine**
