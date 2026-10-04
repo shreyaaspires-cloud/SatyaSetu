@@ -1,4 +1,4 @@
-# Environment variables / Secrets
+# Environment variables and secrets
 .env
 .env.local
 *.env
@@ -15,13 +15,31 @@ venv/
 env/
 ENV/
 
-# Testing & Coverage
+# Testing and coverage
 .pytest_cache/
 .coverage
 htmlcov/
 
-# IDE & OS files
+# Local databases and models
+claims.db
+lid.176.bin
+models_cache/
+*.bin
+*.pt
+*.onnx
+
+# Evaluation outputs
+eval/results/*
+!eval/results/summary.md
+
+# Scratch and logs
+*.log
+scratch/
+tmp/
+temp/
+
+# IDE and OS files
 .vscode/
 .idea/
 .DS_Store
-*.log
+Thumbs.db
