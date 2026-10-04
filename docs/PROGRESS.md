@@ -12,11 +12,14 @@
   - [x] W0-G: Initialized documentation suite (`PROGRESS.md`, `DECISIONS.md`, `BUILD_STATUS.md`)
   - [x] W0-H: Created `scripts/gitingest_safe.sh` for safe repository packaging
 
-- [ ] **Wave 1 (Phase 1): Architecture and Feature Layout Migration**
-  - [ ] W1-A: Define Pydantic v2 contract models (`app/contracts/models.py`)
-  - [ ] W1-B: Implement core settings (`app/core/config.py`)
-  - [ ] W1-C: Implement model registry and lifespan management (`app/core/registry.py`)
-  - [ ] W1-D: Implement core utilities (logging, errors, timing, redaction)
+- [x] **Wave 1 (Phase 1a): Contracts and Core Layer**
+  - [x] W1-A: Define Pydantic v2 contract models (`app/contracts/models.py`)
+  - [x] W1-B: Implement core settings (`app/core/config.py`)
+  - [x] W1-C: Implement logging with RedactionFilter and request-id tracking (`app/core/logging.py`)
+  - [x] W1-D: Implement redaction utility stripping phone numbers, emails, and digit runs (`app/core/redaction.py`)
+  - [x] W1-E: Implement StageTimer context manager for latency tracking (`app/core/timing.py`)
+  - [x] W1-F: Implement system enums and constants (`app/core/constants.py`)
+  - [x] Unit test suite: `tests/unit/test_contracts.py` (12/12 passing; total 20/20 unit tests passing)
 
 - [ ] **Wave 2: Ingestion Layer Migration and Thread-Pool Offloading**
 - [ ] **Wave 3: Security Hardening (SSRF Guard, Auth Guard, Rate Limiting)**
