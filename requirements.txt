@@ -1,0 +1,41 @@
+# FactGuard Backend — Python Dependencies
+# Install with: pip install -r requirements.txt
+# Requires Python 3.11+
+
+# ── FastAPI + Server ────────────────────────────────────────────────────────────
+fastapi==0.111.1
+uvicorn[standard]==0.30.1
+python-multipart==0.0.9          # Required for FastAPI Form() support
+
+# ── Settings / Config ───────────────────────────────────────────────────────────
+pydantic==2.7.4
+pydantic-settings==2.3.4
+python-dotenv==1.0.1
+
+# ── Twilio ──────────────────────────────────────────────────────────────────────
+twilio==9.2.3
+
+# ── OCR ─────────────────────────────────────────────────────────────────────────
+easyocr==1.7.1
+Pillow==10.3.0
+
+# ── ASR (Whisper) ───────────────────────────────────────────────────────────────
+openai-whisper==20231117
+# Note: ffmpeg must be installed separately (not via pip)
+# Windows: choco install ffmpeg  OR  download from https://ffmpeg.org/download.html
+
+# ── PDF ─────────────────────────────────────────────────────────────────────────
+pymupdf==1.24.5
+
+# ── URL Scraping ─────────────────────────────────────────────────────────────────
+newspaper3k==0.2.8
+lxml[html_clean]==5.2.2          # newspaper3k dependency
+requests==2.32.3
+
+# ── HTTP ─────────────────────────────────────────────────────────────────────────
+httpx==0.27.0                    # For async HTTP calls in future services
+
+# ── Testing ──────────────────────────────────────────────────────────────────────
+pytest==8.2.2
+pytest-asyncio==0.23.7
+httpx==0.27.0                    # Used by TestClient for async tests
