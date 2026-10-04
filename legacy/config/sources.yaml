@@ -1,0 +1,48 @@
+# Source domains categorized by reliability tier for SatyaSetu
+# Tier 1: IFCN-certified independent fact-checkers
+tier_1_ifcn:
+  - altnews.in
+  - boomlive.in
+  - factly.in
+  - thequint.com
+  - vishvasnews.com
+  - newschecker.in
+  - thip.media
+  - factcheck.org
+  - politifact.com
+  - snopes.com
+  - reuters.com
+  - afp.com
+
+# Tier 2: Official government and international public health or authority portals
+tier_2_gov_pib:
+  - pib.gov.in
+  - mygov.in
+  - mohfw.gov.in
+  - who.int
+  - rbi.org.in
+  - isro.gov.in
+  - ecisveep.nic.in
+  - india.gov.in
+
+# Tier 3: Mainstream credible news organizations
+tier_3_mainstream:
+  - thehindu.com
+  - indianexpress.com
+  - bbc.com
+  - bbc.co.uk
+  - ndtv.com
+  - apnews.com
+  - hindustantimes.com
+  - timesofindia.indiatimes.com
+  - dw.com
+
+# Tier 4: Knowledge bases (background context only, never alone sufficient for verification)
+tier_4_wikipedia:
+  - en.wikipedia.org
+  - hi.wikipedia.org
+  - mr.wikipedia.org
+  - ta.wikipedia.org
+  - te.wikipedia.org
+  - bn.wikipedia.org
+  - wikipedia.org

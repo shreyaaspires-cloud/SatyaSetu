@@ -1,0 +1,20 @@
+# Labelled check-worthiness samples for check-worthiness scorer evaluation
+claims:
+  - text: "WHO announced that consuming boiled garlic water completely eliminates COVID-19."
+    worthy: true
+    label: "factual_assertion"
+  - text: "Government of India announced 5000 rupees monthly stipend under PM-Kisan scheme."
+    worthy: true
+    label: "factual_assertion"
+  - text: "Good morning! Have a wonderful day filled with happiness and joy."
+    worthy: false
+    label: "greeting"
+  - text: "What is the capital of India?"
+    worthy: false
+    label: "question"
+  - text: "I personally feel that summer is the best season of the year."
+    worthy: false
+    label: "subjective_opinion"
+  - text: "Click here to claim free iPhone 15 pro max right now: http://bit.ly/fake"
+    worthy: true
+    label: "phishing_or_scam_claim"
