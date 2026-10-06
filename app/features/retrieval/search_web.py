@@ -67,17 +67,33 @@ def _search_brave(query: str, api_key: str) -> List[EvidenceItem]:
 
 
 def _search_tavily(query: str, api_key: str) -> List[EvidenceItem]:
-    """Execute search using Tavily Search API."""
+    """Execute search using Tavily Search API with fact-checking query optimization."""
+    # Bias query toward fact checking if not already present
+    lower_q = query.lower()
+    search_q = query
+    if not any(k in lower_q for k in ["fact check", "debunk", "myth", "true or false", "hoax", "rumor"]):
+        search_q = f"fact check: {query}"
+
     payload = {
         "api_key": api_key,
-        "query": query,
-        "search_depth": "basic",
-        "max_results": 5,
+        "query": search_q,
+        "search_depth": "advanced",
+        "max_results": 7,
+        "include_answer": True,
     }
-    resp = requests.post(TAVILY_SEARCH_URL, json=payload, timeout=5.0)
-    resp.raise_for_status()
+    try:
+        resp = requests.post(TAVILY_SEARCH_URL, json=payload, timeout=7.0)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as exc:
+        # Fallback to standard query if biased query fails
+        logger.debug("Biased search failed (%s), trying raw query.", exc)
+        payload["query"] = query
+        payload["search_depth"] = "basic"
+        resp = requests.post(TAVILY_SEARCH_URL, json=payload, timeout=5.0)
+        resp.raise_for_status()
+        data = resp.json()
 
-    data = resp.json()
     results = data.get("results", [])
     items: List[EvidenceItem] = []
 
@@ -93,6 +109,16 @@ def _search_tavily(query: str, api_key: str) -> List[EvidenceItem]:
             source_domain = source_domain[4:]
 
         tier = classify_domain(url)
+        # Use Tavily's relevance score if available (bounded between 0.2 and 0.95)
+        raw_score = r.get("score")
+        if raw_score is not None:
+            try:
+                item_score = round(max(0.2, min(0.95, float(raw_score))), 3)
+            except (ValueError, TypeError):
+                item_score = 0.75
+        else:
+            item_score = 0.75
+
         items.append(
             EvidenceItem(
                 url=url,
@@ -101,7 +127,7 @@ def _search_tavily(query: str, api_key: str) -> List[EvidenceItem]:
                 source_domain=source_domain,
                 tier=tier,
                 rating=Rating.UNVERIFIED,
-                score=0.80,
+                score=item_score,
             )
         )
 

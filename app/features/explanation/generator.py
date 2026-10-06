@@ -43,7 +43,7 @@ def _top_evidence_text(result: ClaimResult, max_items: int = 3) -> str:
     lines: List[str] = []
     for idx, item in enumerate(items, 1):
         stance_tag = f"[{item.stance}] " if item.stance else ""
-        lines.append(f"  {idx}. {stance_tag}{item.snippet[:160].strip()} — {item.source_domain}")
+        lines.append(f"  {idx}. {stance_tag}{item.snippet[:260].strip()} — {item.source_domain}")
     return "\n".join(lines) if lines else "  (no evidence retrieved)"
 
 
@@ -77,25 +77,31 @@ def _template_explanation(result: ClaimResult) -> str:
 
 def _gemini_explanation(result: ClaimResult) -> str | None:
     """
-    Use Gemini Flash to write a fluent 2-3 sentence explanation.
+    Use Gemini Flash to write a fluent, objective 2-3 sentence explanation.
     Returns None if Gemini key is missing or call fails.
     """
     if not settings.gemini_api_key:
         return None
 
-    emoji = VERDICT_EMOJI.get(result.verdict, "❓")
     label = VERDICT_LABEL.get(result.verdict, str(result.verdict))
-    ev_text = _top_evidence_text(result, max_items=2)
+    ev_text = _top_evidence_text(result, max_items=3)
 
     prompt = textwrap.dedent(f"""
-        You are a fact-checking assistant. Write a 2-3 sentence plain-language explanation
-        of the following fact-check result. Do NOT use markdown formatting.
-        Keep it under 180 words and suitable for WhatsApp.
+        You are an expert fact-checking assistant for an Indian WhatsApp misinformation detection service.
+        Write a concise, objective 2-3 sentence explanation of the following fact-check verdict.
+        Do NOT use markdown formatting (no bold, asterisks, bullet points, or headers).
+        Keep it under 150 words and suitable for WhatsApp.
 
-        Claim: {result.claim[:300]}
-        Verdict: {emoji} {label}
-        Evidence:
+        Claim: "{result.claim[:300]}"
+        Assessed Verdict: {label}
+        Retrieved Evidence:
         {ev_text}
+
+        Guidelines:
+        - If the verdict is REFUTED, explicitly state that the claim is false, a myth, or unscientific, explaining what experts or evidence actually say.
+        - If the verdict is SUPPORTED, summarize the key evidence confirming the fact.
+        - If MISLEADING, clarify what aspect is inaccurate, exaggerated, or pseudoscientific.
+        - Output ONLY the plain text explanation.
     """).strip()
 
     try:
@@ -107,7 +113,8 @@ def _gemini_explanation(result: ClaimResult) -> str | None:
             contents=prompt,
         )
         if response and response.text:
-            return response.text.strip()
+            cleaned = response.text.strip().replace("*", "").replace("#", "")
+            return cleaned
     except Exception as exc:
         logger.warning("Gemini explanation generation failed: %s", exc)
 

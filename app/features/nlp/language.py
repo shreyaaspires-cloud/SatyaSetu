@@ -93,9 +93,23 @@ def detect_language(text: str, ft_model: Optional[Any] = None) -> Tuple[str, flo
         except Exception as exc:
             logger.warning("fastText prediction failed: %s. Falling back to script.", exc)
 
+    # Marathi-specific character/word markers that don't appear in Hindi
+    # These are common Marathi grammatical endings and words using Devanagari
+    MARATHI_MARKERS = {
+        "आहे", "आहेत", "केली", "केले", "आहेस", "आपण", "म्हणजे", "म्हणून",
+        "परंतु", "तरी", "मात्र", "असे", "असलेले", "असताना", "त्यांनी",
+        "येथे", "तेव्हा", "नाही", "नव्हते", "होते", "होती", "झाले", "झाली",
+        "होतो", "होती", "झाला", "झाल्या", "असतो", "असते", "कारण", "म्हटले",
+    }
+
     # 3. Fallback based on predominant script
     script = detect_script(cleaned)
     if script == "Devanagari":
+        # Try to distinguish Marathi from Hindi via unique markers
+        marathi_hits = sum(1 for marker in MARATHI_MARKERS if marker in cleaned)
+        if marathi_hits >= 2:
+            logger.info("Detected Marathi via Devanagari script + %d Marathi markers.", marathi_hits)
+            return "mr", 0.82
         return "hi", 0.75
     elif script == "Bengali":
         return "bn", 0.85

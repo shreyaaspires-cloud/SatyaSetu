@@ -23,9 +23,9 @@ TRANSLATION_MODELS: Dict[str, str] = {
 _translation_cache: Dict[str, Tuple[Any, Any]] = {}
 
 
-def translate_hinglish_with_gemini(text: str) -> Optional[str]:
+def translate_with_gemini(text: str, lang_code: str = "") -> Optional[str]:
     """
-    Translate Hinglish (Hindi written in Latin script) into English using Gemini.
+    Translate Indic or Hinglish text into English using Gemini.
     Returns translated English text or None on failure.
     """
     if not settings.gemini_api_key:
@@ -35,8 +35,10 @@ def translate_hinglish_with_gemini(text: str) -> Optional[str]:
         from google import genai
 
         client = genai.Client(api_key=settings.gemini_api_key)
+        lang_hint = f"from language code '{lang_code}' " if lang_code and lang_code != "und" else ""
         prompt = (
-            "Translate the following Hinglish (Hindi in Roman script) text accurately into standard English. "
+            f"Translate the following text {lang_hint}accurately into clear, natural English. "
+            "Preserve any specific medical, factual, or cultural claims exactly. "
             "Output ONLY the English translation, with no explanation or commentary:\n\n"
             f"{text}"
         )
@@ -45,11 +47,18 @@ def translate_hinglish_with_gemini(text: str) -> Optional[str]:
             contents=prompt,
         )
         if response and response.text:
-            return response.text.strip()
+            cleaned = response.text.strip().strip('"').strip("'")
+            if cleaned:
+                return cleaned
     except Exception as exc:
-        logger.warning("Gemini Hinglish translation failed: %s", exc)
+        logger.warning("Gemini translation failed for '%s': %s", lang_code, exc)
 
     return None
+
+
+def translate_hinglish_with_gemini(text: str) -> Optional[str]:
+    """Backward compatibility wrapper for Hinglish translation."""
+    return translate_with_gemini(text, "hi-Latn")
 
 
 def translate_to_english(
@@ -63,15 +72,15 @@ def translate_to_english(
     Returns a tuple of (translated_text, is_fallback).
 
     If lang_code is 'en', returns original text with is_fallback=False.
-    If translation model is unavailable or fails, returns original text with is_fallback=True.
+    If translation model is unavailable or fails, tries Gemini translation before fallback.
     """
     cleaned = text.strip()
     if not cleaned or lang_code == "en":
         return cleaned, False
 
-    # Handle Hinglish translation
+    # Handle Hinglish translation directly via Gemini
     if lang_code == "hi-Latn":
-        gemini_result = translate_hinglish_with_gemini(cleaned)
+        gemini_result = translate_with_gemini(cleaned, "hi-Latn")
         if gemini_result:
             return gemini_result, False
         logger.info("Hinglish translation fallback to original text.")
@@ -80,7 +89,10 @@ def translate_to_english(
     # Check local M2M100 model availability
     model_name = TRANSLATION_MODELS.get(lang_code)
     if not model_name and not (tokenizer and model):
-        logger.warning("No translation model mapping configured for '%s'.", lang_code)
+        logger.warning("No local translation model mapping configured for '%s'. Trying Gemini fallback.", lang_code)
+        gemini_result = translate_with_gemini(cleaned, lang_code)
+        if gemini_result:
+            return gemini_result, False
         return cleaned, True
 
     try:
@@ -115,8 +127,16 @@ def translate_to_english(
         if isinstance(decoded, str) and decoded.strip():
             return decoded.strip(), False
 
+        # Fallback to Gemini if local output was empty
+        gemini_result = translate_with_gemini(cleaned, lang_code)
+        if gemini_result:
+            return gemini_result, False
+
         return cleaned, True
 
     except Exception as exc:
-        logger.warning("Local translation for '%s' failed: %s. Using fallback.", lang_code, exc)
+        logger.warning("Local translation for '%s' failed: %s. Trying Gemini fallback.", lang_code, exc)
+        gemini_result = translate_with_gemini(cleaned, lang_code)
+        if gemini_result:
+            return gemini_result, False
         return cleaned, True
