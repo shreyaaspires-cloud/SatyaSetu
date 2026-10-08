@@ -1,0 +1,14 @@
+# Candidate claims submitted for review before commitment into claim_bank.yaml
+- id: cand-001
+  canonical_claim: "Drinking chlorine dioxide or bleach cures viral infections within 24 hours"
+  source_url: "https://www.boomlive.in/fact-check/fake-news-drinking-bleach-cure-coronavirus-covid19-7812"
+  publisher: "BOOM Live"
+  verdict: REFUTED
+  status: approved
+
+- id: cand-002
+  canonical_claim: "Sleeping with head pointing north disrupts blood flow due to magnetic field"
+  source_url: "https://timesofindia.indiatimes.com/life-style/health-fitness/health-news/sleeping-direction-myth-vs-fact/articleshow/98765432.cms"
+  publisher: "The Times of India"
+  verdict: UNVERIFIABLE
+  status: approved

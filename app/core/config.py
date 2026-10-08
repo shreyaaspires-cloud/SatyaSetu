@@ -78,6 +78,10 @@ class Settings(BaseSettings):
         default="",
         description="Google Fact Check Tools API key",
     )
+    factcheck_min_match: float = Field(
+        default=0.6,
+        description="Minimum relevance match score for Google Fact Check reviews (0.0 to 1.0)",
+    )
 
     # Web Search Provider (Brave or Tavily)
     search_provider: str = Field(

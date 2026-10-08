@@ -161,17 +161,10 @@ def verify_claim(
             claim=claim.strip(),
             evidence_items=evidence,
         )
-
-        # Authoritative fact checks always take precedence
-        if agg_reason == "AUTHORITATIVE_FACT_CHECK":
-            verdict, confidence, reason_code = agg_verdict, agg_conf, agg_reason
-        else:
-            # Check Gemini holistic verification with reasoning
-            gemini_res = _gemini_verify_claim(claim.strip(), evidence)
-            if gemini_res is not None:
-                verdict, confidence, reason_code = gemini_res
-            else:
-                verdict, confidence, reason_code = agg_verdict, agg_conf, agg_reason
+        # T5: the aggregator result is always final.
+        # Gemini is only permitted to classify per-item stance (score_stance),
+        # not to override the verdict produced by evidence sufficiency rules.
+        verdict, confidence, reason_code = agg_verdict, agg_conf, agg_reason
 
     logger.info(
         "Claim verdict=%s confidence=%.2f reason=%s evidence_count=%d",

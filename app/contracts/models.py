@@ -57,6 +57,9 @@ class EvidenceItem(BaseModel):
     stance: Optional[str] = None
     raw_rating: Optional[str] = None
     from_cache: bool = False
+    matched_claim: str = ""
+    match_score: float = 0.0
+    reason: Optional[str] = None
 
 
 class ClaimResult(BaseModel):
