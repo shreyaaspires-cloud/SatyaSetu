@@ -55,6 +55,9 @@ class EvidenceItem(BaseModel):
     publish_date: Optional[str] = None
     score: float = 0.0
     stance: Optional[str] = None
+    matched_claim: str = ""
+    match_score: float = 0.0
+    reason: Optional[str] = None
 
 
 class ClaimResult(BaseModel):
