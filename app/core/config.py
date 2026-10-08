@@ -48,6 +48,22 @@ class Settings(BaseSettings):
         default="whatsapp:+14155238886",
         description="Twilio WhatsApp sender number",
     )
+    twilio_sender_number: str = Field(
+        default="",
+        description="Twilio sender number override",
+    )
+
+    @property
+    def account_sid(self) -> str:
+        return self.twilio_account_sid
+
+    @property
+    def auth_token(self) -> str:
+        return self.twilio_auth_token
+
+    @property
+    def sender_number(self) -> str:
+        return self.twilio_sender_number or self.twilio_whatsapp_number
 
     # Google and Gemini APIs
     gemini_api_key: str = Field(

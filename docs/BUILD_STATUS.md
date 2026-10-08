@@ -47,3 +47,9 @@ Last updated: Wave 10 completion.
   - ✅ **PII Protection:** Phone numbers SHA-256 hashed with salt before logging; regex-based `RedactionFilter` on all logging streams.
   - ✅ **SSRF Protection:** Strict private IP / link-local / DNS rebinding / redirect guard via `safe_get`.
   - ✅ **Secret Management:** 100% environment-driven via `pydantic-settings`; no hardcoded API keys; secrets excluded from diagnostic endpoints.
+  - ✅ **Twilio Webhook Response Timeout & Architecture:**
+    - Twilio officially enforces a **15-second** HTTP response timeout on standard webhooks (Twilio Error 11200 - HTTP retrieval failure). Specific services (e.g. Conversations) enforce 5 seconds.
+    - SatyaSetu implements an asynchronous non-blocking two-step architecture:
+      - Step 1: Immediate TwiML and REST acknowledgement (`"Checking this, one moment..."`) returned in < 2 seconds.
+      - Step 2: Verification pipeline offloaded to background daemon thread; final answer delivered via Twilio REST API upon completion.
+      - Deduplication: `MessageSid` tracked with 10-minute TTL to prevent duplicate pipeline runs on Twilio retries.

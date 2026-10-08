@@ -12,8 +12,10 @@ Security:
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import logging
+import threading
 import time
 import uuid
 from collections import defaultdict
@@ -23,10 +25,11 @@ from typing import Any, Dict
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.responses import PlainTextResponse
 
-from app.contracts.models import WebhookPayload
+from app.contracts.models import IngestedMessage, WebhookPayload
 from app.core.config import settings
 from app.core.logging import get_logger
 from app.core.twiml import twiml_message as _twiml_message_fn
+from app.core.twilio_client import send_twilio_message
 from app.features.ingestion.service import ingest
 from app.pipeline import run_pipeline
 
@@ -39,6 +42,33 @@ router = APIRouter(prefix="/webhook", tags=["webhook"])
 _rate_store: Dict[str, list] = defaultdict(list)
 _rate_lock = Lock()
 
+# ── In-memory deduplication store (per MessageSid, 10 min TTL) ────────────────
+_processed_sids: Dict[str, float] = {}
+_sids_lock = Lock()
+
+
+def clear_processed_sids() -> None:
+    """Clear deduplication cache."""
+    with _sids_lock:
+        _processed_sids.clear()
+
+
+def _is_duplicate_message(sid: str) -> bool:
+    """Return True if message with this MessageSid has already been processed within 10 minutes."""
+    if not sid:
+        return False
+    now = time.monotonic()
+    window = 600.0  # 10 minutes
+    with _sids_lock:
+        # Purge expired entries
+        for s, ts in list(_processed_sids.items()):
+            if now - ts > window:
+                del _processed_sids[s]
+        if sid in _processed_sids:
+            return True
+        _processed_sids[sid] = now
+        return False
+
 
 def _hash_sender(phone: str) -> str:
     """SHA-256 hash of the raw phone number — never log raw digits."""
@@ -48,11 +78,11 @@ def _hash_sender(phone: str) -> str:
 def _is_rate_limited(sender_hash: str) -> bool:
     """Return True if this sender has exceeded rate_limit_per_minute."""
     now = time.monotonic()
-    window = 60.0
+    window = 600.0
     with _rate_lock:
         timestamps = _rate_store[sender_hash]
         # Purge entries older than 1 minute
-        _rate_store[sender_hash] = [ts for ts in timestamps if now - ts < window]
+        _rate_store[sender_hash] = [ts for ts in timestamps if now - ts < 60.0]
         if len(_rate_store[sender_hash]) >= settings.rate_limit_per_minute:
             return True
         _rate_store[sender_hash].append(now)
@@ -94,12 +124,12 @@ async def twilio_webhook(
     request: Request,
 ) -> PlainTextResponse:
     """
-    Receive inbound WhatsApp message from Twilio, run SatyaSetu pipeline,
-    and return a TwiML response that sends the reply back to the user.
+    Receive inbound WhatsApp message from Twilio.
+    Instantly sends an acknowledgement and offloads verification pipeline to a background task.
 
-    Returns HTTP 200 with TwiML <Response><Message>...</Message></Response>.
+    Returns HTTP 200 with immediate TwiML acknowledgement.
     Returns HTTP 429 if rate limit exceeded.
-    Returns HTTP 500 with a safe error TwiML on unhandled exceptions.
+    Returns HTTP 200 if duplicate MessageSid is received (drops duplicate pipeline run).
     """
     request_id = str(uuid.uuid4())[:8]
 
@@ -113,12 +143,22 @@ async def twilio_webhook(
 
     sender_hash = _hash_sender(payload.From)
     logger.info(
-        "[%s] Inbound WhatsApp message sender=%s… body_len=%d media=%d",
+        "[%s] Inbound WhatsApp message sender=%s… body_len=%d media=%d sid=%s",
         request_id,
         sender_hash,
         len(payload.Body),
         payload.NumMedia,
+        payload.MessageSid,
     )
+
+    # ── Deduplication ──────────────────────────────────────────────────────────
+    if payload.MessageSid and _is_duplicate_message(payload.MessageSid):
+        logger.warning("[%s] Duplicate MessageSid=%s received. Dropping duplicate pipeline run.", request_id, payload.MessageSid)
+        return PlainTextResponse(
+            content=_twiml_message("Your message is already being processed."),
+            status_code=200,
+            media_type="application/xml",
+        )
 
     # ── Rate limiting ──────────────────────────────────────────────────────────
     if _is_rate_limited(sender_hash):
@@ -145,23 +185,42 @@ async def twilio_webhook(
         logger.error("[%s] Ingestion error: %s", request_id, exc, exc_info=True)
         return _twiml_error("Could not process your message. Please try again.")
 
-    # ── Pipeline ───────────────────────────────────────────────────────────────
-    try:
-        response = run_pipeline(ingested)
-        reply_text = response.formatted_reply or "Sorry, I could not generate a reply."
-    except Exception as exc:
-        logger.error("[%s] Pipeline error: %s", request_id, exc, exc_info=True)
-        return _twiml_error("Something went wrong while fact-checking. Please try again.")
+    # ── Step 1: Immediate acknowledgement ─────────────────────────────────────
+    ack_message = "Checking this, one moment..."
+    threading.Thread(
+        target=send_twilio_message,
+        args=(payload.From, ack_message),
+        daemon=True,
+    ).start()
 
-    logger.info(
-        "[%s] Pipeline complete verdict=%s total_ms=%.0f",
-        request_id,
-        response.overall_verdict,
-        response.timings_ms.get("total_ms", 0),
-    )
+    # ── Step 2: Offload pipeline to non-blocking background task ──────────────
+    def _execute_pipeline_and_reply(ingested_msg: IngestedMessage, to_number: str, req_id: str) -> None:
+        try:
+            response = run_pipeline(ingested_msg)
+            reply = response.formatted_reply or "Sorry, I could not generate a reply."
+            logger.info(
+                "[%s] Background pipeline complete verdict=%s total_ms=%.0f",
+                req_id,
+                response.overall_verdict,
+                response.timings_ms.get("total_ms", 0),
+            )
+            send_twilio_message(to_number, reply)
+        except Exception as exc:
+            logger.error("[%s] Background pipeline error: %s", req_id, exc, exc_info=True)
+            send_twilio_message(
+                to_number,
+                "⚠️ Something went wrong while fact-checking. Please try again.",
+            )
 
+    threading.Thread(
+        target=_execute_pipeline_and_reply,
+        args=(ingested, payload.From, request_id),
+        daemon=True,
+    ).start()
+
+    # Webhook handler returns immediately with TwiML acknowledgement (< 2 seconds)
     return PlainTextResponse(
-        content=_twiml_message(reply_text),
+        content=_twiml_message(ack_message),
         status_code=200,
         media_type="application/xml",
     )

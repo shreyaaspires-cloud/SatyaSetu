@@ -161,11 +161,13 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 
 # ── Router registration ───────────────────────────────────────────────────────
 
+from app.routers.check import router as check_router      # noqa: E402
 from app.routers.health import router as health_router    # noqa: E402
 from app.routers.webhook import router as webhook_router  # noqa: E402
 
 app.include_router(health_router)
 app.include_router(webhook_router)
+app.include_router(check_router)
 
 
 # ── Dev server entrypoint ─────────────────────────────────────────────────────
