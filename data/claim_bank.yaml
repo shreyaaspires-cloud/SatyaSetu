@@ -1,0 +1,76 @@
+- id: cb-001
+  canonical_claim: "Drinking bleach cures viral infections within 24 hours"
+  variants:
+    - "ब्लीच पीने से 24 घंटे में वायरल इन्फेक्शन ठीक हो जाता है"
+    - "Drinking chlorine dioxide water eliminates viral illness"
+  key_details:
+    - type: health_chemical
+      value: bleach
+  verdict: REFUTED
+  explanation_en: "Drinking bleach or chlorine dioxide is hazardous, causes chemical burns, and has no medicinal or antiviral efficacy."
+  sources:
+    - url: "https://www.boomlive.in/fact-check/fake-news-drinking-bleach-cure-coronavirus-covid19-7812"
+      publisher: "BOOM Live"
+      published_date: "2020-04-25"
+      tier: 1
+    - url: "https://who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public/myth-busters"
+      publisher: "World Health Organization"
+      published_date: "2020-05-15"
+      tier: 2
+  category: health_cure
+  last_reviewed: "2026-01-10"
+  review_by: "2027-01-10"
+
+- id: cb-002
+  canonical_claim: "Sleeping with head pointing north causes severe blood flow disruption and health issues"
+  variants:
+    - "उत्तर दिशा में सिर रखकर सोने से रक्त संचार बिगड़ता है"
+    - "Sleeping with head towards north direction disrupts brain blood flow"
+  key_details:
+    - type: direction
+      value: north
+  verdict: UNVERIFIABLE
+  explanation_en: "There is no conclusive biomedical evidence that Earth's magnetic field affects human blood flow based on sleeping orientation."
+  sources:
+    - url: "https://timesofindia.indiatimes.com/life-style/health-fitness/health-news/sleeping-direction-myth-vs-fact/articleshow/98765432.cms"
+      publisher: "The Times of India"
+      published_date: "2023-08-14"
+      tier: 3
+  category: folk_belief
+  last_reviewed: "2026-02-01"
+  review_by: "2027-02-01"
+
+- id: cb-003
+  canonical_claim: "NPCI has introduced a 2 percent transaction fee on normal UPI merchant payments"
+  variants:
+    - "सामान्य UPI पेमेंट पर 2 प्रतिशत चार्ज लगेगा"
+    - "2% charges levied on all personal UPI payments"
+  key_details:
+    - type: percentage
+      value: "2 percent"
+  verdict: REFUTED
+  explanation_en: "NPCI clarified that standard bank-to-bank UPI transactions remain completely free for normal consumers and regular merchants."
+  sources:
+    - url: "https://pib.gov.in/PressReleasePage.aspx?PRID=1911855"
+      publisher: "PIB Fact Check"
+      published_date: "2023-03-29"
+      tier: 2
+  category: banking_scam
+  last_reviewed: "2026-03-01"
+  review_by: "2027-03-01"
+
+- id: cb-004
+  canonical_claim: "Old test claim that expired yesterday"
+  variants:
+    - "पुराना टेस्ट दावा जो कल समाप्त हो गया"
+  key_details: []
+  verdict: REFUTED
+  explanation_en: "This test claim is marked as expired."
+  sources:
+    - url: "https://factcheck.org/expired-claim"
+      publisher: "FactCheck.org"
+      published_date: "2023-01-01"
+      tier: 1
+  category: test_expired
+  last_reviewed: "2023-01-01"
+  review_by: "2024-01-01"
