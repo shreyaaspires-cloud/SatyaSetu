@@ -40,14 +40,64 @@ MAX_REPLY_LEN = 1400          # Soft cap — trim if exceeded
 WHATSAPP_HARD_CAP = 4096      # Hard WhatsApp limit
 
 
+def compute_evidence_strength(evidence: List[Any]) -> tuple[str, str]:
+    """
+    Computes (strength_label, detail_str) based on evidence tiers and count.
+
+    | Label | Condition |
+    | Strong | >= 2 independent Tier 1-3 sources agree |
+    | Moderate | 1 Tier 1-3 source, or >= 2 Tier 4 sources |
+    | Limited | Only Tier 4-5 sources, or 1 source total |
+    | Insufficient | No decisive sources found |
+    """
+    from app.core.constants import Tier
+
+    if not evidence:
+        return "Insufficient", "No decisive sources found"
+
+    tier1_3_domains = set()
+    tier4_domains = set()
+    tier5_domains = set()
+
+    for item in evidence:
+        domain = getattr(item, "source_domain", "") or getattr(item, "url", "")
+        if not domain:
+            continue
+        tier = getattr(item, "tier", None)
+        if tier in (Tier.TIER_1_IFCN, Tier.TIER_2_GOV_PIB, Tier.TIER_3_MAINSTREAM):
+            tier1_3_domains.add(domain)
+        elif tier == Tier.TIER_4_WIKIPEDIA:
+            tier4_domains.add(domain)
+        else:
+            tier5_domains.add(domain)
+
+    t13_count = len(tier1_3_domains)
+    t4_count = len(tier4_domains)
+    total_sources = len(tier1_3_domains | tier4_domains | tier5_domains)
+
+    if t13_count >= 2:
+        return "Strong", f"{t13_count} official sources agree"
+    elif t13_count == 1:
+        return "Moderate", "1 official source found"
+    elif t4_count >= 2:
+        return "Moderate", f"{t4_count} reference sources agree"
+    elif total_sources == 1:
+        return "Limited", "1 source found"
+    elif total_sources > 1 and (tier4_domains or tier5_domains):
+        return "Limited", f"{total_sources} web sources found"
+    else:
+        return "Insufficient", "No decisive sources found"
+
+
 def _format_single_claim(result: ClaimResult, idx: int, total: int) -> str:
     """Format one ClaimResult as a readable block."""
     emoji = VERDICT_EMOJI.get(result.verdict, "❓")
     label = VERDICT_LABEL.get(result.verdict, str(result.verdict))
-    conf_pct = int(result.confidence * 100)
+    strength_label, strength_detail = compute_evidence_strength(result.evidence)
 
     header = f"*Claim {idx}/{total}:* {result.claim[:120].strip()}"
-    verdict_line = f"{emoji} *{label}* ({conf_pct}% confidence)"
+    verdict_line = f"{emoji} *{label}*"
+    strength_line = f"Evidence strength: {strength_label} · {strength_detail}"
 
     # Pick the single best evidence item as the source cite
     sources: List[str] = []
@@ -59,7 +109,7 @@ def _format_single_claim(result: ClaimResult, idx: int, total: int) -> str:
 
     source_block = "\n".join(sources) if sources else "• No source available"
 
-    parts = [header, verdict_line, source_block]
+    parts = [header, verdict_line, strength_line, source_block]
     return "\n".join(parts)
 
 

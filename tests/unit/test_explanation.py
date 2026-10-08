@@ -90,10 +90,11 @@ class TestTemplateExplanation:
         explanation = _template_explanation(result)
         assert "REFUTED" in explanation
 
-    def test_contains_confidence_percentage(self):
+    def test_contains_evidence_strength_label(self):
         result = _make_claim_result(confidence=0.85)
         explanation = _template_explanation(result)
-        assert "85%" in explanation
+        assert "Evidence strength:" in explanation
+        assert "%" not in explanation
 
     def test_contains_claim_text(self):
         result = _make_claim_result(claim="The earth is flat")
@@ -236,3 +237,25 @@ class TestTwimlMessage:
         from app.core.twiml import twiml_message
         twiml = twiml_message("<script>")
         assert "&lt;script&gt;" in twiml
+
+
+# ── Acceptance Tests: T6 (AT16) ──────────────────────────────────────────────
+
+class TestT6Acceptance:
+    def test_at16_no_reply_contains_confidence_percentage(self):
+        """AT16: No reply contains a % character next to a confidence figure."""
+        result = _make_claim_result(
+            confidence=0.87,
+            evidence=[
+                _make_evidence(tier=Tier.TIER_1_IFCN, domain="altnews.in"),
+                _make_evidence(tier=Tier.TIER_2_GOV_PIB, domain="pib.gov.in"),
+            ],
+        )
+        response = _make_response(claim_results=[result])
+        reply = format_whatsapp_reply(response)
+
+        # Check no percentage symbol in reply
+        assert "%" not in reply
+        assert "87%" not in reply
+        assert "Evidence strength:" in reply
+

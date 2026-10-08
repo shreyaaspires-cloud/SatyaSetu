@@ -51,13 +51,16 @@ def _top_evidence_text(result: ClaimResult, max_items: int = 3) -> str:
 
 def _template_explanation(result: ClaimResult) -> str:
     """Deterministic template-based explanation (Gemini fallback)."""
+    from app.features.explanation.formatter import compute_evidence_strength
+
     emoji = VERDICT_EMOJI.get(result.verdict, "❓")
     label = VERDICT_LABEL.get(result.verdict, str(result.verdict))
-    conf_pct = int(result.confidence * 100)
+    strength_label, strength_detail = compute_evidence_strength(result.evidence)
     ev_text = _top_evidence_text(result)
 
     lines = [
-        f"Verdict: {emoji} {label} (confidence: {conf_pct}%)",
+        f"Verdict: {emoji} {label}",
+        f"Evidence strength: {strength_label} · {strength_detail}",
         f'Claim: "{result.claim[:200]}"',
         "",
         "Evidence summary:",
