@@ -131,3 +131,55 @@ def test_orchestrator_parallel_dedupe_and_sorting():
                 # Sorting check: Tier 1 IFCN must be first, followed by Tier 4 Wikipedia
                 assert evidence[0].tier == Tier.TIER_1_IFCN
                 assert evidence[1].tier == Tier.TIER_4_WIKIPEDIA
+
+
+# ── Acceptance Tests: T8 (AT20, AT21) ────────────────────────────────────────
+
+class TestT8Acceptance:
+    def test_at20_enforces_budget_under_1_5s_when_sources_sleep(self):
+        """AT20: With 3 sources sleeping 6 s and a 1 s budget, call returns in < 1.5 s."""
+        import time
+
+        def slow_source(*args, **kwargs):
+            time.sleep(6.0)
+            return []
+
+        with patch("app.features.retrieval.orchestrator.search_google_fact_check", side_effect=slow_source):
+            with patch("app.features.retrieval.orchestrator.search_wikipedia", side_effect=slow_source):
+                with patch("app.features.retrieval.orchestrator.search_web", side_effect=slow_source):
+                    t0 = time.monotonic()
+                    results = retrieve_evidence("slow test claim budget", budget_ms=1000)
+                    elapsed = time.monotonic() - t0
+                    assert elapsed < 1.5
+                    assert results == []
+
+    def test_at21_repeated_claim_within_ttl_uses_cache_no_external_calls(self):
+        """AT21: A repeated claim within TTL does not trigger external source calls again."""
+        from app.features.retrieval.orchestrator import clear_evidence_cache
+
+        clear_evidence_cache()
+        item = EvidenceItem(
+            url="https://altnews.in/cached-article",
+            title="Cached",
+            snippet="Cached snippet",
+            source_domain="altnews.in",
+            tier=Tier.TIER_1_IFCN,
+            score=0.9,
+        )
+
+        with patch("app.features.retrieval.orchestrator.search_google_fact_check", return_value=[item]) as mock_google:
+            with patch("app.features.retrieval.orchestrator.search_wikipedia", return_value=[]) as mock_wiki:
+                with patch("app.features.retrieval.orchestrator.search_web", return_value=[]) as mock_web:
+                    # Call 1: triggers external sources
+                    res1 = retrieve_evidence("Test claim for TTL cache", budget_ms=2000)
+                    assert len(res1) == 1
+                    assert mock_google.call_count == 1
+
+                    # Call 2: repeated within TTL must use cache
+                    res2 = retrieve_evidence("Test claim for TTL cache", budget_ms=2000)
+                    assert len(res2) == 1
+                    assert res2[0].from_cache is True
+                    assert mock_google.call_count == 1
+                    assert mock_wiki.call_count == 1
+                    assert mock_web.call_count == 1
+
