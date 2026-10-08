@@ -23,7 +23,7 @@ from app.features.nlp.claims import extract_claims
 from app.features.nlp.keywords import extract_keywords
 from app.features.nlp.language import detect_language
 from app.features.nlp.translation import translate_to_english
-from app.features.nlp.worthiness import score_check_worthiness
+from app.features.nlp.worthiness import is_non_claim, score_check_worthiness
 from app.features.verification.service import batch_verify_claims
 
 logger = logging.getLogger(__name__)
@@ -103,36 +103,30 @@ def run_pipeline(message: IngestedMessage) -> CheckResponse:
     # ── Stage 4: Claim Extraction ──────────────────────────────────────────────
     with StageTimer("claim_extraction") as t:
         raw_claims = extract_claims(english_text)
-        # Cap at configured maximum
-        claims = raw_claims[: settings.max_claims_per_message]
+        claims = [c for c in raw_claims if not is_non_claim(c)][: settings.max_claims_per_message]
     timings["claim_extraction_ms"] = t.elapsed_ms
     logger.info("Extracted %d claims (capped at %d)", len(claims), settings.max_claims_per_message)
 
-    # ── Stage 5: Check-Worthiness Filtering ───────────────────────────────────
+    # ── Stage 5: Check-Worthiness / Non-Claim Filtering ───────────────────────
     with StageTimer("worthiness_scoring") as t:
         worthiness_score = score_check_worthiness(english_text)
     timings["worthiness_ms"] = t.elapsed_ms
 
-    # If the message is a greeting, question, or otherwise not fact-checkable
-    if worthiness_score < 0.1 and not claims:
-        logger.info("Low check-worthiness (%.2f) with no claims — short-circuit.", worthiness_score)
-        reply = (
-            "👋 *SatyaSetu* here!\n\n"
-            "Please send me a claim, forward, or news item you'd like fact-checked."
-        )
+    # If the message is a greeting, opinion, pure question, or has no verifiable claims
+    if not claims or is_non_claim(english_text):
+        logger.info("Non-claim detected — returning standard prompt reply.")
+        timings["total_ms"] = round((time.monotonic() - t_start) * 1000, 1)
+        reply = "Only factual claims can be verified. Please share a forwarded message to check."
         return CheckResponse(
             claim_results=[],
             overall_verdict=Verdict.UNVERIFIABLE,
-            explanation="No verifiable claims detected in this message.",
+            explanation=reply,
             formatted_reply=reply,
             language=lang_code,
             timings_ms=timings,
             cached=False,
+            flags=["non_claim"],
         )
-
-    # If no claims extracted but text is long enough, treat the full text as claim
-    if not claims and english_text.strip():
-        claims = [english_text.strip()[:300]]
 
     # ── Stage 6: Verification ─────────────────────────────────────────────────
     with StageTimer("verification") as t:

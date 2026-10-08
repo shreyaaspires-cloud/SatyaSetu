@@ -97,6 +97,8 @@ def extract_claims(
     if not sentences:
         return [text.strip()[:500]]
 
+    from app.features.nlp.worthiness import is_non_claim
+
     claims: List[str] = []
     for s in sentences:
         # Check if sentence is purely an instruction to forward with no other content
@@ -108,14 +110,13 @@ def extract_claims(
             # Skip pure forward instructions like "Please forward"
             continue
 
+        # If there are multiple sentences, skip greetings and non-claims
+        if len(sentences) > 1 and is_non_claim(s):
+            continue
+
         claims.append(s)
         if len(claims) >= cap:
             break
 
-    # If all sentences were skipped, fall back to the first non-empty sentence or full text
-    if not claims and sentences:
-        claims = [sentences[0]]
-    elif not claims:
-        claims = [text.strip()[:500]]
-
-    return claims
+    # If all extracted were non-claims, return empty list
+    return [c for c in claims if not is_non_claim(c)]

@@ -133,3 +133,37 @@ class TestRunPipeline:
         msg = _make_message("Drinking bleach cures all diseases.")
         response = run_pipeline(msg)
         assert response.overall_verdict in list(Verdict)
+
+
+# ── Acceptance Tests: T7 (AT17, AT18, AT19) ──────────────────────────────────
+
+class TestT7Acceptance:
+    def test_at17_greetings_receive_non_claim_message(self):
+        """AT17: 'Hello' and 'Good morning' receive the non-claim message, not a fact check reply."""
+        non_claim_msg = "Only factual claims can be verified. Please share a forwarded message to check."
+        for text in ("Hello", "Good morning"):
+            msg = _make_message(text)
+            resp = run_pipeline(msg)
+            assert resp.formatted_reply == non_claim_msg
+            assert "Fact Check" not in resp.formatted_reply
+            assert resp.claim_results == []
+
+    def test_at18_opinion_skipped_with_non_claim_message(self):
+        """AT18: 'This is the best phone' (opinion) is skipped with the non-claim message."""
+        non_claim_msg = "Only factual claims can be verified. Please share a forwarded message to check."
+        msg = _make_message("This is the best phone")
+        resp = run_pipeline(msg)
+        assert resp.formatted_reply == non_claim_msg
+        assert "Fact Check" not in resp.formatted_reply
+        assert resp.claim_results == []
+
+    def test_at19_greeting_line_plus_real_claim_checks_only_claim(self):
+        """AT19: A message with one greeting line + one real claim -> only the real claim is checked."""
+        text = "Good morning!\nGovernment is giving free laptops to all students."
+        msg = _make_message(text)
+        resp = run_pipeline(msg)
+        claims_checked = [cr.claim for cr in resp.claim_results]
+        assert len(claims_checked) == 1
+        assert "free laptops" in claims_checked[0].lower()
+        assert "good morning" not in claims_checked[0].lower()
+
