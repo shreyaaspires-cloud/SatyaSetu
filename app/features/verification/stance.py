@@ -279,66 +279,117 @@ def aggregate_verdict(
     """
     Aggregate per-item stances into a single Verdict with confidence and reason code.
 
-    Verdict logic (in priority order):
-    1. Any TIER_1/TIER_2 item with rating FALSE/MISLEADING  → REFUTED
-    2. Any TIER_1/TIER_2 item with rating TRUE              → SUPPORTED
-    3. Stance aggregation weighted by tier
-    4. Mixed signals                                        → MISLEADING
-    5. Insufficient evidence                                → UNVERIFIABLE
+    Verdict logic — applied in order (T3 sufficiency rules):
+
+    1. Demoted / detail-mismatched items (reason in {RELATED_NOT_SAME, DETAIL_MISMATCH})
+       are excluded from the decisive path. They may contribute to context display only.
+
+    2. REFUTED: 1 relevant Tier-1/2 item with a FALSE rating that passed the
+       relevance gate, OR ≥ 2 independent Tier-1/2/3 items that REFUTE.
+
+    3. SUPPORTED: ≥ 2 independent domains with Tier-1/2/3 items that SUPPORT,
+       at least one of them Tier-1/2/3, with no REFUTES from Tier-1/2/3 sources
+       and no DETAIL_MISMATCH on any supporting item.
+
+    4. UNVERIFIABLE (CONFLICTING_EVIDENCE): Tier-1/2/3 items both SUPPORT
+       and REFUTE — cannot resolve.
+
+    5. Tier-4 (Wikipedia) and Tier-5 evidence alone are NEVER decisive.
+       Wikipedia alone → always UNVERIFIABLE.
+
+    6. Default: UNVERIFIABLE.
 
     Returns:
         (verdict, confidence_0_to_1, reason_code)
     """
     from app.core.constants import Rating, Tier
 
-    tier_weight = {
-        Tier.TIER_1_IFCN: 1.0,
-        Tier.TIER_2_GOV_PIB: 0.9,
-        Tier.TIER_3_MAINSTREAM: 0.7,
-        Tier.TIER_4_WIKIPEDIA: 0.5,
-        Tier.TIER_5_GENERAL_WEB: 0.3,
-    }
+    _DECISIVE_TIERS = {Tier.TIER_1_IFCN, Tier.TIER_2_GOV_PIB, Tier.TIER_3_MAINSTREAM}
+    _NON_DECISIVE_REASONS = {"RELATED_NOT_SAME", "DETAIL_MISMATCH"}
 
     if not evidence_items:
         return Verdict.UNVERIFIABLE, 0.0, "NO_EVIDENCE"
 
-    # Priority 1 & 2: authoritative fact-checker ratings
+    # Partition: decisive candidates vs context-only
+    decisive: List[EvidenceItem] = []
     for item in evidence_items:
-        weight = tier_weight.get(item.tier, 0.3)
-        if weight >= 0.9:  # Tier 1 or 2
-            if item.rating in (Rating.FALSE, Rating.MISLEADING):
-                conf = round(min(item.score + 0.3, 1.0), 3)
-                return Verdict.REFUTED, conf, "AUTHORITATIVE_FACT_CHECK"
-            if item.rating == Rating.TRUE:
-                conf = round(min(item.score + 0.3, 1.0), 3)
-                return Verdict.SUPPORTED, conf, "AUTHORITATIVE_FACT_CHECK"
-            if item.rating == Rating.PARTLY_TRUE:
-                conf = round(min(item.score + 0.2, 1.0), 3)
-                return Verdict.MISLEADING, conf, "AUTHORITATIVE_FACT_CHECK"
+        if getattr(item, "reason", None) in _NON_DECISIVE_REASONS:
+            continue  # context only — excluded from verdict
+        decisive.append(item)
 
-    # Stance aggregation weighted by tier
-    stance_scores: Dict[str, float] = {"SUPPORTS": 0.0, "REFUTES": 0.0, "NEUTRAL": 0.0}
-    for item in evidence_items:
-        w = tier_weight.get(item.tier, 0.3)
-        stance_key = item.stance or "NEUTRAL"
-        if stance_key in stance_scores:
-            stance_scores[stance_key] += item.score * w
+    # -----------------------------------------------------------------------
+    # Rule 2: REFUTED — authoritative FALSE rating that passed gate
+    # -----------------------------------------------------------------------
+    tier12_false = [
+        i for i in decisive
+        if i.tier in (Tier.TIER_1_IFCN, Tier.TIER_2_GOV_PIB)
+        and i.rating in (Rating.FALSE, Rating.MISLEADING)
+        and i.stance != "NEUTRAL"
+    ]
+    if tier12_false:
+        best = max(tier12_false, key=lambda i: i.score)
+        return Verdict.REFUTED, round(min(best.score, 1.0), 3), "AUTHORITATIVE_FACT_CHECK"
 
-    total = sum(stance_scores.values())
-    if total < 0.05:
-        return Verdict.UNVERIFIABLE, 0.0, "LOW_EVIDENCE_SIGNAL"
+    # -----------------------------------------------------------------------
+    # Rule 2b: SUPPORTED — authoritative TRUE rating that passed gate
+    # -----------------------------------------------------------------------
+    tier12_true = [
+        i for i in decisive
+        if i.tier in (Tier.TIER_1_IFCN, Tier.TIER_2_GOV_PIB)
+        and i.rating == Rating.TRUE
+        and i.stance != "NEUTRAL"
+    ]
+    if tier12_true:
+        best = max(tier12_true, key=lambda i: i.score)
+        return Verdict.SUPPORTED, round(min(best.score, 1.0), 3), "AUTHORITATIVE_FACT_CHECK"
 
-    best_stance = max(stance_scores, key=lambda k: stance_scores[k])
-    best_score = stance_scores[best_stance]
-    confidence = round(min(best_score / total, 1.0), 3)
+    # -----------------------------------------------------------------------
+    # Rule 2c: PARTLY_TRUE → MISLEADING (authoritative)
+    # -----------------------------------------------------------------------
+    tier12_partly = [
+        i for i in decisive
+        if i.tier in (Tier.TIER_1_IFCN, Tier.TIER_2_GOV_PIB)
+        and i.rating == Rating.PARTLY_TRUE
+    ]
+    if tier12_partly:
+        best = max(tier12_partly, key=lambda i: i.score)
+        return Verdict.MISLEADING, round(min(best.score, 1.0), 3), "AUTHORITATIVE_FACT_CHECK"
 
-    # Detect mixed or conflicting evidence
-    if stance_scores["SUPPORTS"] > 0.25 and stance_scores["REFUTES"] > 0.25:
-        return Verdict.MISLEADING, confidence, "MIXED_EVIDENCE"
+    # -----------------------------------------------------------------------
+    # From here on: only stance-based evaluation of decisive Tier-1/2/3 items
+    # -----------------------------------------------------------------------
+    decisive_t123 = [i for i in decisive if i.tier in _DECISIVE_TIERS]
 
-    if best_stance == "SUPPORTS" and confidence > 0.5:
-        return Verdict.SUPPORTED, confidence, "STANCE_MAJORITY"
-    if best_stance == "REFUTES" and confidence > 0.5:
-        return Verdict.REFUTED, confidence, "STANCE_MAJORITY"
+    supports_t123 = [i for i in decisive_t123 if i.stance == "SUPPORTS"]
+    refutes_t123 = [i for i in decisive_t123 if i.stance == "REFUTES"]
 
-    return Verdict.UNVERIFIABLE, confidence, "INCONCLUSIVE"
+    # Rule 4: conflicting decisive evidence → UNVERIFIABLE (CONFLICTING_EVIDENCE)
+    if supports_t123 and refutes_t123:
+        return Verdict.UNVERIFIABLE, 0.5, "CONFLICTING_EVIDENCE"
+
+    # Rule 2 (stance): ≥2 independent Tier-1/2/3 items REFUTE
+    if len(refutes_t123) >= 2:
+        unique_domains = {i.source_domain for i in refutes_t123}
+        if len(unique_domains) >= 2:
+            best_conf = round(max(i.score for i in refutes_t123), 3)
+            return Verdict.REFUTED, best_conf, "STANCE_MAJORITY"
+
+    # Rule 3: ≥2 independent domains of Tier-1/2/3 SUPPORT, no refutes
+    if len(supports_t123) >= 2 and not refutes_t123:
+        unique_domains = {i.source_domain for i in supports_t123}
+        if len(unique_domains) >= 2:
+            best_conf = round(max(i.score for i in supports_t123), 3)
+            return Verdict.SUPPORTED, best_conf, "STANCE_MAJORITY"
+
+    # -----------------------------------------------------------------------
+    # Rule 5: Tier-4/5 only evidence is NEVER decisive
+    # -----------------------------------------------------------------------
+    has_only_weak = all(i.tier not in _DECISIVE_TIERS for i in decisive) if decisive else True
+    if has_only_weak:
+        return Verdict.UNVERIFIABLE, 0.0, "INSUFFICIENT_TIER"
+
+    # -----------------------------------------------------------------------
+    # Default: insufficient decisive evidence
+    # -----------------------------------------------------------------------
+    return Verdict.UNVERIFIABLE, 0.0, "INCONCLUSIVE"
+
