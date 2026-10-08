@@ -55,8 +55,10 @@ def load_sources_config() -> Dict[str, List[str]]:
             "politifact.com", "snopes.com", "reuters.com", "afp.com",
         ],
         "tier_2_gov_pib": [
-            "pib.gov.in", "mygov.in", "mohfw.gov.in", "who.int",
-            "rbi.org.in", "isro.gov.in", "ecisveep.nic.in", "india.gov.in",
+            "pib.gov.in", "mygov.in", "mohfw.gov.in", "icmr.gov.in", "who.int",
+            "rbi.org.in", "npci.org.in", "cert-in.org.in", "sebi.gov.in", "uidai.gov.in",
+            "india.gov.in", "incometax.gov.in", "incometaxindia.gov.in",
+            "isro.gov.in", "ecisveep.nic.in",
         ],
         "tier_3_mainstream": [
             "thehindu.com", "indianexpress.com", "bbc.com", "bbc.co.uk",

@@ -1,0 +1,52 @@
+# SatyaSetu Source Credibility Tier Configuration
+# Tier 1: Published IFCN fact checkers
+# Tier 2: Government & international public health/regulatory bodies
+# Tier 3: Mainstream accredited news publishers
+# Tier 4: Wikipedia (context only, never decisive alone)
+# Tier 5: General web / unlisted
+
+tier_1_ifcn:
+  - altnews.in          # reason: IFCN certified Indian fact-checker
+  - boomlive.in         # reason: IFCN certified Indian fact-checker
+  - factly.in           # reason: IFCN certified Indian fact-checker
+  - thequint.com        # reason: WebQoof IFCN fact-checking division
+  - vishvasnews.com     # reason: IFCN certified Hindi/multilingual fact-checker
+  - newschecker.in      # reason: IFCN certified Indian regional fact-checker
+  - thip.media          # reason: The Healthy Indian Project certified health fact-checker
+  - factcheck.org       # reason: IFCN certified international fact-checker
+  - politifact.com      # reason: Pulitzer prize-winning IFCN fact-checker
+  - snopes.com          # reason: Standard reference fact-checking organization
+  - reuters.com         # reason: Reuters Fact Check division
+  - afp.com             # reason: AFP Fact Check global news agency
+
+tier_2_gov_pib:
+  - pib.gov.in              # reason: Press Information Bureau, official Govt of India fact-check and release agency
+  - mygov.in                # reason: Citizen engagement platform and official govt announcements
+  - mohfw.gov.in            # reason: Ministry of Health and Family Welfare, India
+  - icmr.gov.in             # reason: Indian Council of Medical Research, apex biomedical research body
+  - who.int                 # reason: World Health Organization international health authority
+  - rbi.org.in              # reason: Reserve Bank of India, central banking authority
+  - npci.org.in             # reason: National Payments Corporation of India, UPI and retail payments regulator
+  - cert-in.org.in          # reason: Indian Computer Emergency Response Team, national cybersecurity agency
+  - sebi.gov.in             # reason: Securities and Exchange Board of India, capital markets regulator
+  - uidai.gov.in            # reason: Unique Identification Authority of India, Aadhaar official issuer
+  - india.gov.in            # reason: National portal of India, central government services
+  - incometax.gov.in        # reason: Income Tax Department official e-filing portal
+  - incometaxindia.gov.in   # reason: Central Board of Direct Taxes, Income Tax Department India
+  - isro.gov.in             # reason: Indian Space Research Organisation
+  - ecisveep.nic.in         # reason: Election Commission of India voter portal
+
+tier_3_mainstream:
+  - thehindu.com                 # reason: National daily newspaper of record
+  - indianexpress.com            # reason: Major investigative national newspaper
+  - bbc.com                      # reason: British Broadcasting Corporation international news
+  - bbc.co.uk                    # reason: BBC UK domain
+  - ndtv.com                     # reason: Established national broadcast news network
+  - apnews.com                   # reason: Associated Press global news agency
+  - hindustantimes.com           # reason: Major Indian national English daily
+  - timesofindia.indiatimes.com  # reason: Widely circulated national daily newspaper
+
+tier_4_wikipedia:
+  - wikipedia.org       # reason: Crowd-sourced encyclopedia (context only, never decisive alone)
+  - en.wikipedia.org    # reason: English Wikipedia
+  - hi.wikipedia.org    # reason: Hindi Wikipedia
