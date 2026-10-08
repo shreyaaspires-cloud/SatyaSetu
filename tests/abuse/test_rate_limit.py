@@ -69,22 +69,24 @@ class TestRateLimiterCore:
 
 class TestWebhookRateLimitIntegration:
     def test_webhook_rate_limit_reply(self, monkeypatch):
+        from unittest.mock import patch
         monkeypatch.setattr(settings, "rate_limit_per_minute", 2)
         client = TestClient(app)
         phone = "+919999988888"
 
-        # Request 1: OK
-        res1 = client.post("/webhook/twilio", data={"Body": "Claim 1", "From": f"whatsapp:{phone}"})
-        assert res1.status_code == 200
+        with patch("app.routers.webhook.run_pipeline"):
+            # Request 1: OK
+            res1 = client.post("/webhook/twilio", data={"Body": "Claim 1", "From": f"whatsapp:{phone}"})
+            assert res1.status_code == 200
 
-        # Request 2: OK
-        res2 = client.post("/webhook/twilio", data={"Body": "Claim 2", "From": f"whatsapp:{phone}"})
-        assert res2.status_code == 200
+            # Request 2: OK
+            res2 = client.post("/webhook/twilio", data={"Body": "Claim 2", "From": f"whatsapp:{phone}"})
+            assert res2.status_code == 200
 
-        # Request 3: Exceeds rate limit -> Graceful 429
-        res3 = client.post("/webhook/twilio", data={"Body": "Claim 3", "From": f"whatsapp:{phone}"})
-        assert res3.status_code == 429
-        assert "too many messages" in res3.text.lower()
+            # Request 3: Exceeds rate limit -> Graceful 429
+            res3 = client.post("/webhook/twilio", data={"Body": "Claim 3", "From": f"whatsapp:{phone}"})
+            assert res3.status_code == 429
+            assert "too many messages" in res3.text.lower()
 
     def test_ip_rate_limiting_middleware(self, monkeypatch):
         import app_main

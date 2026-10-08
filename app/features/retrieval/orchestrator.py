@@ -17,6 +17,7 @@ from app.contracts.models import EvidenceItem
 from app.core.config import settings
 from app.core.constants import Tier
 from app.features.retrieval.factcheck_google import search_google_fact_check
+from app.features.retrieval.official_search import route_claim_topic, search_official_sources
 from app.features.retrieval.search_web import search_web
 from app.features.retrieval.wikipedia import search_wikipedia
 
@@ -111,8 +112,11 @@ def retrieve_evidence(
 
     collected_evidence: List[EvidenceItem] = []
 
+    topic, official_domains = route_claim_topic(cleaned_claim)
+
     # Non-blocking executor shutdown avoids waiting for slow threads
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+    max_workers = 4 if official_domains else 3
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
     try:
         future_google = executor.submit(search_google_fact_check, cleaned_claim)
         future_wiki = executor.submit(search_wikipedia, wiki_query)
@@ -123,6 +127,9 @@ def retrieve_evidence(
             future_wiki: "wikipedia",
             future_web: "web_search",
         }
+        if official_domains:
+            future_official = executor.submit(search_official_sources, cleaned_claim, official_domains)
+            futures_map[future_official] = f"official_search_{topic}"
 
         done, not_done = concurrent.futures.wait(
             futures_map.keys(),

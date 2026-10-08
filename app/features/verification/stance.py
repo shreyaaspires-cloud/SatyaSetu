@@ -307,6 +307,10 @@ def aggregate_verdict(
     for item in evidence_items:
         weight = tier_weight.get(item.tier, 0.3)
         if weight >= 0.9:  # Tier 1 or 2
+            if item.tier == Tier.TIER_2_GOV_PIB:
+                from app.features.retrieval.official_search import passes_detail_check
+                if not passes_detail_check(claim, f"{item.title} {item.snippet}"):
+                    continue
             if item.rating == Rating.OUTDATED:
                 conf = round(min(item.score + 0.3, 1.0), 3)
                 return Verdict.OUTDATED, conf, "AUTHORITATIVE_FACT_CHECK"
@@ -323,6 +327,10 @@ def aggregate_verdict(
     # Stance aggregation weighted by tier
     stance_scores: Dict[str, float] = {"SUPPORTS": 0.0, "REFUTES": 0.0, "NEUTRAL": 0.0}
     for item in evidence_items:
+        if item.tier == Tier.TIER_2_GOV_PIB:
+            from app.features.retrieval.official_search import passes_detail_check
+            if not passes_detail_check(claim, f"{item.title} {item.snippet}"):
+                continue
         w = tier_weight.get(item.tier, 0.3)
         stance_key = item.stance or "NEUTRAL"
         if stance_key in stance_scores:

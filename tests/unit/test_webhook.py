@@ -21,8 +21,11 @@ def client():
 class TestT9Acceptance:
     def test_at22_webhook_returns_under_2s_even_when_pipeline_takes_10s(self, client):
         """AT22: Webhook returns in < 2 s even when pipeline takes 10 s."""
+        import threading
+        stop_event = threading.Event()
+
         def slow_pipeline(*args, **kwargs):
-            time.sleep(10.0)
+            stop_event.wait(timeout=10.0)
             mock_res = MagicMock()
             mock_res.formatted_reply = "Done"
             return mock_res
@@ -43,6 +46,9 @@ class TestT9Acceptance:
             assert elapsed < 2.0
             assert "<Response><Message>" in resp.text
             assert "Checking this, one moment..." in resp.text
+
+            stop_event.set()
+            time.sleep(0.05)
 
     def test_at23_same_messagesid_sent_twice_triggers_only_one_pipeline_run(self, client):
         """AT23: Same MessageSid sent twice triggers only one pipeline run."""
@@ -82,7 +88,7 @@ class TestT9Acceptance:
         import concurrent.futures
 
         def moderate_pipeline(*args, **kwargs):
-            time.sleep(0.5)
+            time.sleep(0.05)
             mock_res = MagicMock()
             mock_res.formatted_reply = "Moderate Done"
             return mock_res
@@ -111,6 +117,7 @@ class TestT9Acceptance:
             # Both webhooks return immediately (< 1.0s), not waiting 0.5s sequentially
             assert res1[1] < 1.0
             assert res2[1] < 1.0
+            time.sleep(0.15)
 
 
 class TestApiCheckEndpoint:

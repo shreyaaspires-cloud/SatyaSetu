@@ -91,10 +91,12 @@ class TestEndpointsSmoke:
 
     def test_webhook_twilio_empty_payload(self, client):
         """POST /webhook/twilio with empty body gracefully returns TwiML."""
-        res = client.post(
-            "/webhook/twilio",
-            data={"Body": "Is water wet?", "From": "whatsapp:+919876543210"},
-        )
-        assert res.status_code == 200
-        assert "<Response><Message>" in res.text
-        assert "</Message></Response>" in res.text
+        from unittest.mock import patch
+        with patch("app.routers.webhook.run_pipeline"):
+            res = client.post(
+                "/webhook/twilio",
+                data={"Body": "Is water wet?", "From": "whatsapp:+919876543210"},
+            )
+            assert res.status_code == 200
+            assert "<Response><Message>" in res.text
+            assert "</Message></Response>" in res.text
