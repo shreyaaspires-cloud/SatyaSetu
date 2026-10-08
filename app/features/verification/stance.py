@@ -348,6 +348,12 @@ def aggregate_verdict(
         best = max(tier12_outdated, key=lambda i: i.score)
         return Verdict.OUTDATED, round(min(best.score + 0.3, 1.0), 3), "AUTHORITATIVE_FACT_CHECK"
 
+    def _is_tier2_detail_valid(item: EvidenceItem) -> bool:
+        if item.tier == Tier.TIER_2_GOV_PIB:
+            from app.features.retrieval.official_search import passes_detail_check
+            return passes_detail_check(claim, f"{item.title} {item.snippet}")
+        return True
+
     # -----------------------------------------------------------------------
     # Rule 2: REFUTED — authoritative FALSE rating that passed gate
     # -----------------------------------------------------------------------
@@ -356,6 +362,7 @@ def aggregate_verdict(
         if i.tier in (Tier.TIER_1_IFCN, Tier.TIER_2_GOV_PIB)
         and i.rating in (Rating.FALSE, Rating.MISLEADING)
         and i.stance != "NEUTRAL"
+        and _is_tier2_detail_valid(i)
     ]
     if tier12_false:
         best = max(tier12_false, key=lambda i: i.score)
@@ -369,6 +376,7 @@ def aggregate_verdict(
         if i.tier in (Tier.TIER_1_IFCN, Tier.TIER_2_GOV_PIB)
         and i.rating == Rating.TRUE
         and i.stance != "NEUTRAL"
+        and _is_tier2_detail_valid(i)
     ]
     if tier12_true:
         best = max(tier12_true, key=lambda i: i.score)
@@ -381,6 +389,7 @@ def aggregate_verdict(
         i for i in decisive
         if i.tier in (Tier.TIER_1_IFCN, Tier.TIER_2_GOV_PIB)
         and i.rating == Rating.PARTLY_TRUE
+        and _is_tier2_detail_valid(i)
     ]
     if tier12_partly:
         best = max(tier12_partly, key=lambda i: i.score)
@@ -389,7 +398,8 @@ def aggregate_verdict(
     # -----------------------------------------------------------------------
     # From here on: only stance-based evaluation of decisive Tier-1/2/3 items
     # -----------------------------------------------------------------------
-    decisive_t123 = [i for i in decisive if i.tier in _DECISIVE_TIERS]
+    decisive_t123 = [i for i in decisive if i.tier in _DECISIVE_TIERS and _is_tier2_detail_valid(i)]
+
 
 
     supports_t123 = [i for i in decisive_t123 if i.stance == "SUPPORTS"]
