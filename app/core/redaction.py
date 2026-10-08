@@ -73,3 +73,87 @@ def redact(text: str) -> str:
     cleaned = LONG_DIGIT_REGEX.sub(_clean_digit_run, cleaned)
 
     return cleaned
+
+
+# ── T10 External Redaction Patterns ───────────────────────────────────────────
+
+EXTERNAL_UPI_REGEX = re.compile(
+    r"\b[A-Za-z0-9._\-]{2,}@(upi|okaxis|paytm|ybl|icici|oksbi|okhdfcbank|barodampay|axisbank|apl|postbank|idfcbank|kotak|axl|ibl|airtel)\b",
+    re.IGNORECASE,
+)
+
+EXTERNAL_PAN_REGEX = re.compile(
+    r"\b[A-Za-z]{5}[0-9]{4}[A-Za-z]\b"
+)
+
+EXTERNAL_CARD_REGEX = re.compile(
+    r"(?<!\w)(?:(?:\d{4}[-\s]){3}\d{4}|\d{16})(?!\w)"
+)
+
+EXTERNAL_AADHAAR_REGEX = re.compile(
+    r"(?<![+\w:])(?:(?:\d{4}[-\s]){2}\d{4}|\d{12})(?!\w)"
+)
+
+EXTERNAL_PHONE_REGEX = re.compile(
+    r"(?<!\w)(?:whatsapp:\s*\+?\d{7,15}|(?:\+91[\-\s]?|0)?[6-9]\d{9})(?!\w)",
+    re.IGNORECASE,
+)
+
+EXTERNAL_LONG_DIGIT_REGEX = re.compile(
+    r"(?<!\w)\d{11,}(?!\w)"
+)
+
+
+def redact_for_external(text: str) -> str:
+    """
+    Redact PII before data is transmitted outside the server to external services
+    (Google Fact Check, Brave, Tavily, Wikipedia, Gemini).
+
+    Tokens:
+      - Phone numbers: [PHONE]
+      - Email addresses: [EMAIL]
+      - Aadhaar-style 12-digit numbers: [ID_NUMBER]
+      - PAN-style codes: [PAN]
+      - Card-like 16-digit runs: [CARD_NUMBER]
+      - UPI IDs: [UPI_ID]
+      - Long digit strings >10 digits: [NUMBER]
+
+    Meaningful figures (Rs 500, 2 percent, 1 lakh, years) survive untouched.
+    """
+    if not text:
+        return text
+
+    # 1. UPI IDs (must precede email regex to avoid matching as email)
+    result = EXTERNAL_UPI_REGEX.sub("[UPI_ID]", text)
+
+    # 2. Email addresses
+    result = EMAIL_REGEX.sub("[EMAIL]", result)
+
+    # 3. PAN codes (5 letters + 4 digits + 1 letter)
+    result = EXTERNAL_PAN_REGEX.sub("[PAN]", result)
+
+    # 4. Card-like 16-digit runs
+    def _card_repl(m: re.Match) -> str:
+        digits = re.sub(r"\D", "", m.group(0))
+        if len(digits) == 16:
+            return "[CARD_NUMBER]"
+        return m.group(0)
+
+    result = EXTERNAL_CARD_REGEX.sub(_card_repl, result)
+
+    # 5. Aadhaar-style 12-digit runs
+    def _aadhaar_repl(m: re.Match) -> str:
+        digits = re.sub(r"\D", "", m.group(0))
+        if len(digits) == 12:
+            return "[ID_NUMBER]"
+        return m.group(0)
+
+    result = EXTERNAL_AADHAAR_REGEX.sub(_aadhaar_repl, result)
+
+    # 6. Phone numbers (10-digit Indian mobile, +91, whatsapp prefix)
+    result = EXTERNAL_PHONE_REGEX.sub("[PHONE]", result)
+
+    # 7. Long digit strings (>10 digits) not matching card/aadhaar
+    result = EXTERNAL_LONG_DIGIT_REGEX.sub("[NUMBER]", result)
+
+    return result

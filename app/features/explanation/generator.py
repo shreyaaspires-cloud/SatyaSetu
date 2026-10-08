@@ -91,13 +91,16 @@ def _gemini_explanation(result: ClaimResult) -> str | None:
     label = VERDICT_LABEL.get(result.verdict, str(result.verdict))
     ev_text = _top_evidence_text(result, max_items=3)
 
+    from app.core.redaction import redact_for_external
+    redacted_claim = redact_for_external(result.claim[:300])
+
     prompt = textwrap.dedent(f"""
         You are an expert fact-checking assistant for an Indian WhatsApp misinformation detection service.
         Write a concise, objective 2-3 sentence explanation of the following fact-check verdict.
         Do NOT use markdown formatting (no bold, asterisks, bullet points, or headers).
         Keep it under 150 words and suitable for WhatsApp.
 
-        Claim: "{result.claim[:300]}"
+        Claim: "{redacted_claim}"
         Assessed Verdict: {label}
         Retrieved Evidence:
         {ev_text}

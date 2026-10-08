@@ -16,6 +16,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 from app.contracts.models import EvidenceItem
 from app.core.config import settings
 from app.core.constants import Rating, Tier
+from app.core.redaction import redact_for_external
 from app.core.security import is_public_http_url
 from app.features.retrieval.ratings import normalize_rating
 from app.features.retrieval.sources import classify_domain
@@ -56,8 +57,10 @@ def search_google_fact_check(query: str) -> List[EvidenceItem]:
     if not query or not query.strip():
         return []
 
+    cleaned_query = redact_for_external(query.strip())
+
     try:
-        data = _fetch_google_fact_check(query.strip(), settings.google_fact_check_api_key)
+        data = _fetch_google_fact_check(cleaned_query, settings.google_fact_check_api_key)
         claims = data.get("claims", [])
         evidence_items: List[EvidenceItem] = []
 

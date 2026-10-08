@@ -97,7 +97,8 @@ def retrieve_evidence(
     if not claim or not claim.strip():
         return []
 
-    cleaned_claim = claim.strip()
+    from app.core.redaction import redact_for_external
+    cleaned_claim = redact_for_external(claim.strip())
 
     # Check evidence cache first
     cached = get_cached_evidence(cleaned_claim)

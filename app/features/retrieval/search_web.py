@@ -146,12 +146,15 @@ def search_web(query: str) -> List[EvidenceItem]:
     if not query or not query.strip():
         return []
 
+    from app.core.redaction import redact_for_external
+    cleaned_query = redact_for_external(query.strip())
+
     try:
         provider = (settings.search_provider or "brave").lower().strip()
         if provider == "brave":
-            return _search_brave(query.strip(), settings.search_api_key)
+            return _search_brave(cleaned_query, settings.search_api_key)
         elif provider == "tavily":
-            return _search_tavily(query.strip(), settings.search_api_key)
+            return _search_tavily(cleaned_query, settings.search_api_key)
         else:
             logger.warning("Unsupported search provider: %s", provider)
             return []

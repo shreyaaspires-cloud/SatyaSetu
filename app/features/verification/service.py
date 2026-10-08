@@ -46,10 +46,14 @@ def _gemini_verify_claim(
 
         evidence_payload = "\n".join(items_desc)
 
+        from app.core.redaction import redact_for_external
+
+        redacted_claim = redact_for_external(claim)
+
         prompt = f"""You are an objective fact-checking verification engine for an Indian misinformation detection system.
 Analyze the following claim against the retrieved evidence snippets and scientific/historical consensus.
 
-CLAIM: "{claim}"
+CLAIM: "{redacted_claim}"
 
 RETRIEVED EVIDENCE:
 {evidence_payload}

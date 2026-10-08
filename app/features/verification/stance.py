@@ -111,10 +111,13 @@ def _gemini_stance_batch(claim: str, evidence_items: List[EvidenceItem]) -> bool
 
         evidence_payload = "\n".join(items_desc)
 
+        from app.core.redaction import redact_for_external
+        redacted_claim = redact_for_external(claim)
+
         prompt = f"""You are an expert fact-checking NLI (Natural Language Inference) classifier.
 Evaluate how each evidence snippet relates to the following CLAIM.
 
-CLAIM: "{claim}"
+CLAIM: "{redacted_claim}"
 
 EVIDENCE ITEMS:
 {evidence_payload}

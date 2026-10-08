@@ -217,13 +217,15 @@ def translate_reply_back(
             return english_reply
 
         from google import genai
+        from app.core.redaction import redact_for_external
 
+        redacted_reply = redact_for_external(english_reply)
         client = genai.Client(api_key=cfg.gemini_api_key)
         prompt = (
             f"Translate the following WhatsApp fact-check reply into language code '{target_lang}'. "
             "Preserve all *bold* markers, emojis, and URLs exactly as-is. "
             "Output ONLY the translated text:\n\n"
-            f"{english_reply}"
+            f"{redacted_reply}"
         )
         response = client.models.generate_content(
             model=cfg.gemini_model,

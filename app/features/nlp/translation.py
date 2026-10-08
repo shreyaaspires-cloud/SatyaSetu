@@ -33,14 +33,16 @@ def translate_with_gemini(text: str, lang_code: str = "") -> Optional[str]:
 
     try:
         from google import genai
+        from app.core.redaction import redact_for_external
 
+        redacted_text = redact_for_external(text)
         client = genai.Client(api_key=settings.gemini_api_key)
         lang_hint = f"from language code '{lang_code}' " if lang_code and lang_code != "und" else ""
         prompt = (
             f"Translate the following text {lang_hint}accurately into clear, natural English. "
             "Preserve any specific medical, factual, or cultural claims exactly. "
             "Output ONLY the English translation, with no explanation or commentary:\n\n"
-            f"{text}"
+            f"{redacted_text}"
         )
         response = client.models.generate_content(
             model=settings.gemini_model,

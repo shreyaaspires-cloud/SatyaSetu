@@ -30,7 +30,8 @@ def search_wikipedia(query: str, lang: str = "en") -> List[EvidenceItem]:
     if not query or not query.strip():
         return []
 
-    cleaned_query = query.strip()
+    from app.core.redaction import redact_for_external
+    cleaned_query = redact_for_external(query.strip())
     evidence_items: List[EvidenceItem] = []
 
     try:
