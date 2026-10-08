@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from app.contracts.models import EvidenceItem
 from app.core.constants import Verdict
+from app.features.verification.details import check_detail_conflict, has_negation
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -212,11 +213,30 @@ def score_stance(
     if not claim.strip() or not evidence_items:
         return evidence_items
 
+    # Pre-pass: key detail agreement check (T2).
+    # Runs before any NLI/Gemini/lexical scoring.
+    # Items with a detail conflict are marked NEUTRAL immediately and excluded
+    # from further stance scoring so they cannot SUPPORT or REFUTE.
+    _to_score: list[EvidenceItem] = []
+    for item in evidence_items:
+        premise = f"{item.title}. {item.snippet}"[:500].strip()
+        conflict = check_detail_conflict(claim, premise)
+        if conflict == "DETAIL_MISMATCH":
+            item.stance = "NEUTRAL"
+            item.reason = "DETAIL_MISMATCH"
+            # Keep existing score so sorting still works
+        else:
+            _to_score.append(item)
+
+    # If all items were mismatched, return early
+    if not _to_score:
+        return evidence_items
+
     # 1. Try local NLI model
     model_tuple = _load_nli_model(settings.nli_model_name)
     if model_tuple is not None:
         tokenizer, model = model_tuple
-        for item in evidence_items:
+        for item in _to_score:
             premise = f"{item.title}. {item.snippet}"[:500].strip()
             label, confidence = _nli_stance(premise, claim, tokenizer, model)
             if label == "ENTAILMENT":
@@ -228,12 +248,12 @@ def score_stance(
             item.score = round(confidence, 3)
         return evidence_items
 
-    # 2. Try Gemini batch stance
-    if _gemini_stance_batch(claim, evidence_items):
+    # 2. Try Gemini batch stance (only on non-mismatched items)
+    if _gemini_stance_batch(claim, _to_score):
         return evidence_items
 
     # 3. Upgraded lexical fallback
-    for item in evidence_items:
+    for item in _to_score:
         premise = f"{item.title}. {item.snippet}"[:500].strip()
         premise_lower = premise.lower()
         overlap = _lexical_overlap_score(claim, premise)
