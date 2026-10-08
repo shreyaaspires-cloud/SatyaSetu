@@ -121,11 +121,69 @@ def _gemini_explanation(result: ClaimResult) -> str | None:
     return None
 
 
+def _evidence_word_pool(result: ClaimResult) -> set[str]:
+    """
+    Build a set of lowercase content words from all evidence snippets and titles.
+    Used to validate that each sentence in a Gemini explanation has grounding.
+    """
+    import re as _re
+    pool: set[str] = set()
+    for item in result.evidence:
+        for text in (item.snippet, item.title, item.source_domain):
+            tokens = _re.findall(r"\b[a-z]{3,}\b", text.lower())
+            pool.update(tokens)
+    # Also add words from the claim itself
+    pool.update(_re.findall(r"\b[a-z]{3,}\b", result.claim.lower()))
+    return pool
+
+
+def _is_grounded(sentence: str, word_pool: set[str]) -> bool:
+    """
+    Return True if at least one content word in the sentence appears in the
+    evidence/claim word pool. Sentences with zero overlap are hallucinated.
+    """
+    import re as _re
+    _STOP = {"the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
+              "it", "its", "of", "in", "on", "at", "to", "for", "and", "or", "but",
+              "not", "no", "this", "that", "has", "have", "had", "with", "by"}
+    tokens = {w for w in _re.findall(r"\b[a-z]{3,}\b", sentence.lower())
+              if w not in _STOP}
+    return bool(tokens & word_pool)
+
+
+def _validate_explanation(text: str, result: ClaimResult) -> bool:
+    """
+    Validate every sentence in the Gemini explanation against evidence.
+    Returns True only if all sentences are grounded in evidence or the claim.
+    When evidence is empty, any non-empty text is considered ungrounded.
+    """
+    if not result.evidence:
+        # No evidence retrieved → any generated text is ungrounded
+        return False
+
+    import re as _re
+    word_pool = _evidence_word_pool(result)
+    sentences = [s.strip() for s in _re.split(r"(?<=[.!?])\s+", text.strip()) if s.strip()]
+
+    for sentence in sentences:
+        if not _is_grounded(sentence, word_pool):
+            logger.warning(
+                "Explanation sentence has no evidence grounding — rejecting Gemini output. "
+                "Sentence: '%.80s'", sentence
+            )
+            return False
+    return True
+
+
 def generate_explanation(result: ClaimResult) -> str:
     """
     Generate a human-readable explanation for a single ClaimResult.
 
-    Tries Gemini first; falls back to a deterministic template.
+    Steps (T5 hardened):
+      1. Call Gemini for a fluent 2-3 sentence explanation.
+      2. Validate every sentence against evidence word-overlap.
+         If any sentence is ungrounded → discard and fall back to template.
+      3. Fall back to deterministic template if Gemini is unavailable.
 
     Args:
         result: A fully-populated ClaimResult (verdict, confidence, evidence).
@@ -135,8 +193,13 @@ def generate_explanation(result: ClaimResult) -> str:
     """
     gemini_text = _gemini_explanation(result)
     if gemini_text:
-        logger.debug("Using Gemini-generated explanation.")
-        return gemini_text
+        if _validate_explanation(gemini_text, result):
+            logger.debug("Using Gemini-generated explanation (grounding validated).")
+            return gemini_text
+        logger.warning(
+            "Gemini explanation failed grounding check — using template fallback."
+        )
 
-    logger.debug("Using template explanation (Gemini unavailable or failed).")
+    logger.debug("Using template explanation (Gemini unavailable or failed grounding).")
     return _template_explanation(result)
+
