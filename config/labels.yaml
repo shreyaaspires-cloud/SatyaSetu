@@ -1,0 +1,83 @@
+en:
+  needs_native_review: false
+  verdicts:
+    SUPPORTED: "SUPPORTED"
+    REFUTED: "REFUTED"
+    PARTIALLY_SUPPORTED: "PARTIALLY_SUPPORTED"
+    OUTDATED: "OUTDATED"
+    UNVERIFIABLE: "UNVERIFIABLE"
+  ui:
+    evidence_strength: "Evidence strength"
+    sources: "Sources"
+    claim_echo: "I understood your message as"
+    translation_unavailable: "This explanation is in English because translation is currently unavailable."
+
+hi:
+  needs_native_review: false # Reviewed by Shreya
+  verdicts:
+    SUPPORTED: "सत्य (पुष्ट)"
+    REFUTED: "असत्य (खारिज)"
+    PARTIALLY_SUPPORTED: "आंशिक रूप से सत्य"
+    OUTDATED: "पुराना (कालबाह्य)"
+    UNVERIFIABLE: "सत्यापित नहीं हो सका"
+  ui:
+    evidence_strength: "प्रमाण की मजबूती"
+    sources: "स्रोत"
+    claim_echo: "मैंने आपके संदेश को इस प्रकार समझा"
+    translation_unavailable: "यह विवरण अंग्रेजी में है क्योंकि अनुवाद वर्तमान में उपलब्ध नहीं है।"
+
+mr:
+  needs_native_review: false # Reviewed by Shreya
+  verdicts:
+    SUPPORTED: "सत्य (पुष्टी झाली)"
+    REFUTED: "असत्य (खोडून काढले)"
+    PARTIALLY_SUPPORTED: "अंशतः सत्य"
+    OUTDATED: "कालबाह्य (जुने)"
+    UNVERIFIABLE: "तपासणे शक्य नाही"
+  ui:
+    evidence_strength: "पुराव्याची तीव्रता"
+    sources: "स्रोत"
+    claim_echo: "मला तुमचा संदेश असा समजला"
+    translation_unavailable: "हे स्पष्टीकरण इंग्रजीत आहे कारण भाषांतर सध्या उपलब्ध नाही."
+
+ta:
+  needs_native_review: true
+  verdicts:
+    SUPPORTED: "உண்மை (உறுதியானது)"
+    REFUTED: "தவறு (மறுக்கப்பட்டது)"
+    PARTIALLY_SUPPORTED: "பகுதி உண்மை"
+    OUTDATED: "காலாவதியானது"
+    UNVERIFIABLE: "சரிபார்க்க முடியவில்லை"
+  ui:
+    evidence_strength: "ஆதார வலிமை"
+    sources: "ஆதாரங்கள்"
+    claim_echo: "உங்கள் செய்தியை நான் இவ்வாறு புரிந்து கொண்டேன்"
+    translation_unavailable: "மொழிபெயர்ப்பு தற்போது கிடைக்காததால் இந்த விளக்கம் ஆங்கிலத்தில் உள்ளது."
+
+te:
+  needs_native_review: true
+  verdicts:
+    SUPPORTED: "నిజం (ధృవీకరించబడింది)"
+    REFUTED: "అవాస్తవం (ఖండించబడింది)"
+    PARTIALLY_SUPPORTED: "పాక్షికంగా నిజం"
+    OUTDATED: "కాలం చెల్లినది (పాతది)"
+    UNVERIFIABLE: "ధృవీకరించడం సాధ్యం కాలేదు"
+  ui:
+    evidence_strength: "ఆధారాల బలం"
+    sources: "మూలాలు"
+    claim_echo: "మీ సందేశాన్ని నేను ఇలా అర్థం చేసుకున్నాను"
+    translation_unavailable: "అనువాదం ప్రస్తుతం అందుబాటులో లేనందున ఈ వివరణ ఆంగ్లంలో ఉంది."
+
+bn:
+  needs_native_review: true
+  verdicts:
+    SUPPORTED: "সত্য (নিশ্চিত)"
+    REFUTED: "মিথ্যা (খারিজ)"
+    PARTIALLY_SUPPORTED: "আংশিক সত্য"
+    OUTDATED: "পুরনো (মেয়াদোত্তীর্ণ)"
+    UNVERIFIABLE: "যাচাই করা যায়নি"
+  ui:
+    evidence_strength: "প্রমাণের শক্তি"
+    sources: "উৎস"
+    claim_echo: "আমি আপনার বার্তাটি এইভাবে বুঝেছি"
+    translation_unavailable: "অনুবাদ বর্তমানে উপলব্ধ না থাকায় এই ব্যাখ্যাটি ইংরেজিতে দেওয়া হয়েছে।"

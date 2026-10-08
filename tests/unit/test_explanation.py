@@ -259,3 +259,77 @@ class TestT6Acceptance:
         assert "87%" not in reply
         assert "Evidence strength:" in reply
 
+
+# ── Acceptance Tests: T11 (AT27, AT28) ─────────────────────────────────────────
+
+class TestT11Acceptance:
+    def test_at27_each_verdict_renders_with_fixed_label_in_all_six_languages(self):
+        """AT27: Each verdict renders with a fixed label in all 6 supported languages from labels.yaml."""
+        from pathlib import Path
+        import yaml
+        from app.features.explanation.formatter import get_verdict_label
+
+        labels_path = Path("config/labels.yaml")
+        assert labels_path.exists(), "config/labels.yaml must exist"
+
+        with open(labels_path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+
+        languages = ["en", "hi", "mr", "ta", "te", "bn"]
+        verdicts = [
+            Verdict.SUPPORTED,
+            Verdict.REFUTED,
+            Verdict.PARTIALLY_SUPPORTED,
+            Verdict.OUTDATED,
+            Verdict.UNVERIFIABLE,
+        ]
+
+        for lang in languages:
+            assert lang in data, f"Language '{lang}' missing in labels.yaml"
+            lang_data = data[lang]
+            assert "verdicts" in lang_data
+            assert "ui" in lang_data
+
+            # Check all 5 verdicts exist and match get_verdict_label
+            for v in verdicts:
+                v_name = v.value
+                assert v_name in lang_data["verdicts"], f"Verdict '{v_name}' missing in {lang}"
+                expected_label = lang_data["verdicts"][v_name]
+                assert get_verdict_label(v, lang) == expected_label
+
+            # Check fixed UI phrases
+            assert "evidence_strength" in lang_data["ui"]
+            assert "sources" in lang_data["ui"]
+            assert "claim_echo" in lang_data["ui"]
+            assert "translation_unavailable" in lang_data["ui"]
+
+            # Review flags
+            if lang not in ("en", "hi", "mr"):
+                assert lang_data.get("needs_native_review") is True
+
+    def test_at28_translation_unavailable_honest_fallback_line(self, monkeypatch):
+        """AT28: With translation disabled, the reply contains a line explicitly stating explanation is in English."""
+        monkeypatch.setattr("app.core.config.settings.gemini_api_key", "")
+
+        result = _make_claim_result(
+            claim="Vaccines are dangerous",
+            verdict=Verdict.REFUTED,
+            evidence=[_make_evidence(tier=Tier.TIER_1_IFCN, domain="altnews.in")],
+        )
+        response = _make_response(claim_results=[result])
+        response.language = "mr"  # Marathi user
+
+        reply = format_whatsapp_reply(response)
+
+        # The reply must contain the honest fallback notice in Marathi
+        from pathlib import Path
+        import yaml
+        with open("config/labels.yaml", "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        mr_fallback_msg = data["mr"]["ui"]["translation_unavailable"]
+
+        assert mr_fallback_msg in reply
+        # Claim echo line must also be present
+        mr_echo_label = data["mr"]["ui"]["claim_echo"]
+        assert mr_echo_label in reply
+
