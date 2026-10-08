@@ -25,14 +25,16 @@ logger = logging.getLogger(__name__)
 VERDICT_EMOJI: dict = {
     Verdict.SUPPORTED: "✅",
     Verdict.REFUTED: "❌",
-    Verdict.MISLEADING: "⚠️",
+    Verdict.PARTIALLY_SUPPORTED: "⚠️",
+    Verdict.OUTDATED: "⏳",
     Verdict.UNVERIFIABLE: "❓",
 }
 
 VERDICT_LABEL: dict = {
     Verdict.SUPPORTED: "SUPPORTED",
     Verdict.REFUTED: "REFUTED",
-    Verdict.MISLEADING: "MISLEADING / PARTLY TRUE",
+    Verdict.PARTIALLY_SUPPORTED: "PARTIALLY_SUPPORTED",
+    Verdict.OUTDATED: "OUTDATED",
     Verdict.UNVERIFIABLE: "UNVERIFIABLE",
 }
 

@@ -27,9 +27,43 @@ def get_verification_config_path() -> str:
     return os.path.join(base_dir, "config", "verification.yaml")
 
 
+def get_verdict_keywords_config_path() -> str:
+    """Return path to config/verdict_keywords.yaml."""
+    base_dir = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "..")
+    )
+    return os.path.join(base_dir, "config", "verdict_keywords.yaml")
+
+
+def load_verdict_keywords() -> dict[str, list[str]]:
+    """Load configurable keyword lists from config/verdict_keywords.yaml."""
+    kw_path = get_verdict_keywords_config_path()
+    if os.path.exists(kw_path):
+        try:
+            with open(kw_path, "r", encoding="utf-8") as f:
+                content = yaml.safe_load(f) or {}
+                return {
+                    "partly_supported_keywords": content.get("partly_supported_keywords", []),
+                    "outdated_keywords": content.get("outdated_keywords", []),
+                }
+        except Exception as exc:
+            logger.warning("Failed to load %s: %s", kw_path, exc)
+    return {
+        "partly_supported_keywords": [
+            "partly true", "half true", "mixture", "mostly true", "mostly false",
+            "partly false", "mixed", "partially true", "partially false"
+        ],
+        "outdated_keywords": [
+            "old", "outdated", "old video", "old photo", "old image", "recycled",
+            "no longer", "expired", "not current", "not recent", "from [year]",
+            "circulating again", "previously", "misleading context"
+        ],
+    }
+
+
 def load_rating_mappings() -> Dict[Rating, List[str]]:
     """
-    Load rating mappings from config/verification.yaml.
+    Load rating mappings from config/verification.yaml and config/verdict_keywords.yaml.
     Falls back to built-in rules if file is missing.
     """
     global _rating_mappings_cache
@@ -66,6 +100,11 @@ def load_rating_mappings() -> Dict[Rating, List[str]]:
                 "सत्य", "सही", "पुष्ट",
             ],
         }
+
+    # Merge in keywords from verdict_keywords.yaml
+    vk = load_verdict_keywords()
+    raw_dict.setdefault("OUTDATED", []).extend(vk.get("outdated_keywords", []))
+    raw_dict.setdefault("PARTLY_TRUE", []).extend(vk.get("partly_supported_keywords", []))
 
     parsed: Dict[Rating, List[str]] = {}
     for key, phrases in raw_dict.items():

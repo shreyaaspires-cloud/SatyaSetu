@@ -55,6 +55,7 @@ class EvidenceItem(BaseModel):
     publish_date: Optional[str] = None
     score: float = 0.0
     stance: Optional[str] = None
+    raw_rating: Optional[str] = None
 
 
 class ClaimResult(BaseModel):
@@ -69,6 +70,9 @@ class ClaimResult(BaseModel):
     reason_code: str
     evidence: list[EvidenceItem] = Field(default_factory=list)
     guard_passed: bool = True
+    matched_claim: Optional[str] = None
+    match_score: Optional[float] = None
+    flags: list[str] = Field(default_factory=list)
 
 
 class CheckResponse(BaseModel):
@@ -84,6 +88,7 @@ class CheckResponse(BaseModel):
     language: str
     timings_ms: dict[str, float] = Field(default_factory=dict)
     cached: bool = False
+    flags: list[str] = Field(default_factory=list)
 
 
 class WebhookPayload(BaseModel):

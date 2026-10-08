@@ -34,10 +34,11 @@ def _derive_overall_verdict(claim_results: list[ClaimResult]) -> Verdict:
     Combine per-claim verdicts into a single overall verdict.
 
     Rules (applied in priority order):
-      - Any REFUTED claim        → overall REFUTED
-      - Any MISLEADING claim     → overall MISLEADING
-      - All SUPPORTED            → overall SUPPORTED
-      - Otherwise                → UNVERIFIABLE
+      - Any REFUTED claim             → overall REFUTED
+      - Any OUTDATED claim            → overall OUTDATED
+      - Any PARTIALLY_SUPPORTED claim → overall PARTIALLY_SUPPORTED
+      - All SUPPORTED                 → overall SUPPORTED
+      - Otherwise                     → UNVERIFIABLE
     """
     if not claim_results:
         return Verdict.UNVERIFIABLE
@@ -46,8 +47,10 @@ def _derive_overall_verdict(claim_results: list[ClaimResult]) -> Verdict:
 
     if Verdict.REFUTED in verdicts:
         return Verdict.REFUTED
-    if Verdict.MISLEADING in verdicts:
-        return Verdict.MISLEADING
+    if Verdict.OUTDATED in verdicts:
+        return Verdict.OUTDATED
+    if Verdict.PARTIALLY_SUPPORTED in verdicts:
+        return Verdict.PARTIALLY_SUPPORTED
     if all(v == Verdict.SUPPORTED for v in verdicts):
         return Verdict.SUPPORTED
     return Verdict.UNVERIFIABLE
@@ -144,10 +147,10 @@ def run_pipeline(message: IngestedMessage) -> CheckResponse:
 
     # ── Stage 7: Explanation Generation ───────────────────────────────────────
     with StageTimer("explanation") as t:
-        # Use the most important (refuted/misleading) claim result for explanation
+        # Use the most important (refuted/outdated/partially supported) claim result for explanation
         primary_result = (
             next(
-                (r for r in claim_results if r.verdict in (Verdict.REFUTED, Verdict.MISLEADING)),
+                (r for r in claim_results if r.verdict in (Verdict.REFUTED, Verdict.OUTDATED, Verdict.PARTIALLY_SUPPORTED)),
                 claim_results[0] if claim_results else None,
             )
         )
@@ -156,6 +159,8 @@ def run_pipeline(message: IngestedMessage) -> CheckResponse:
         else:
             explanation = "Unable to generate an explanation for this message."
     timings["explanation_ms"] = t.elapsed_ms
+
+    all_flags = list(dict.fromkeys(f for r in claim_results for f in r.flags))
 
     # ── Stage 8: Formatting + Back-Translation ─────────────────────────────────
     with StageTimer("formatting") as t:
@@ -167,6 +172,7 @@ def run_pipeline(message: IngestedMessage) -> CheckResponse:
             language=lang_code,
             timings_ms=timings,
             cached=False,
+            flags=all_flags,
         )
         english_reply = format_whatsapp_reply(draft_response)
         final_reply = translate_reply_back(
@@ -191,4 +197,5 @@ def run_pipeline(message: IngestedMessage) -> CheckResponse:
         language=lang_code,
         timings_ms=timings,
         cached=False,
+        flags=all_flags,
     )

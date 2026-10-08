@@ -28,23 +28,33 @@ class TestDeriveOverallVerdict:
         ]
         assert _derive_overall_verdict(results) == Verdict.REFUTED
 
-    def test_refuted_priority_over_misleading(self):
+    def test_refuted_priority_over_outdated_and_partially_supported(self):
         from app.contracts.models import ClaimResult
 
         results = [
-            ClaimResult(claim="a", verdict=Verdict.MISLEADING, confidence=0.7, reason_code="X"),
-            ClaimResult(claim="b", verdict=Verdict.REFUTED, confidence=0.8, reason_code="Y"),
+            ClaimResult(claim="a", verdict=Verdict.PARTIALLY_SUPPORTED, confidence=0.7, reason_code="X"),
+            ClaimResult(claim="b", verdict=Verdict.OUTDATED, confidence=0.75, reason_code="Z"),
+            ClaimResult(claim="c", verdict=Verdict.REFUTED, confidence=0.8, reason_code="Y"),
         ]
         assert _derive_overall_verdict(results) == Verdict.REFUTED
 
-    def test_misleading_without_refuted(self):
+    def test_outdated_priority_over_partially_supported(self):
+        from app.contracts.models import ClaimResult
+
+        results = [
+            ClaimResult(claim="a", verdict=Verdict.PARTIALLY_SUPPORTED, confidence=0.7, reason_code="X"),
+            ClaimResult(claim="b", verdict=Verdict.OUTDATED, confidence=0.8, reason_code="Z"),
+        ]
+        assert _derive_overall_verdict(results) == Verdict.OUTDATED
+
+    def test_partially_supported_without_refuted(self):
         from app.contracts.models import ClaimResult
 
         results = [
             ClaimResult(claim="a", verdict=Verdict.SUPPORTED, confidence=0.7, reason_code="X"),
-            ClaimResult(claim="b", verdict=Verdict.MISLEADING, confidence=0.6, reason_code="Y"),
+            ClaimResult(claim="b", verdict=Verdict.PARTIALLY_SUPPORTED, confidence=0.6, reason_code="Y"),
         ]
-        assert _derive_overall_verdict(results) == Verdict.MISLEADING
+        assert _derive_overall_verdict(results) == Verdict.PARTIALLY_SUPPORTED
 
     def test_all_supported_gives_supported(self):
         from app.contracts.models import ClaimResult

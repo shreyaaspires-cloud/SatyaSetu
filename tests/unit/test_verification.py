@@ -95,7 +95,7 @@ class TestAggregateVerdict:
         assert verdict == Verdict.SUPPORTED
         assert code == "AUTHORITATIVE_FACT_CHECK"
 
-    def test_tier2_misleading_gives_misleading(self):
+    def test_tier2_partly_true_gives_partially_supported(self):
         item = _make_item(
             tier=Tier.TIER_2_GOV_PIB,
             rating=Rating.PARTLY_TRUE,
@@ -103,7 +103,7 @@ class TestAggregateVerdict:
         )
         item.stance = "NEUTRAL"
         verdict, conf, code = aggregate_verdict("claim", [item])
-        assert verdict == Verdict.MISLEADING
+        assert verdict == Verdict.PARTIALLY_SUPPORTED
 
     def test_majority_supports_gives_supported(self):
         """Three SUPPORTS items from web should tip toward SUPPORTED."""
@@ -166,3 +166,43 @@ class TestBatchVerifyClaims:
         results = batch_verify_claims(["hello", "world"], budget_ms=200)
         for r in results:
             assert isinstance(r, ClaimResult)
+
+
+# ── Acceptance Tests: T4 (AT10, AT11, AT12) ──────────────────────────────────
+
+class TestT4Acceptance:
+    def test_at10_partly_true_rating_yields_partially_supported(self):
+        """AT10: A fact check rating of 'partly true' yields PARTIALLY_SUPPORTED."""
+        from app.features.retrieval.ratings import normalize_rating
+        rating = normalize_rating("partly true")
+        item = _make_item(
+            tier=Tier.TIER_1_IFCN,
+            rating=rating,
+            score=0.85,
+        )
+        verdict, conf, code = aggregate_verdict("Claim under test", [item])
+        assert verdict == Verdict.PARTIALLY_SUPPORTED
+
+    def test_at11_old_video_rating_yields_outdated(self):
+        """AT11: A rating of 'old video, not from this year' yields OUTDATED."""
+        from app.features.retrieval.ratings import normalize_rating
+        rating = normalize_rating("old video, not from this year")
+        item = _make_item(
+            tier=Tier.TIER_1_IFCN,
+            rating=rating,
+            score=0.85,
+        )
+        verdict, conf, code = aggregate_verdict("Viral video claim", [item])
+        assert verdict == Verdict.OUTDATED
+
+    def test_at12_tier2_snippet_withdrawn_yields_outdated(self):
+        """AT12: A Tier 2 snippet saying a notice was withdrawn yields OUTDATED."""
+        item = _make_item(
+            tier=Tier.TIER_2_GOV_PIB,
+            title="Press Information Bureau Notice",
+            snippet="The public notice regarding the mandatory exam requirement has been withdrawn by the department.",
+            score=0.8,
+        )
+        verdict, conf, code = aggregate_verdict("Mandatory exam requirement notice", [item])
+        assert verdict == Verdict.OUTDATED
+

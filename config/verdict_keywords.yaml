@@ -1,0 +1,29 @@
+# SatyaSetu Verdict Keywords Configuration (Task T4)
+# Configurable keyword lists to tune verdict mappings without code changes.
+
+partly_supported_keywords:
+  - "partly true"
+  - "half true"
+  - "mixture"
+  - "mostly true"
+  - "mostly false"
+  - "partly false"
+  - "mixed"
+  - "partially true"
+  - "partially false"
+
+outdated_keywords:
+  - "old"
+  - "outdated"
+  - "old video"
+  - "old photo"
+  - "old image"
+  - "recycled"
+  - "no longer"
+  - "expired"
+  - "not current"
+  - "not recent"
+  - "from [year]"
+  - "circulating again"
+  - "previously"
+  - "misleading context"

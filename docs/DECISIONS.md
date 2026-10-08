@@ -36,11 +36,11 @@
 - **Decision:** Detect Hinglish (Latin script with Hindi vocabulary) and route through Gemini Flash with strict JSON schema fallback rather than M2M100.
 - **Consequences:** Preserves colloquial context and colloquial idioms in viral forwards.
 
-## ADR-007: Neutral Fact-Checking Language
-- **Status:** Accepted
-- **Context:** Calling claims "fake" or "lies" triggers defensive bias in forwarded message recipients.
-- **Decision:** Use neutral, evidence-grounded verdicts (SUPPORTED, REFUTED, MISLEADING, UNVERIFIABLE) and cite verified sources directly without accusatory terminology.
-- **Consequences:** Fosters trust and aligns with International Fact-Checking Network (IFCN) standards.
+## ADR-007: Neutral Fact-Checking Language & Verdict Standardization
+- **Status:** Accepted (Updated Wave 11 / Hardening)
+- **Context:** Calling claims "fake" or "lies" triggers defensive bias. Furthermore, the legacy `MISLEADING` verdict was overly broad, conflating out-of-date media/notices with nuanced partial truths and missing context. Conflicting evidence was also mistakenly grouped under `MISLEADING` instead of `UNVERIFIABLE`.
+- **Decision:** Remove `MISLEADING` from the core verdict enum and standardize on five precise, IFCN-aligned verdicts: `SUPPORTED`, `REFUTED`, `PARTIALLY_SUPPORTED`, `OUTDATED`, and `UNVERIFIABLE`. Nuances such as "missing context" or "altered media" are preserved via a dedicated `flags` list (e.g. `["missing_context"]`) on result models. Conflicting evidence cleanly resolves to `UNVERIFIABLE` per ADR-003.
+- **Consequences:** Eliminates fake precision, cleanly separates expired/withdrawn notices (`OUTDATED`) from half-truths (`PARTIALLY_SUPPORTED`), preserves nuance through `flags`, and ensures consistent aggregation.
 
 ## ADR-008: Gemini SDK Package Specification
 - **Status:** Accepted

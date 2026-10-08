@@ -57,7 +57,8 @@ RETRIEVED EVIDENCE:
 Determine the factual verdict of the claim:
 - "REFUTED": The claim is false, a myth, a hoax, fabricated, debunked, or medically/scientifically incorrect.
 - "SUPPORTED": The claim is confirmed to be true, accurate, and substantiated by reliable sources.
-- "MISLEADING": The claim contains partial truth mixed with exaggeration, distorted context, or unverified folk beliefs.
+- "PARTIALLY_SUPPORTED": The claim contains partial truth mixed with exaggeration, distorted context, or unverified folk beliefs.
+- "OUTDATED": The claim was true in the past or references an old notice, video, photo, or policy that has expired, been withdrawn, or is no longer valid.
 - "UNVERIFIABLE": The evidence is insufficient, irrelevant, or contradictory without clear resolution.
 
 Output strictly valid JSON with NO markdown formatting:
@@ -92,8 +93,11 @@ Output strictly valid JSON with NO markdown formatting:
         verdict_map = {
             "REFUTED": Verdict.REFUTED,
             "SUPPORTED": Verdict.SUPPORTED,
-            "MISLEADING": Verdict.MISLEADING,
+            "PARTIALLY_SUPPORTED": Verdict.PARTIALLY_SUPPORTED,
+            "PARTIALLY SUPPORTED": Verdict.PARTIALLY_SUPPORTED,
+            "OUTDATED": Verdict.OUTDATED,
             "UNVERIFIABLE": Verdict.UNVERIFIABLE,
+            "MISLEADING": Verdict.PARTIALLY_SUPPORTED,
         }
 
         if verdict_str in verdict_map:

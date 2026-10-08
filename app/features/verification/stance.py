@@ -282,19 +282,40 @@ def aggregate_verdict(
     if not evidence_items:
         return Verdict.UNVERIFIABLE, 0.0, "NO_EVIDENCE"
 
+    # OUTDATED rule for official sources (Tier 2):
+    # Snippet mentions scheme/rule/notice being withdrawn, discontinued, replaced, or no longer valid
+    for item in evidence_items:
+        if item.tier == Tier.TIER_2_GOV_PIB:
+            combined_text = f"{item.title} {item.snippet}".lower()
+            withdrawal_kws = [
+                "withdrawn", "discontinued", "replaced", "no longer valid",
+                "expired", "cancelled", "repealed", "revoked",
+            ]
+            if any(re.search(r"\b" + re.escape(kw) + r"\b", combined_text) for kw in withdrawal_kws):
+                claim_words = set(re.findall(r"\w{3,}", claim.lower()))
+                stopwords = {"the", "and", "for", "with", "that", "this", "from", "have", "been", "has", "are", "was"}
+                relevant_words = claim_words - stopwords
+                text_words = set(re.findall(r"\w{3,}", combined_text))
+                if not relevant_words or (relevant_words & text_words) or item.score >= 0.3:
+                    conf = round(min((item.score or 0.7) + 0.2, 1.0), 3)
+                    return Verdict.OUTDATED, conf, "OFFICIAL_NOTICE_WITHDRAWN"
+
     # Priority 1 & 2: authoritative fact-checker ratings
     for item in evidence_items:
         weight = tier_weight.get(item.tier, 0.3)
         if weight >= 0.9:  # Tier 1 or 2
+            if item.rating == Rating.OUTDATED:
+                conf = round(min(item.score + 0.3, 1.0), 3)
+                return Verdict.OUTDATED, conf, "AUTHORITATIVE_FACT_CHECK"
+            if item.rating == Rating.PARTLY_TRUE:
+                conf = round(min(item.score + 0.2, 1.0), 3)
+                return Verdict.PARTIALLY_SUPPORTED, conf, "AUTHORITATIVE_FACT_CHECK"
             if item.rating in (Rating.FALSE, Rating.MISLEADING):
                 conf = round(min(item.score + 0.3, 1.0), 3)
                 return Verdict.REFUTED, conf, "AUTHORITATIVE_FACT_CHECK"
             if item.rating == Rating.TRUE:
                 conf = round(min(item.score + 0.3, 1.0), 3)
                 return Verdict.SUPPORTED, conf, "AUTHORITATIVE_FACT_CHECK"
-            if item.rating == Rating.PARTLY_TRUE:
-                conf = round(min(item.score + 0.2, 1.0), 3)
-                return Verdict.MISLEADING, conf, "AUTHORITATIVE_FACT_CHECK"
 
     # Stance aggregation weighted by tier
     stance_scores: Dict[str, float] = {"SUPPORTS": 0.0, "REFUTES": 0.0, "NEUTRAL": 0.0}
@@ -312,9 +333,9 @@ def aggregate_verdict(
     best_score = stance_scores[best_stance]
     confidence = round(min(best_score / total, 1.0), 3)
 
-    # Detect mixed or conflicting evidence
+    # Detect mixed or conflicting evidence (ADR-003: maps to UNVERIFIABLE)
     if stance_scores["SUPPORTS"] > 0.25 and stance_scores["REFUTES"] > 0.25:
-        return Verdict.MISLEADING, confidence, "MIXED_EVIDENCE"
+        return Verdict.UNVERIFIABLE, confidence, "CONFLICTING_EVIDENCE"
 
     if best_stance == "SUPPORTS" and confidence > 0.5:
         return Verdict.SUPPORTED, confidence, "STANCE_MAJORITY"
