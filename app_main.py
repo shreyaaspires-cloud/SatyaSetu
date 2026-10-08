@@ -50,18 +50,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     try:
         from app.features.ingestion.ocr import load_ocr_reader
         app.state.ocr_reader = load_ocr_reader()
-        logger.info("✅ EasyOCR reader loaded")
+        logger.info("[OK] EasyOCR reader loaded")
     except Exception as exc:
-        logger.error("❌ EasyOCR failed to load: %s", exc)
+        logger.error("[ERROR] EasyOCR failed to load: %s", exc)
         app.state.ocr_reader = None
 
     # ASR (Whisper) — non-fatal on load failure
     try:
         from app.features.ingestion.asr import load_whisper_model
         app.state.whisper_model = load_whisper_model()
-        logger.info("✅ Whisper model '%s' loaded", settings.whisper_model_size)
+        logger.info("[OK] Whisper model '%s' loaded", settings.whisper_model_size)
     except Exception as exc:
-        logger.error("❌ Whisper failed to load: %s", exc)
+        logger.error("[ERROR] Whisper failed to load: %s", exc)
         app.state.whisper_model = None
 
     logger.info("=" * 60)
