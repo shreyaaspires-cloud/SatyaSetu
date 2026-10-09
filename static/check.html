@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><title>SatyaSetu — Check Your Message</title><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"background":"#faf8ff","surface-bright":"#faf8ff","surface-tint":"#a33e00","tertiary-fixed-dim":"#62df7d","on-tertiary-fixed-variant":"#005320","on-surface-variant":"#594137","on-error":"#ffffff","on-primary-container":"#fffbff","on-primary":"#ffffff","surface-container-low":"#f1f3ff","on-secondary-fixed-variant":"#384668","on-error-container":"#93000a","surface-container-high":"#e1e8ff","secondary-container":"#c5d4fd","on-secondary-fixed":"#0a1a3a","on-background":"#0a1a3a","primary-fixed":"#ffdbcd","on-secondary":"#ffffff","on-primary-fixed-variant":"#7c2e00","surface-container-lowest":"#ffffff","on-tertiary-container":"#f7fff2","surface":"#faf8ff","secondary-fixed":"#d9e2ff","secondary-fixed-dim":"#b7c6ee","primary":"#9f3d00","secondary":"#4f5e81","error":"#ba1a1a","inverse-primary":"#ffb596","on-tertiary":"#ffffff","error-container":"#ffdad6","surface-container":"#e9edff","on-secondary-container":"#4d5b7e","tertiary-container":"#00873a","on-primary-fixed":"#360f00","surface-container-highest":"#d9e2ff","primary-fixed-dim":"#ffb596","outline":"#8d7165","outline-variant":"#e1bfb2","surface-dim":"#ccd9ff","surface-variant":"#d9e2ff","primary-container":"#c74e00","on-tertiary-fixed":"#002109","tertiary-fixed":"#7ffc97","inverse-on-surface":"#edf0ff","on-surface":"#0a1a3a","tertiary":"#006b2c","inverse-surface":"#213050"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"gutter-desktop":"1.5rem","gutter":"1rem","space-md":"1rem","space-lg":"1.5rem","space-sm":"0.75rem","margin":"1rem","space-xl":"2.25rem","space-xs":"0.375rem","margin-desktop":"2rem"},fontFamily:{"headline-lg-mobile":["Noto Sans"],"body-xl":["Noto Sans"],"headline-xl":["Noto Sans"],"body-lg":["Noto Sans"],"body-md":["Noto Sans"],"label-lg":["Noto Sans"],"headline-sm":["Noto Sans"],"label-md":["Noto Sans"],"headline-xl-mobile":["Noto Sans"],"headline-md":["Noto Sans"],"headline-lg":["Noto Sans"],"label-sm":["Noto Sans"]},fontSize:{"headline-lg-mobile":["24px",{"lineHeight":"34px","fontWeight":"700"}],"body-xl":["18px",{"lineHeight":"30px","fontWeight":"400"}],"headline-xl":["36px",{"lineHeight":"48px","fontWeight":"700"}],"body-lg":["17px",{"lineHeight":"28px","fontWeight":"400"}],"body-md":["16px",{"lineHeight":"26px","fontWeight":"400"}],"label-lg":["16px",{"lineHeight":"24px","fontWeight":"600"}],"headline-sm":["20px",{"lineHeight":"28px","fontWeight":"700"}],"label-md":["15px",{"lineHeight":"22px","fontWeight":"600"}],"headline-xl-mobile":["28px",{"lineHeight":"38px","fontWeight":"700"}],"headline-md":["22px",{"lineHeight":"32px","fontWeight":"700"}],"headline-lg":["28px",{"lineHeight":"38px","fontWeight":"700"}],"label-sm":["14px",{"lineHeight":"20px","fontWeight":"500"}]}}}};</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_2px_8px_rgba(10,26,58,0.06)] border-b border-surface-container"><div class="h-20 max-w-[1200px] mx-auto px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-sm group focus:outline-none" data-path="home" href="/"><div class="w-11 h-11 rounded-xl bg-surface-container-low flex items-center justify-center text-primary transition-transform group-hover:scale-105"><span class="material-symbols-outlined text-[28px]">verified_user</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none">SatyaSetu</span><span class="font-label-sm text-label-sm text-primary font-bold tracking-wide mt-0.5 leading-none">सत्यसेतु</span></div></a><nav class="hidden lg:flex items-center gap-space-xs p-1" data-active-classes="bg-surface-container text-primary font-bold rounded-lg shadow-sm"><a class="px-space-md py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all" data-path="home" href="/">Home</a><a aria-current="page" class="px-space-md py-2 transition-all bg-surface-container text-primary font-bold rounded-lg shadow-sm" data-path="check-now" href="/check">Check Now</a><a class="px-space-md py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all" data-path="how-it-works" href="/#how-it-works">How It Works</a><a class="px-space-md py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all" data-path="learn" href="/#learn">Learn</a><a class="px-space-md py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all" data-path="about" href="/#about">About</a></nav></div><div class="flex items-center gap-space-sm"><div class="relative flex items-center"><button aria-label="Select Language" class="flex items-center gap-space-xs h-11 px-space-md rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary" type="button"><span class="material-symbols-outlined text-[18px] text-primary">translate</span><span>हिन्दी / English</span><span class="material-symbols-outlined text-[16px] text-on-surface-variant">expand_more</span></button></div><a class="hidden sm:inline-flex items-center gap-space-xs h-11 px-space-lg rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md shadow-[0_2px_8px_rgba(159,61,0,0.25)] transition-all focus:outline-none" data-path="whatsapp-demo" href="/whatsapp"><span class="material-symbols-outlined text-[20px]">chat</span><span>WhatsApp Bot</span></a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-background min-h-[calc(100vh-20rem)]"><div class="flex flex-col w-full">
+<!-- PAGE HEADER SECTION -->
+<section class="w-full py-10 px-gutter-desktop max-w-[1200px] mx-auto text-center flex flex-col items-center">
+<!-- Multimodal Badge -->
+<div class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant shadow-sm mb-space-sm">
+<span class="material-symbols-outlined text-[18px] text-primary">travel_explore</span>
+<span class="font-label-md text-label-md tracking-wide uppercase font-bold">MULTIMODAL VERIFICATION • बहुभाषी सत्यापन</span>
+</div>
+<!-- Main Headings -->
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight mb-1">
+      Check Your Message
+    </h1>
+<h2 class="font-headline-md text-headline-md text-primary font-medium tracking-normal mb-space-sm">
+      अपना मैसेज जाँचें
+    </h2>
+<!-- Explanatory Subtitle -->
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl leading-relaxed">
+      Paste a WhatsApp forward, upload a screenshot, record a voice note, or drop a document to get instant, verified truth backed by accredited fact-checkers.
+    </p>
+<!-- Quick Stat Chips -->
+<div class="flex flex-wrap items-center justify-center gap-space-md mt-space-md">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm bg-surface-container-low px-space-md py-1 rounded-full">
+<span class="material-symbols-outlined text-[16px] text-tertiary">bolt</span>
+<span>Average time: ~6.2s</span>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm bg-surface-container-low px-space-md py-1 rounded-full">
+<span class="material-symbols-outlined text-[16px] text-primary">security</span>
+<span>Stateless &amp; Zero Log</span>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm bg-surface-container-low px-space-md py-1 rounded-full">
+<span class="material-symbols-outlined text-[16px] text-secondary">g_translate</span>
+<span>10+ Regional Languages</span>
+</div>
+</div>
+</section>
+<!-- WORKSPACE CONTENT: 2 COLUMN GRID -->
+<section class="w-full max-w-[1200px] mx-auto px-gutter-desktop pb-space-xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT / MAIN SUBMISSION COLUMN (approx 68% / 8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-space-lg">
+<!-- CARD CONTAINER -->
+<div class="bg-surface-container-lowest rounded-xl shadow-md p-space-md sm:p-space-lg flex flex-col">
+<!-- HORIZONTAL MULTIMODAL TABS -->
+<div class="flex items-center gap-1 sm:gap-2 bg-surface-container-low p-1.5 rounded-lg mb-space-lg overflow-x-auto" role="tablist">
+<!-- Tab 1: Text / Link -->
+<button aria-selected="true" class="flex-1 min-w-[110px] h-11 flex items-center justify-center gap-space-xs px-space-sm rounded-lg font-label-md text-label-md transition-all bg-surface-container-lowest text-primary shadow-sm font-bold" id="tab-btn-text" onclick="switchTab('text')" role="tab" type="button">
+<span class="material-symbols-outlined text-[20px]">notes</span>
+<span>Text / Link</span>
+</button>
+<!-- Tab 2: Image / Screenshot -->
+<button aria-selected="false" class="flex-1 min-w-[110px] h-11 flex items-center justify-center gap-space-xs px-space-sm rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all" id="tab-btn-image" onclick="switchTab('image')" role="tab" type="button">
+<span class="material-symbols-outlined text-[20px]">image</span>
+<span>Screenshot</span>
+</button>
+<!-- Tab 3: Voice Note -->
+<button aria-selected="false" class="flex-1 min-w-[110px] h-11 flex items-center justify-center gap-space-xs px-space-sm rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all" id="tab-btn-voice" onclick="switchTab('voice')" role="tab" type="button">
+<span class="material-symbols-outlined text-[20px]">mic</span>
+<span>Voice Note</span>
+</button>
+<!-- Tab 4: Document -->
+<button aria-selected="false" class="flex-1 min-w-[110px] h-11 flex items-center justify-center gap-space-xs px-space-sm rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all" id="tab-btn-doc" onclick="switchTab('doc')" role="tab" type="button">
+<span class="material-symbols-outlined text-[20px]">description</span>
+<span>Document</span>
+</button>
+</div>
+<!-- TAB PANEL 1: TEXT / LINK -->
+<div class="flex flex-col gap-space-md" id="panel-text">
+<div class="relative flex flex-col bg-surface-container-low rounded-xl p-space-sm sm:p-space-md shadow-inner">
+<!-- Top bar inside textarea box -->
+<div class="flex items-center justify-between pb-space-xs text-on-surface-variant">
+<span class="font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">chat_bubble</span>
+                  Message Content / संदेश विवरण
+                </span>
+<div class="flex items-center gap-space-xs">
+<button class="inline-flex items-center gap-1 text-label-sm font-label-sm px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface hover:text-primary transition-colors shadow-sm" onclick="pasteClipboard()" type="button">
+<span class="material-symbols-outlined text-[16px]">content_paste</span>
+<span>Paste</span>
+</button>
+<button class="inline-flex items-center gap-1 text-label-sm font-label-sm px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface-variant hover:text-error transition-colors shadow-sm" onclick="clearText()" type="button">
+<span class="material-symbols-outlined text-[16px]">backspace</span>
+<span>Clear</span>
+</button>
+</div>
+</div>
+<!-- Main Input Textarea -->
+<textarea class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md p-space-md rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-on-surface-variant/60 min-h-[200px] leading-relaxed shadow-sm" id="message-input" oninput="updateCharCount(this)" placeholder="Paste your WhatsApp forward, viral message, news headline, or URL here...
+यहाँ मैसेज, वायरल फ़ॉरवर्ड या लिंक पेस्ट करें..." rows="8"></textarea>
+<!-- Bottom status bar inside container -->
+<div class="flex items-center justify-between pt-space-xs mt-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-tertiary">check_circle</span>
+                  Automatic script translation active
+                </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono" id="char-counter">0 / 2,000</span>
+</div>
+</div>
+<!-- EXAMPLE PROMPTS ROW -->
+<div class="flex flex-col gap-space-xs pt-1">
+<div class="flex items-center gap-space-xs text-on-surface">
+<span class="material-symbols-outlined text-[18px] text-primary">electric_bolt</span>
+<span class="font-label-md text-label-md font-bold">Or try a viral example to test:</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">(या उदाहरण चुनें)</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-xs sm:gap-space-sm pt-1">
+<button class="text-left p-space-sm bg-surface-container-low hover:bg-surface-container hover:text-primary rounded-lg transition-all text-on-surface text-label-sm font-label-sm flex items-start gap-2 shadow-sm group" onclick="loadPrompt('🍋 &quot;Boiled lemon water and turmeric kills cancer cells within 48 hours according to Oxford University study.&quot;')" type="button">
+<span class="text-lg">🍋</span>
+<span class="line-clamp-2 leading-tight group-hover:underline">"Lemon juice cures cancer in 48 hours"</span>
+</button>
+<button class="text-left p-space-sm bg-surface-container-low hover:bg-surface-container hover:text-primary rounded-lg transition-all text-on-surface text-label-sm font-label-sm flex items-start gap-2 shadow-sm group" onclick="loadPrompt('🏛️ &quot;Pradhan Mantri Free Smartphone Scheme 2025: All citizens will get free 5G smartphone under digital Bharat. Click link to register.&quot;')" type="button">
+<span class="text-lg">🏛️</span>
+<span class="line-clamp-2 leading-tight group-hover:underline">"New PM free smartphone scheme announced"</span>
+</button>
+<button class="text-left p-space-sm bg-surface-container-low hover:bg-surface-container hover:text-primary rounded-lg transition-all text-on-surface text-label-sm font-label-sm flex items-start gap-2 shadow-sm group" onclick="loadPrompt('📱 &quot;WhatsApp will start charging ₹499 monthly from midnight unless you forward this notice to 20 contacts immediately.&quot;')" type="button">
+<span class="text-lg">📱</span>
+<span class="line-clamp-2 leading-tight group-hover:underline">"WhatsApp shutting down unless forwarded"</span>
+</button>
+</div>
+</div>
+</div>
+<!-- TAB PANEL 2: IMAGE / SCREENSHOT -->
+<div class="hidden flex-col gap-space-md" id="panel-image">
+<div class="bg-surface-container-low rounded-xl p-space-lg text-center flex flex-col items-center justify-center min-h-[260px] cursor-pointer hover:bg-surface-container transition-all">
+<div class="w-16 h-16 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm mb-space-sm">
+<span class="material-symbols-outlined text-[36px]">add_photo_alternate</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">
+                Drag &amp; drop viral WhatsApp screenshot or photo here
+              </h3>
+<p class="font-body-md text-body-md text-primary font-medium mb-space-sm">स्क्रीनशॉट यहाँ अपलोड करें</p>
+<div class="flex items-center gap-space-sm mb-space-sm">
+<label class="h-11 px-space-lg rounded-full bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md flex items-center gap-space-xs cursor-pointer shadow-sm transition-all">
+<span class="material-symbols-outlined text-[20px]">upload_file</span>
+<span>Browse Photos</span>
+<input accept="image/*" class="hidden" onchange="handleFileSelect(this, 'Image selected!')" type="file"/>
+</label>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant max-w-md">
+                Supports JPG, PNG, WEBP — up to 10MB • Optical Character Recognition (OCR) extracts Devanagari &amp; English text automatically.
+              </p>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-lg flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-tertiary">lock</span>
+                Screenshots are scrubbed of sender numbers and metadata before analysis.
+              </span>
+<span class="text-primary font-semibold">Exif-Sanitized</span>
+</div>
+</div>
+<!-- TAB PANEL 3: VOICE NOTE -->
+<div class="hidden flex-col gap-space-md" id="panel-voice">
+<div class="bg-surface-container-low rounded-xl p-space-lg text-center flex flex-col items-center justify-center min-h-[260px]">
+<div class="relative my-space-sm">
+<div class="absolute -inset-2 bg-primary/20 rounded-full animate-ping pointer-events-none"></div>
+<button class="relative w-24 h-24 rounded-full bg-primary text-on-primary flex flex-col items-center justify-center shadow-lg hover:scale-105 transition-all focus:outline-none" id="record-btn" onclick="toggleRecording()" type="button">
+<span class="material-symbols-outlined text-[40px]">mic</span>
+<span class="font-label-sm text-label-sm font-bold mt-0.5">Speak</span>
+</button>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-2 mb-0.5" id="record-status">
+                🎙️ Tap to Record
+              </h3>
+<p class="font-body-md text-body-md text-primary font-medium mb-space-sm">
+                रिकॉर्ड करने के लिए क्लिक करें
+              </p>
+<div class="w-full max-w-md bg-surface-container-lowest p-space-sm rounded-lg flex items-center justify-between shadow-sm mt-2">
+<div class="flex items-center gap-space-xs text-on-surface">
+<span class="material-symbols-outlined text-secondary">audio_file</span>
+<span class="font-label-sm text-label-sm">Or upload audio file</span>
+</div>
+<label class="h-9 px-space-md rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm flex items-center gap-1 cursor-pointer transition-all">
+<span>Browse MP3/WAV</span>
+<input accept="audio/*" class="hidden" onchange="handleFileSelect(this, 'Audio file attached!')" type="file"/>
+</label>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-space-sm">Supports regional accents: Hindi, Bhojpuri, Marathi, Tamil, Bengali up to 25MB</span>
+</div>
+</div>
+<!-- TAB PANEL 4: DOCUMENT -->
+<div class="hidden flex-col gap-space-md" id="panel-doc">
+<div class="bg-surface-container-low rounded-xl p-space-lg text-center flex flex-col items-center justify-center min-h-[260px] cursor-pointer hover:bg-surface-container transition-all">
+<div class="w-16 h-16 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm mb-space-sm">
+<span class="material-symbols-outlined text-[36px]">picture_as_pdf</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">
+                Upload circular, gazette notification, or PDF report
+              </h3>
+<p class="font-body-md text-body-md text-primary font-medium mb-space-sm">सरकारी परिपत्र या दस्तावेज़ जोड़ें</p>
+<label class="h-11 px-space-lg rounded-full bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md flex items-center gap-space-xs cursor-pointer shadow-sm transition-all mb-space-sm">
+<span class="material-symbols-outlined text-[20px]">attach_file</span>
+<span>Select PDF / DOC</span>
+<input accept=".pdf,.doc,.docx" class="hidden" onchange="handleFileSelect(this, 'Document uploaded!')" type="file"/>
+</label>
+<p class="font-label-sm text-label-sm text-on-surface-variant max-w-md">
+                Govt notifications, exam circulars, railway circulars, and press releases up to 15MB.
+              </p>
+</div>
+</div>
+<!-- STATUS BANNER / FILE INDICATOR -->
+<div class="hidden mt-space-sm p-space-sm rounded-lg bg-surface-container-low text-primary font-label-md text-label-md items-center justify-between" id="file-status">
+<span class="flex items-center gap-2" id="file-status-text">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+              Attached successfully
+            </span>
+<button class="text-on-surface-variant hover:text-error text-label-sm font-label-sm" onclick="clearFile()" type="button">Remove</button>
+</div>
+<!-- DIVIDER -->
+<div class="h-px bg-surface-container my-space-lg"></div>
+<!-- BOTTOM ACTION STRIP -->
+<div class="flex flex-col gap-space-md">
+<!-- Preferences bar -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md bg-surface-container-low p-space-md rounded-xl">
+<!-- Result Language Selector -->
+<div class="flex items-center gap-space-sm flex-wrap">
+<label class="font-label-md text-label-md text-on-surface font-bold flex items-center gap-1.5" for="language-select">
+<span class="material-symbols-outlined text-[20px] text-primary">translate</span>
+                  Result language / परिणाम की भाषा:
+                </label>
+<div class="relative">
+<select class="h-11 pl-space-md pr-10 rounded-lg bg-surface-container-lowest text-on-surface font-label-sm text-label-sm appearance-none shadow-sm focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer font-medium" id="language-select">
+<option value="auto">🌐 Auto-detect (स्वतः पहचानें)</option>
+<option value="en">English (अंग्रेजी)</option>
+<option selected="" value="hi">हिंदी (Hindi)</option>
+<option value="mr">मराठी (Marathi)</option>
+<option value="ta">தமிழ் (Tamil)</option>
+<option value="te">తెలుగు (Telugu)</option>
+<option value="bn">বাংলা (Bengali)</option>
+<option value="gu">ગુજરાતી (Gujarati)</option>
+<option value="kn">ಕನ್ನಡ (Kannada)</option>
+<option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+</select>
+<span class="material-symbols-outlined text-[20px] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<!-- Speed Guarantee Pill -->
+<div class="inline-flex items-center gap-1.5 text-on-surface font-label-sm text-label-sm font-semibold bg-surface-container-lowest px-space-md py-2 rounded-lg shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-tertiary">speed</span>
+<span>⚡ Under 10 seconds</span>
+</div>
+</div>
+<!-- PRIMARY SUBMISSION BUTTON -->
+<button class="w-full h-14 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-headline-sm text-headline-sm shadow-md transition-all flex items-center justify-center gap-space-sm group focus:outline-none focus:ring-4 focus:ring-primary/30" id="verify-cta" onclick="simulateVerification()" type="button">
+<span class="material-symbols-outlined text-[24px] transition-transform group-hover:scale-110">verified_user</span>
+<span>Verify Now → (सत्यापित करें)</span>
+</button>
+<!-- Inline Verification Progress (Hidden initially) -->
+<div class="hidden flex-col gap-2 p-space-md rounded-xl bg-surface-container-low transition-all" id="verification-progress">
+<div class="flex items-center justify-between text-on-surface font-label-sm text-label-sm">
+<span class="flex items-center gap-2 font-bold text-primary" id="progress-status">
+<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                  Connecting to IFCN repository &amp; PIB archives...
+                </span>
+<span class="font-mono font-bold" id="progress-percent">24%</span>
+</div>
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary transition-all duration-300 w-1/4" id="progress-bar"></div>
+</div>
+</div>
+<!-- PRIVACY & ASSURANCE FOOTNOTE -->
+<div class="flex flex-col sm:flex-row items-center justify-center text-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm pt-1">
+<div class="flex items-center gap-1.5 text-tertiary font-bold">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+<span>Stateless &amp; Encrypted:</span>
+</div>
+<span>We never store personal messages. All checks are anonymous.</span>
+<span class="text-primary font-medium">(आपका डेटा सुरक्षित और गोपनीय है।)</span>
+</div>
+</div>
+</div>
+<!-- RECENT FACT-CHECK FLASH / CAROUSEL -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-tertiary">check_circle</span>
+              Recently Debunked Viral Claims (ताज़ा पड़ताल)
+            </span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Live Feed</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-sm pt-1">
+<!-- Debunk mini card 1 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1 text-[12px] font-bold px-2 py-0.5 rounded-full bg-error-container text-on-error-container">
+                  ❌ FALSE / झूठ
+                </span>
+<span class="text-[12px] text-on-surface-variant font-mono">14m ago</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface line-clamp-2 mt-1">
+                "Government order mandates linking biometric with all social media by May 1st."
+              </p>
+<span class="text-[12px] text-secondary font-medium">Fact-checked by PIB &amp; AltNews</span>
+</div>
+<!-- Debunk mini card 2 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1 text-[12px] font-bold px-2 py-0.5 rounded-full bg-[#fef3c7] text-[#b45309]">
+                  ⚠️ MISLEADING / भ्रामक
+                </span>
+<span class="text-[12px] text-on-surface-variant font-mono">38m ago</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface line-clamp-2 mt-1">
+                "Video claiming RBI declared old 500 currency note with star mark invalid."
+              </p>
+<span class="text-[12px] text-secondary font-medium">Fact-checked by BOOM Live</span>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT SIDEBAR COLUMN (approx 32% / 4 cols) -->
+<aside class="lg:col-span-4 flex flex-col gap-space-md">
+<!-- CARD 1: WHAT HAPPENS NEXT PIPELINE -->
+<div class="bg-surface-container-lowest rounded-xl shadow-md p-space-md sm:p-space-lg flex flex-col">
+<div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-surface-container">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">
+              What happens next?
+            </h3>
+<span class="font-label-sm text-label-sm text-primary font-bold">आगे क्या होगा?</span>
+</div>
+<div class="flex flex-col gap-space-md relative">
+<!-- Step 1 -->
+<div class="flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-primary-fixed text-on-primary-fixed font-bold font-mono text-label-sm flex items-center justify-center shrink-0 shadow-sm">
+                1
+              </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px] text-primary">input</span>
+                  Receive &amp; Parse
+                </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant leading-snug">
+                  Multimodal ingestion &amp; auto-OCR/ASR if screenshot or voice is provided.
+                </span>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-primary-fixed text-on-primary-fixed font-bold font-mono text-label-sm flex items-center justify-center shrink-0 shadow-sm">
+                2
+              </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px] text-primary">filter_alt</span>
+                  Claim Extraction
+                </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant leading-snug">
+                  AI isolates testable assertions from opinions, emojis, and viral noise.
+                </span>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-primary-fixed text-on-primary-fixed font-bold font-mono text-label-sm flex items-center justify-center shrink-0 shadow-sm">
+                3
+              </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px] text-primary">manage_search</span>
+                  Database Search
+                </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant leading-snug">
+                  Queries PIB, BOOM, AltNews, Factly, and global IFCN index.
+                </span>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-primary-fixed text-on-primary-fixed font-bold font-mono text-label-sm flex items-center justify-center shrink-0 shadow-sm">
+                4
+              </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px] text-primary">balance</span>
+                  Cross-Corroboration
+                </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant leading-snug">
+                  Verified against official gazettes, research papers &amp; primary statements.
+                </span>
+</div>
+</div>
+<!-- Step 5 -->
+<div class="flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-bold font-mono text-label-sm flex items-center justify-center shrink-0 shadow-sm">
+                5
+              </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px] text-tertiary">task_alt</span>
+                  Bilingual Verdict
+                </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant leading-snug">
+                  Unambiguous True/False/Misleading verdict with audio playback &amp; citations.
+                </span>
+</div>
+</div>
+</div>
+</div>
+<!-- CARD 2: SUPPORTED REGIONAL LANGUAGES -->
+<div class="bg-surface-container-lowest rounded-xl shadow-md p-space-md sm:p-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[20px] text-secondary">public</span>
+              Supported Languages
+            </h3>
+<span class="font-label-sm text-label-sm text-primary font-bold">10+ भाषाएँ</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">
+            Full translation, dialect tolerance, and native voice audio explainers available for:
+          </p>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+<span class="px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm text-center font-medium">English</span>
+<span class="px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm text-center font-medium">हिन्दी</span>
+<span class="px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm text-center font-medium">मराठी</span>
+<span class="px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm text-center font-medium">தமிழ்</span>
+<span class="px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm text-center font-medium">తెలుగు</span>
+<span class="px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm text-center font-medium">বাংলা</span>
+<span class="px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm text-center font-medium">ગુજરાતી</span>
+<span class="px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm text-center font-medium">ಕನ್ನಡ</span>
+<span class="px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm text-center font-medium">മലയാളം</span>
+<span class="px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm text-center font-medium">ਪੰਜਾਬੀ</span>
+</div>
+</div>
+<!-- CARD 3: TRUSTED INDEPENDENT SOURCES -->
+<div class="bg-surface-container-lowest rounded-xl shadow-md p-space-md sm:p-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-xs text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-tertiary">verified</span>
+<h3 class="font-headline-sm text-headline-sm">Trusted Verification Network</h3>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">
+            Verified strictly through primary indices and signatory newsrooms:
+          </p>
+<div class="flex flex-wrap gap-2 pt-1">
+<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[15px] text-primary">policy</span>
+              PIB Fact Check
+            </span>
+<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[15px] text-primary">newspaper</span>
+              BOOM Live
+            </span>
+<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[15px] text-primary">shield</span>
+              AltNews
+            </span>
+<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[15px] text-primary">fact_check</span>
+              Quint WebQoof
+            </span>
+<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[15px] text-primary">search_check</span>
+              Google Fact Tools
+            </span>
+<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[15px] text-primary">check</span>
+              Vishvas News
+            </span>
+</div>
+<div class="mt-space-sm p-space-sm rounded-lg bg-surface-container-low flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[18px] text-tertiary">check_circle</span>
+<span>IFCN Code of Principles Certified Architecture</span>
+</div>
+</div>
+<!-- WHATSAPP FAST FORWARD CTA CARD -->
+<div class="bg-surface-container-high rounded-xl p-space-md flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-primary">phone_iphone</span>
+<span class="font-label-lg text-label-lg font-bold">Prefer WhatsApp?</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Forward suspicious forwards, voice audios, or photos directly to our verified Tipline at <strong class="text-on-surface font-mono">+91 98765 43210</strong>.
+          </p>
+<a class="mt-space-xs inline-flex items-center justify-center gap-2 h-10 px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md transition-all shadow-sm" data-path="whatsapp-demo" href="/whatsapp">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+<span>Open in WhatsApp</span>
+</a>
+</div>
+</aside>
+</div>
+</section>
+<!-- INTERACTIVE LOGIC SCRIPT -->
+<script>
+    // Tab switching function
+    function switchTab(activeTab) {
+      const tabs = ['text', 'image', 'voice', 'doc'];
+      
+      tabs.forEach(tab => {
+        const btn = document.getElementById('tab-btn-' + tab);
+        const panel = document.getElementById('panel-' + tab);
+        
+        if (tab === activeTab) {
+          btn.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-sm', 'font-bold');
+          btn.classList.remove('text-on-surface-variant');
+          btn.setAttribute('aria-selected', 'true');
+          panel.classList.remove('hidden');
+          panel.classList.add('flex');
+        } else {
+          btn.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-sm', 'font-bold');
+          btn.classList.add('text-on-surface-variant');
+          btn.setAttribute('aria-selected', 'false');
+          panel.classList.add('hidden');
+          panel.classList.remove('flex');
+        }
+      });
+    }
+
+    // Live character counter
+    function updateCharCount(el) {
+      const len = el.value.length;
+      document.getElementById('char-counter').innerText = len.toLocaleString() + ' / 2,000';
+    }
+
+    // Load example prompt into textarea
+    function loadPrompt(promptText) {
+      switchTab('text');
+      const textarea = document.getElementById('message-input');
+      textarea.value = promptText;
+      updateCharCount(textarea);
+      textarea.focus();
+    }
+
+    // Clear textarea
+    function clearText() {
+      const textarea = document.getElementById('message-input');
+      textarea.value = '';
+      updateCharCount(textarea);
+      textarea.focus();
+    }
+
+    // Paste from clipboard simulation / clipboard API
+    async function pasteClipboard() {
+      try {
+        if (navigator.clipboard) {
+          const text = await navigator.clipboard.readText();
+          const textarea = document.getElementById('message-input');
+          textarea.value = text;
+          updateCharCount(textarea);
+        } else {
+          loadPrompt('🏛️ "New PM free smartphone scheme announced for student registered under digital Bharat."');
+        }
+      } catch (err) {
+        loadPrompt('📱 "WhatsApp shutting down tonight unless forwarded to all groups."');
+      }
+    }
+
+    // Handle File Selections
+    function handleFileSelect(input, label) {
+      if (input.files && input.files[0]) {
+        const fileName = input.files[0].name;
+        const statusBox = document.getElementById('file-status');
+        const statusText = document.getElementById('file-status-text');
+        statusBox.classList.remove('hidden');
+        statusBox.classList.add('flex');
+        statusText.innerHTML = '<span class="material-symbols-outlined text-[20px]">check_circle</span> Attached: <strong>' + fileName + '</strong>';
+      }
+    }
+
+    function clearFile() {
+      const statusBox = document.getElementById('file-status');
+      statusBox.classList.add('hidden');
+      statusBox.classList.remove('flex');
+    }
+
+    // Voice record toggle
+    let isRecording = false;
+    function toggleRecording() {
+      isRecording = !isRecording;
+      const btn = document.getElementById('record-btn');
+      const status = document.getElementById('record-status');
+      
+      if (isRecording) {
+        btn.classList.add('bg-error');
+        btn.classList.remove('bg-primary');
+        status.innerText = '🔴 Recording... Speak now (रिकॉर्डिंग चालू है)';
+      } else {
+        btn.classList.remove('bg-error');
+        btn.classList.add('bg-primary');
+        status.innerText = '✅ Voice Note Captured (2.4s) — Ready to Verify';
+        const statusBox = document.getElementById('file-status');
+        const statusText = document.getElementById('file-status-text');
+        statusBox.classList.remove('hidden');
+        statusBox.classList.add('flex');
+        statusText.innerHTML = '<span class="material-symbols-outlined text-[20px]">mic</span> Audio recorded: <strong>VoiceNote_01.wav (128kb)</strong>';
+      }
+    }
+
+    // Simulated Verification Pipeline on CTA Click
+    function simulateVerification() {
+      const progressBox = document.getElementById('verification-progress');
+      const progressBar = document.getElementById('progress-bar');
+      const statusText = document.getElementById('progress-status');
+      const percentText = document.getElementById('progress-percent');
+      const ctaBtn = document.getElementById('verify-cta');
+
+      progressBox.classList.remove('hidden');
+      progressBox.classList.add('flex');
+      ctaBtn.disabled = true;
+      ctaBtn.classList.add('opacity-75');
+
+      let step = 0;
+      const stages = [
+        { pct: '28%', msg: 'Isolating factual claims & entity extraction...' },
+        { pct: '56%', msg: 'Querying PIB archives & certified IFCN partners...' },
+        { pct: '84%', msg: 'Cross-referencing primary gazette records...' },
+        { pct: '100%', msg: 'Verdict ready! Generating bilingual fact report...' }
+      ];
+
+      const interval = setInterval(() => {
+        if (step < stages.length) {
+          progressBar.style.width = stages[step].pct;
+          percentText.innerText = stages[step].pct;
+          statusText.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span> ' + stages[step].msg;
+          step++;
+        } else {
+          clearInterval(interval);
+          statusText.innerHTML = '<span class="material-symbols-outlined text-[18px] text-tertiary">check_circle</span> Fact Check Complete! Loading Verdict Card...';
+          setTimeout(() => {
+            // Smoothly redirect or inform user
+            alert('Verification Complete! SatyaSetu verified this claim: [MISLEADING / भ्रामक]. PIB & BOOM have already issued authentic clarifications.');
+            ctaBtn.disabled = false;
+            ctaBtn.classList.remove('opacity-75');
+            progressBox.classList.add('hidden');
+            progressBox.classList.remove('flex');
+            progressBar.style.width = '20%';
+          }, 600);
+        }
+      }, 700);
+    }
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest border-t border-surface-container mt-space-xl"><div class="max-w-[1200px] mx-auto px-gutter-desktop py-space-xl"><div class="grid grid-cols-1 md:grid-cols-4 gap-space-xl pb-space-xl border-b border-surface-container-low"><div class="md:col-span-1 flex flex-col gap-space-sm"><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[20px]">verified_user</span></div><span class="font-headline-sm text-headline-sm text-on-surface">SatyaSetu</span></div><p class="font-body-md text-body-md text-on-surface-variant">Citizen-first verification bridge empowering India against viral misinformation in regional languages.</p><div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-low w-fit"><span class="material-symbols-outlined text-[16px] text-tertiary">verified</span><span class="font-label-sm text-label-sm text-on-surface font-medium">Made for Bharat 🇮🇳</span></div></div><div class="flex flex-col gap-space-xs"><span class="font-label-lg text-label-lg text-on-surface font-bold mb-1">Civic Actions</span><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="check-now" href="/check">Verify Message</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="whatsapp-demo" href="/whatsapp">Connect on WhatsApp</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="learn" href="/#learn">Media Literacy Guide</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="how-it-works" href="/#how-it-works">Methodology</a></div><div class="flex flex-col gap-space-xs"><span class="font-label-lg text-label-lg text-on-surface font-bold mb-1">Institutional Trust</span><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="about" href="/#about">About SatyaSetu</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="compliance" href="/">IFCN Compliance</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="privacy-guarantee" href="#">Privacy Guarantee</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="transparency" href="#">Correction Policy</a></div><div class="flex flex-col gap-space-sm bg-surface-container-low p-space-md rounded-xl"><div class="flex items-center gap-space-xs text-tertiary"><span class="material-symbols-outlined text-[20px]">security</span><span class="font-label-md text-label-md font-bold text-on-surface">Zero Log Guarantee</span></div><p class="font-label-sm text-label-sm text-on-surface-variant">Personal WhatsApp chats and audio notes sent for verification are processed anonymously and never sold or retained.</p><span class="font-label-sm text-label-sm text-secondary font-semibold">IFCN Certified Signatory Standard</span></div></div><div class="pt-space-lg flex flex-col sm:flex-row items-center justify-between gap-space-md text-on-surface-variant font-label-sm text-label-sm"><p>© 2025 SatyaSetu Civic Foundation. Dedicated to truth, accessible to every citizen.</p><div class="flex items-center gap-space-md"><a class="hover:text-on-surface transition-colors" data-path="privacy-guarantee" href="#">Privacy Policy</a><a class="hover:text-on-surface transition-colors" data-path="about" href="/#about">Open Data</a><a class="hover:text-on-surface transition-colors" data-path="compliance" href="#">Compliance</a></div></div></div></footer>
+<script>
+let selectedLanguage = 'en';
+
+// Language selection
+function selectLang(code) {
+  selectedLanguage = code;
+  const langNames = {
+    'en': 'English',
+    'hi': 'हिन्दी',
+    'mr': 'मराठी',
+    'ta': 'தமிழ்',
+    'te': 'తెలుగు',
+    'bn': 'বাংলা'
+  };
+  const label = document.getElementById('selected-lang-label');
+  if (label) label.innerText = langNames[code] || code;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const msgInput = document.getElementById('message-input');
+  const verifyBtn = document.getElementById('verify-cta');
+  const screenshotInput = document.getElementById('screenshot-file-input');
+  const recordBtn = document.getElementById('record-btn');
+
+  // Load URL query parameter if present
+  const params = new URLSearchParams(window.location.search);
+  const claimParam = params.get('claim') || params.get('q');
+  if (claimParam && msgInput) {
+    msgInput.value = claimParam;
+  }
+
+  // Sample claim chips
+  document.querySelectorAll('.sample-claim-chip, button').forEach(el => {
+    const txt = el.getAttribute('data-claim') || el.innerText.trim();
+    if (txt.includes('Lemon juice') || txt.includes('smartphone') || txt.includes('WhatsApp shutting down') || txt.includes('Railway Free Ticket')) {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        const cleanClaim = el.getAttribute('data-claim') || txt.replace(/^[🍋🏛️📱"]+|["]+$/g, '').trim();
+        if (msgInput) {
+          msgInput.value = cleanClaim;
+          msgInput.focus();
+        }
+      });
+    }
+  });
+
+  // Verify Action
+  function doVerify() {
+    const text = msgInput ? msgInput.value.trim() : '';
+    if (!text) {
+      if (msgInput) {
+        msgInput.focus();
+        msgInput.classList.add('ring-2', 'ring-red-500');
+        setTimeout(() => msgInput.classList.remove('ring-2', 'ring-red-500'), 1500);
+      }
+      return;
+    }
+    // Redirect to processing flow which queries the backend and shows the result
+    window.location.href = `/processing?claim=${encodeURIComponent(text)}&lang=${selectedLanguage}`;
+  }
+
+  if (verifyBtn) {
+    verifyBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      doVerify();
+    });
+  }
+
+  if (msgInput) {
+    msgInput.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        doVerify();
+      }
+    });
+  }
+
+  // Clipboard Paste Helper
+  window.pasteClipboard = async function() {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text && msgInput) {
+        msgInput.value = text;
+        msgInput.focus();
+      }
+    } catch(err) {
+      alert("Please press Ctrl+V to paste into the text area.");
+    }
+  };
+
+  window.clearText = function() {
+    if (msgInput) {
+      msgInput.value = '';
+      msgInput.focus();
+    }
+  };
+
+  // Screenshot Upload & EasyOCR
+  const uploadDropzones = document.querySelectorAll('[onclick*="file"], input[type="file"]');
+  document.querySelectorAll('input[type="file"]').forEach(inp => {
+    inp.addEventListener('change', async () => {
+      if (!inp.files || !inp.files[0]) return;
+      const file = inp.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      if (verifyBtn) {
+        verifyBtn.innerText = "Extracting text from image via EasyOCR...";
+        verifyBtn.disabled = true;
+      }
+
+      try {
+        const resp = await fetch('/api/ocr', { method: 'POST', body: formData });
+        const data = await resp.json();
+        if (data.success && data.text) {
+          if (msgInput) {
+            msgInput.value = data.text;
+            switchTab('text');
+          }
+        } else {
+          alert("Could not extract legible text. Please enter the claim directly.");
+        }
+      } catch (err) {
+        console.error("OCR error:", err);
+        alert("OCR error occurred. Please type or paste your message.");
+      } finally {
+        if (verifyBtn) {
+          verifyBtn.innerHTML = '<span>verified_user</span><span>Verify Now → (सत्यापित करें)</span>';
+          verifyBtn.disabled = false;
+        }
+      }
+    });
+  });
+
+  // Voice Note Recording
+  if (recordBtn) {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRec) {
+      const rec = new SpeechRec();
+      rec.lang = 'hi-IN';
+      rec.continuous = false;
+      let recording = false;
+
+      recordBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!recording) {
+          try {
+            rec.start();
+            recording = true;
+            recordBtn.classList.add('animate-pulse', 'ring-4', 'ring-red-400');
+          } catch(e) {}
+        } else {
+          rec.stop();
+        }
+      });
+
+      rec.onresult = (evt) => {
+        const text = evt.results[0][0].transcript;
+        if (msgInput) {
+          msgInput.value = (msgInput.value ? msgInput.value + ' ' : '') + text;
+          switchTab('text');
+        }
+      };
+
+      rec.onend = () => {
+        recording = false;
+        recordBtn.classList.remove('animate-pulse', 'ring-4', 'ring-red-400');
+      };
+    }
+  }
+});
+</script>
+</body>
+</html>

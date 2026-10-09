@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-background": "#0a1a3a", "secondary": "#4f5e81", "primary-fixed": "#ffdbcd", "error-container": "#ffdad6", "on-surface": "#0a1a3a", "tertiary": "#006b2c", "surface-bright": "#faf8ff", "on-primary-container": "#fffbff", "secondary-fixed-dim": "#b7c6ee", "on-error-container": "#93000a", "on-secondary": "#ffffff", "on-primary": "#ffffff", "surface-tint": "#a33e00", "on-tertiary-container": "#f7fff2", "on-tertiary": "#ffffff", "on-error": "#ffffff", "background": "#faf8ff", "secondary-fixed": "#d9e2ff", "surface-container-lowest": "#ffffff", "on-surface-variant": "#594137", "inverse-surface": "#213050", "tertiary-fixed-dim": "#62df7d", "surface": "#faf8ff", "on-secondary-fixed": "#0a1a3a", "surface-container": "#e9edff", "on-secondary-container": "#4d5b7e", "primary": "#9f3d00", "surface-container-low": "#f1f3ff", "tertiary-fixed": "#7ffc97", "inverse-primary": "#ffb596", "secondary-container": "#c5d4fd", "outline-variant": "#e1bfb2", "on-secondary-fixed-variant": "#384668", "surface-container-high": "#e1e8ff", "surface-variant": "#d9e2ff", "error": "#ba1a1a", "on-tertiary-fixed": "#002109", "surface-container-highest": "#d9e2ff", "tertiary-container": "#00873a", "on-primary-fixed-variant": "#7c2e00", "surface-dim": "#ccd9ff", "primary-fixed-dim": "#ffb596", "on-primary-fixed": "#360f00", "inverse-on-surface": "#edf0ff", "outline": "#8d7165", "on-tertiary-fixed-variant": "#005320", "primary-container": "#c74e00" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-lg": "1.5rem", "space-md": "1rem", "gutter": "1rem", "space-xs": "0.375rem", "space-xl": "2.25rem", "margin": "1rem", "margin-desktop": "2rem", "gutter-desktop": "1.5rem", "space-sm": "0.75rem" }, "fontFamily": { "headline-lg": [ "Noto Sans" ], "headline-lg-mobile": [ "Noto Sans" ], "body-lg": [ "Noto Sans" ], "headline-sm": [ "Noto Sans" ], "label-md": [ "Noto Sans" ], "body-xl": [ "Noto Sans" ], "label-lg": [ "Noto Sans" ], "headline-md": [ "Noto Sans" ], "headline-xl-mobile": [ "Noto Sans" ], "body-md": [ "Noto Sans" ], "label-sm": [ "Noto Sans" ], "headline-xl": [ "Noto Sans" ] }, "fontSize": { "headline-lg": [ "28px", { "lineHeight": "38px", "fontWeight": "700" } ], "headline-lg-mobile": [ "24px", { "lineHeight": "34px", "fontWeight": "700" } ], "body-lg": [ "17px", { "lineHeight": "28px", "fontWeight": "400" } ], "headline-sm": [ "20px", { "lineHeight": "28px", "fontWeight": "700" } ], "label-md": [ "15px", { "lineHeight": "22px", "fontWeight": "600" } ], "body-xl": [ "18px", { "lineHeight": "30px", "fontWeight": "400" } ], "label-lg": [ "16px", { "lineHeight": "24px", "fontWeight": "600" } ], "headline-md": [ "22px", { "lineHeight": "32px", "fontWeight": "700" } ], "headline-xl-mobile": [ "28px", { "lineHeight": "38px", "fontWeight": "700" } ], "body-md": [ "16px", { "lineHeight": "26px", "fontWeight": "400" } ], "label-sm": [ "14px", { "lineHeight": "20px", "fontWeight": "500" } ], "headline-xl": [ "36px", { "lineHeight": "48px", "fontWeight": "700" } ] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-surface-container"><div class="h-20 w-full px-margin-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm"><div class="w-11 h-11 rounded-xl bg-primary-fixed flex items-center justify-center text-primary shadow-[0_2px_8px_rgba(27,42,74,0.06)]"><span class="material-symbols-outlined text-[26px]">verified_user</span></div><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface">SatyaSetu</span><span class="font-label-sm text-label-sm text-primary font-bold px-1.5 py-0.5 rounded bg-primary-fixed">सत्यसेतु</span></div><span class="font-label-sm text-label-sm text-secondary">सत्यसेतु • Public Trust Portal</span></div></div><nav class="hidden lg:flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-on-surface font-bold rounded-lg"><a class="px- space-sm py-2 font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors" data-path="home" href="#">Home</a><a aria-current="page" class="px-space-sm py-2 transition-colors bg-surface-container-high text-on-surface font-bold rounded-lg" data-path="check-now" href="#">Check Now</a><a class="px-space-sm py-2 font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors" data-path="how-it-works" href="#">How It Works</a><a class="px-space-sm py-2 font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors" data-path="learn" href="#">Learn</a></nav><div class="flex items-center gap-space-sm"><div class="relative flex items-center gap-1.5 px-3 py-2 rounded-full bg-surface-container border border-surface-variant text-on-surface cursor-pointer hover:bg-surface-container-high hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[18px] text-secondary">translate</span><span class="font-label-sm text-label-sm font-medium">English / हिंदी / मराठी</span><span class="material-symbols-outlined text-[18px] text-secondary">arrow_drop_down</span></div><a class="hidden sm:inline-flex items-center justify-center h-12 px-space-lg rounded-xl bg-primary text-on-primary font-label-lg text-label-lg shadow-[0_2px_8px_rgba(27,42,74,0.06)] hover:bg-primary-container hover:text-on-primary-container transition-all" data-path="check-now" href="#">Try It Free</a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-surface"><div class="flex flex-col w-full">
+<!-- Subtle Gradient Accent Backdrop (Contained) -->
+<div class="relative w-full overflow-hidden pb-12 pt-4">
+<div class="absolute -top-32 -left-20 w-96 h-96 rounded-full bg-primary-fixed/25 blur-3xl pointer-events-none"></div>
+<div class="absolute top-48 right-0 w-80 h-80 rounded-full bg-secondary-fixed/20 blur-3xl pointer-events-none"></div>
+<div class="max-w-[1200px] mx-auto px-margin md:px-margin-desktop w-full relative z-10 flex flex-col gap-6">
+<!-- Breadcrumb Navigation -->
+<nav aria-label="Breadcrumb" class="flex items-center gap-2 text-label-sm font-label-sm text-secondary">
+<a class="hover:text-on-surface transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[18px]">home</span>
+<span>Home</span>
+</a>
+<span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+<a class="hover:text-on-surface transition-colors" href="#">Check Now</a>
+<span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+<span class="text-primary font-bold bg-primary-fixed/60 px-2 py-0.5 rounded text-label-sm">Result / परिणाम</span>
+</nav>
+<!-- Main 2-Column Responsive Grid (Left 65%, Right 35%) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-start">
+<!-- ==================== LEFT COLUMN (approx 65% = 8 cols) ==================== -->
+<div class="lg:col-span-8 flex flex-col gap-6">
+<!-- 1. VERDICT HERO CARD (High-impact civic verdict presentation) -->
+<section aria-labelledby="verdict-heading" class="relative overflow-hidden rounded-2xl bg-error-container/40 p-6 sm:p-8 shadow-sm">
+<!-- Left verdict bar accent -->
+<div class="absolute left-0 top-0 bottom-0 w-2.5 bg-error"></div>
+<!-- Top Header Row -->
+<div class="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-error/15">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-bold shadow-xs">
+<span class="material-symbols-outlined text-[17px]">notes</span>
+<span>📝 Text Forward</span>
+</span>
+<span class="font-label-sm text-label-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+                Checked on Oct 9, 2026 at 3:45 PM IST
+              </span>
+</div>
+<!-- Center Verdict Display -->
+<div class="pt-6 pb-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
+<div class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-2xl bg-error/15 flex items-center justify-center text-error shadow-inner">
+<span class="material-symbols-outlined text-[42px] sm:text-[50px]" style="font-variation-settings: 'FILL' 1;">cancel</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline gap-3 flex-wrap">
+<h1 class="font-headline-xl text-headline-xl text-error tracking-tight font-black uppercase" id="verdict-heading">
+                    FALSE
+                  </h1>
+<span class="font-headline-md text-headline-md text-error/90 font-bold">
+                    [झूठा दावा]
+                  </span>
+</div>
+<p class="font-headline-sm text-headline-sm text-on-error-container font-bold leading-snug">
+                  ❌ यह दावा पूरी तरह से झूठा और मनगढ़ंत है
+                </p>
+<p class="font-body-md text-body-md text-on-surface-variant pt-1">
+                  There is no such government scheme offering cash grants or free laptops through WhatsApp forwards.
+                </p>
+</div>
+</div>
+<!-- Confidence Progress Bar -->
+<div class="p-4 rounded-xl bg-surface-container-lowest/90 shadow-sm flex flex-col gap-2.5">
+<div class="flex items-center justify-between font-label-md text-label-md">
+<span class="text-on-surface font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-error">analytics</span>
+                  Confidence Score: 96%
+                </span>
+<span class="text-error font-bold px-2 py-0.5 rounded bg-error-container text-label-sm">
+                  Highly Confident (अति-विश्वसनीय)
+                </span>
+</div>
+<!-- Bar track -->
+<div class="w-full h-3 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-error rounded-full transition-all duration-700 ease-out" style="width: 96%;"></div>
+</div>
+<p class="font-label-sm text-label-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-tertiary">verified</span>
+                Verified by multimodal cross-referencing against 12 IFCN-certified fact registries and Union Gazettes.
+              </p>
+</div>
+<!-- Quick reference verdict chips for public civic awareness -->
+<div class="pt-5 mt-2 border-t border-error/15 flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">
+                SatyaSetu Verdict Framework:
+              </span>
+<div class="flex flex-wrap gap-2 pt-1 font-label-sm text-label-sm">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-tertiary-fixed text-on-tertiary-fixed font-semibold opacity-75">
+                  ✅ TRUE / सच
+                </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-error text-on-error font-bold shadow-sm">
+                  ❌ FALSE / झूठ (Current)
+                </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-highest text-on-surface font-medium">
+                  ⚠️ MISLEADING / भ्रामक
+                </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container text-secondary font-medium">
+                  ❓ UNVERIFIABLE / अपुष्ट
+                </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container text-secondary font-medium">
+                  🔄 OUTDATED / पुराना
+                </span>
+</div>
+</div>
+</section>
+<!-- 2. ORIGINAL CLAIM CARD -->
+<section aria-labelledby="original-claim-heading" class="rounded-2xl bg-surface-container-lowest p-6 shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h2 class="font-label-sm text-label-sm font-bold text-secondary uppercase tracking-wider flex items-center gap-1.5" id="original-claim-heading">
+<span class="material-symbols-outlined text-[18px] text-primary">chat</span>
+                WHAT WAS CHECKED • जाँचा गया संदेश
+              </h2>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container text-on-secondary-container font-label-sm text-label-sm font-semibold">
+                Viral Forward
+              </span>
+</div>
+<!-- The Quoted Viral Claim -->
+<div class="relative p-5 rounded-xl bg-surface-container-low text-on-surface">
+<span class="material-symbols-outlined text-outline-variant text-[36px] absolute -top-3 -left-1 opacity-40 select-none">format_quote</span>
+<blockquote class="italic font-headline-sm text-headline-sm leading-relaxed text-on-surface pl-4 pt-1">
+                “Government is offering free ₹5,000 monthly allowance and laptops to all students under PM-Yojana. Forward to 5 groups to activate your scheme link immediately.”
+              </blockquote>
+</div>
+<!-- Claim Metadata -->
+<div class="flex flex-wrap items-center justify-between gap-3 text-label-sm font-label-sm text-secondary pt-1">
+<div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-tertiary">send</span>
+                  Shared via WhatsApp Forward
+                </span>
+<span>•</span>
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">history</span>
+                  Circulating since Oct 2026
+                </span>
+<span>•</span>
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">language</span>
+                  Hindi / Hinglish
+                </span>
+</div>
+<!-- Message toggle trigger -->
+<button class="inline-flex items-center gap-1 text-primary hover:text-primary-container font-bold transition-colors" id="toggle-forward-msg" type="button">
+<span>View Full Raw Forward</span>
+<span class="material-symbols-outlined text-[18px]" id="toggle-icon">expand_more</span>
+</button>
+</div>
+<!-- Expandable Raw Message -->
+<div class="hidden p-4 rounded-xl bg-surface-container font-body-md text-body-md text-on-surface-variant flex-col gap-2" id="raw-message-drawer">
+<p class="text-label-sm font-bold text-secondary uppercase">Raw Message Transcript:</p>
+<p class="whitespace-pre-line leading-relaxed font-mono text-sm bg-surface-container-lowest p-3 rounded-lg">
+🚨 *खुशखबरी: PM-योजना के तहत सभी भारतीय छात्रों को फ्री ₹5,000 और मुफ्त लैपटॉप दिए जा रहे हैं।*
+अपने फोन से अभी आवेदन करें। अंतिम तिथि कल शाम 5 बजे तक है। 
+👉 लिंक खोलें: http://pm-laptop-yojana2026-portal.online/claim
+*ध्यान दें:* योजना सक्रिय करने के लिए इस संदेश को कम से कम 5 व्हाट्सएप्प ग्रुपों में फॉरवर्ड करें।
+              </p>
+</div>
+</section>
+<!-- 3. EVIDENCE SECTION ("Why we say this" / प्रमाण और आधार) -->
+<section aria-labelledby="evidence-heading" class="rounded-2xl bg-surface-container-lowest p-6 sm:p-7 shadow-sm flex flex-col gap-5">
+<div class="flex items-center justify-between flex-wrap gap-2">
+<div class="flex items-center gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold" id="evidence-heading">
+                  Why we say this: / प्रमाण और आधार
+                </h2>
+<div class="group relative flex items-center cursor-pointer">
+<span class="material-symbols-outlined text-secondary hover:text-primary text-[20px]">info</span>
+<div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:flex w-64 p-2.5 bg-inverse-surface text-inverse-on-surface text-xs rounded-lg shadow-lg z-20 pointer-events-none text-center">
+                    Evidence gathered from IFCN-certified fact-checkers &amp; official government gazettes.
+                  </div>
+</div>
+</div>
+<span class="text-label-sm font-label-sm text-tertiary bg-tertiary-fixed/60 px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+                3 Official Debunks
+              </span>
+</div>
+<!-- Evidence Cards Stack -->
+<div class="flex flex-col gap-4">
+<!-- Evidence Card 1: BOOM Live -->
+<article class="p-5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col gap-3">
+<div class="flex items-center justify-between flex-wrap gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+                    BOOM Live Fact Check
+                  </span>
+<span class="font-label-sm text-label-sm font-bold text-tertiary bg-surface-container-lowest px-2.5 py-0.5 rounded-full">
+                    High Confidence (98%)
+                  </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+                  PIB and Ministry of Education confirmed that no such scheme exists. The viral link is a phishing scam attempting to harvest bank details, OTPs, and personal student credentials.
+                </p>
+<div class="pt-1 flex items-center justify-between">
+<a class="inline-flex items-center gap-1 font-label-md text-label-md text-primary font-bold hover:text-primary-container transition-colors group" href="#">
+<span>View Source Report</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+<span class="font-label-sm text-label-sm text-secondary">Oct 8, 2026</span>
+</div>
+</article>
+<!-- Evidence Card 2: AltNews Archive -->
+<article class="p-5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col gap-3">
+<div class="flex items-center justify-between flex-wrap gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+                    AltNews Fact Archive
+                  </span>
+<span class="font-label-sm text-label-sm font-bold text-tertiary bg-surface-container-lowest px-2.5 py-0.5 rounded-full">
+                    High Confidence (95%)
+                  </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+                  Old scam circulating in slightly altered formats since 2022 under various fake ministerial names. Official PIB Fact Check has repeatedly flagged this domain registry as fraudulent.
+                </p>
+<div class="pt-1 flex items-center justify-between">
+<a class="inline-flex items-center gap-1 font-label-md text-label-md text-primary font-bold hover:text-primary-container transition-colors group" href="#">
+<span>View Archival Debunk</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+<span class="font-label-sm text-label-sm text-secondary">Historical Pattern #2022-LPT</span>
+</div>
+</article>
+<!-- Evidence Card 3: PIB Fact Check -->
+<article class="p-5 rounded-xl bg-secondary-fixed/40 hover:bg-secondary-fixed/60 transition-all flex flex-col gap-3">
+<div class="flex items-center justify-between flex-wrap gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">account_balance</span>
+                    PIB Fact Check (Govt of India)
+                  </span>
+<span class="font-label-sm text-label-sm font-bold text-on-secondary-fixed bg-surface-container-lowest px-2.5 py-0.5 rounded-full">
+                    Official Government Denial
+                  </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface leading-relaxed font-medium">
+                  Official press communique: “The Government of India has not authorized any cash disbursement or free laptop distribution under this scheme title. Citizens are urged to check only pib.gov.in.”
+                </p>
+<div class="pt-1 flex items-center justify-between">
+<a class="inline-flex items-center gap-1 font-label-md text-label-md text-primary font-bold hover:text-primary-container transition-colors group" href="#">
+<span>View PIB Gazette Tweet &amp; Bulletin</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+<span class="font-label-sm text-label-sm text-secondary">Official ID: #PIB-FC-9844</span>
+</div>
+</article>
+</div>
+</section>
+<!-- 4. PLAIN LANGUAGE SUMMARY BOX ("In Simple Words" / सरल भाषा में) -->
+<section aria-labelledby="simple-words-heading" class="rounded-2xl bg-secondary-container/40 p-6 sm:p-7 shadow-sm flex flex-col gap-5">
+<!-- Header & Multilingual Toggle -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[24px]">forum</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold" id="simple-words-heading">
+                  In Simple Words / सरल भाषा में
+                </h2>
+</div>
+<!-- Interactive Language Switcher Tabs -->
+<div class="inline-flex p-1 rounded-xl bg-surface-container-lowest shadow-xs" role="tablist">
+<button class="lang-tab px-3 py-1.5 rounded-lg text-label-sm font-label-sm font-bold bg-primary text-on-primary transition-all" data-lang="en" type="button">
+                  English
+                </button>
+<button class="lang-tab px-3 py-1.5 rounded-lg text-label-sm font-label-sm font-semibold text-secondary hover:text-on-surface transition-all" data-lang="hi" type="button">
+                  हिंदी
+                </button>
+<button class="lang-tab px-3 py-1.5 rounded-lg text-label-sm font-label-sm font-semibold text-secondary hover:text-on-surface transition-all" data-lang="mr" type="button">
+                  मराठी
+                </button>
+</div>
+</div>
+<!-- Content Container by Language -->
+<div class="p-5 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-4">
+<!-- English Version (Default) -->
+<div class="lang-content flex flex-col gap-2" id="content-en">
+<p class="font-body-lg text-body-lg text-on-surface font-medium leading-relaxed">
+                  This message is completely fake. The government is <strong class="text-error font-bold">NOT</strong> giving ₹5,000 or free laptops. Anyone asking you to forward this link to WhatsApp groups is tricking you into visiting a dangerous scam website that steals your private data. Do not click the link, and do not forward it to family or friends.
+                </p>
+</div>
+<!-- Hindi Version (Hidden by default) -->
+<div class="lang-content hidden flex flex-col gap-2" id="content-hi">
+<p class="font-body-lg text-body-lg text-on-surface font-medium leading-relaxed">
+                  यह संदेश पूरी तरह फर्जी है। सरकार कोई ₹5,000 या मुफ्त लैपटॉप <strong class="text-error font-bold">नहीं दे रही है</strong>। जो भी आपको यह लिंक व्हाट्सएप्प ग्रुप्स में भेजने को कह रहा है, वह आपको एक खतरनाक फर्जी वेबसाइट पर ले जाकर आपकी निजी जानकारी चुराने की कोशिश कर रहा है। किसी को भी यह मैसेज आगे न भेजें।
+                </p>
+</div>
+<!-- Marathi Version (Hidden by default) -->
+<div class="lang-content hidden flex flex-col gap-2" id="content-mr">
+<p class="font-body-lg text-body-lg text-on-surface font-medium leading-relaxed">
+                  हा संदेश पूर्णपणे खोटा आहे. सरकार <strong class="text-error font-bold">कोणतेही ₹5,000 किंवा मोफत लॅपटॉप देत नाहीये</strong>. ही लिंक व्हॉट्सॲप ग्रुपवर फॉरवर्ड करायला सांगून तुमची वैयक्तिक माहिती चोरी करण्याचा हा सायबर गुन्हा आहे. ही लिंक कोणालाही पाठवू नका.
+                </p>
+</div>
+<!-- Audio Player Pill with Senior-friendly play controls -->
+<div class="pt-3 border-t border-surface-container flex flex-wrap items-center justify-between gap-3">
+<button class="min-h-[48px] px-5 py-2.5 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md font-bold hover:bg-surface-container flex items-center gap-2.5 shadow-xs transition-colors" id="audio-toggle-btn" type="button">
+<span class="material-symbols-outlined text-[24px] text-primary" id="audio-icon">volume_up</span>
+<span id="audio-label">🔊 आवाज़ में सुनें (Listen Voice Note)</span>
+</button>
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-secondary">
+<span class="inline-block w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span>Duration: 0:42 sec • Hindi / English AI audio</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. SHARE & ACTION ROW -->
+<section aria-label="Action Controls" class="p-6 rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col gap-4">
+<span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">
+              PROTECT YOUR GROUPS • सच्चाई आगे साझा करें
+            </span>
+<div class="flex flex-col sm:flex-row flex-wrap items-center gap-3 w-full">
+<!-- WhatsApp Green Share Button -->
+<button class="w-full sm:w-auto flex-1 min-h-[52px] px-6 py-3.5 rounded-xl bg-tertiary text-on-tertiary font-label-lg text-label-lg font-bold flex items-center justify-center gap-2.5 shadow-sm hover:bg-tertiary-container transition-all active:scale-[0.98]" id="whatsapp-share-btn" type="button">
+<span class="material-symbols-outlined text-[24px]">share</span>
+<span>📤 Share Debunk on WhatsApp</span>
+</button>
+<!-- Copy Fact-Check Link -->
+<button class="w-full sm:w-auto min-h-[52px] px-5 py-3.5 rounded-xl bg-surface-container-low text-on-surface hover:bg-surface-container font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98]" id="copy-link-btn" type="button">
+<span class="material-symbols-outlined text-[20px] text-secondary">link</span>
+<span id="copy-btn-text">Copy Link</span>
+</button>
+<!-- Check Another Message Button -->
+<a class="w-full sm:w-auto min-h-[52px] px-6 py-3.5 rounded-xl bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]">search_check</span>
+<span>Check Another Claim</span>
+</a>
+</div>
+<!-- WhatsApp Debunk Preview Note -->
+<div class="p-3.5 rounded-lg bg-surface-container-low text-label-sm font-label-sm text-secondary flex items-start gap-2">
+<span class="material-symbols-outlined text-[18px] text-tertiary mt-0.5 shrink-0">info</span>
+<p>
+                Sharing generates a pre-formatted message that politely informs family group members that this link is a reported scam, citing the PIB gazette.
+              </p>
+</div>
+</section>
+</div>
+<!-- ==================== RIGHT COLUMN (approx 35% = 4 cols, Desktop Sticky Rail) ==================== -->
+<aside class="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-24">
+<!-- 1. VERDICT SUMMARY & HACKATHON PIPELINE CARD -->
+<div class="rounded-2xl bg-surface-container-lowest p-5 sm:p-6 shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-surface-container">
+<span class="font-label-md text-label-md font-bold text-on-surface">Quick Verdict Overview</span>
+<span class="px-2 py-0.5 rounded-md bg-error text-on-error font-label-sm text-label-sm font-bold">
+                ❌ FALSE
+              </span>
+</div>
+<!-- Visual Pipeline Latency Spark Gauge -->
+<div class="p-3 rounded-xl bg-surface-container-low flex items-center justify-between">
+<div>
+<p class="font-label-sm text-label-sm text-secondary">Pipeline Latency</p>
+<p class="font-headline-sm text-headline-sm font-bold text-primary">1.2s</p>
+</div>
+<svg class="w-20 h-10 text-primary" fill="none" stroke="currentColor" viewbox="0 0 100 40">
+<path d="M0 35 L20 28 L40 32 L60 12 L80 18 L100 8" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+</svg>
+</div>
+<!-- Pipeline Stats (Judge Showcase) -->
+<div class="flex flex-col gap-3 pt-1">
+<span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">memory</span>
+                AI VERIFICATION PIPELINE STATS
+              </span>
+<ul class="flex flex-col gap-2.5 font-label-sm text-label-sm text-on-surface">
+<li class="p-2.5 rounded-lg bg-surface-container flex items-center justify-between">
+<span class="text-secondary flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">speed</span> Total Pipeline:
+                  </span>
+<span class="font-bold text-tertiary">1.2s (Fast cross-lingual)</span>
+</li>
+<li class="p-2.5 rounded-lg bg-surface-container flex items-center justify-between">
+<span class="text-secondary flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">menu_book</span> Sources Checked:
+                  </span>
+<span class="font-bold text-on-surface">12 IFCN Databases</span>
+</li>
+<li class="p-2.5 rounded-lg bg-surface-container flex items-center justify-between">
+<span class="text-secondary flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">translate</span> Language:
+                  </span>
+<span class="font-bold text-on-surface">Hindi / Hinglish (99%)</span>
+</li>
+<li class="p-2.5 rounded-lg bg-surface-container flex items-center justify-between">
+<span class="text-secondary flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">compare_arrows</span> NLI Stance:
+                  </span>
+<span class="font-bold text-error">96% Contradiction</span>
+</li>
+<li class="p-2.5 rounded-lg bg-surface-container flex flex-col gap-1">
+<span class="text-secondary flex items-center gap-1.5 text-xs">
+<span class="material-symbols-outlined text-[14px]">fingerprint</span> Audit Cryptographic Fingerprint:
+                  </span>
+<span class="font-mono text-xs font-bold text-secondary truncate">
+                    #SS-IND-2026-9812A
+                  </span>
+</li>
+</ul>
+</div>
+</div>
+<!-- 2. RELATED CHECKS CARD -->
+<div class="rounded-2xl bg-surface-container-lowest p-5 sm:p-6 shadow-sm flex flex-col gap-4">
+<h3 class="font-label-md text-label-md font-bold text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-secondary">dynamic_feed</span>
+              Similar Claims Checked / मिलते-जुलते दावे
+            </h3>
+<div class="flex flex-col gap-2.5">
+<!-- Item 1 -->
+<a class="p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col gap-1.5 group" href="#">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-error font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">cancel</span> FALSE
+                  </span>
+<span class="text-xs text-secondary">Yesterday</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors line-clamp-2">
+                  PM Kanya Sumangala ₹6,000 direct bank transfer link for girl child applicants.
+                </p>
+</a>
+<!-- Item 2 -->
+<a class="p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col gap-1.5 group" href="#">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-error font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">cancel</span> FALSE
+                  </span>
+<span class="text-xs text-secondary">3 days ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors line-clamp-2">
+                  Free mobile recharge 3-month scheme for all telecom subscribers before elections.
+                </p>
+</a>
+<!-- Item 3 -->
+<a class="p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col gap-1.5 group" href="#">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-tertiary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> TRUE
+                  </span>
+<span class="text-xs text-secondary">1 week ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors line-clamp-2">
+                  RBI currency exchange window extended for senior citizens at select branches.
+                </p>
+</a>
+</div>
+</div>
+<!-- 3. CIVIC SAFETY TIP CARD -->
+<div class="rounded-2xl bg-primary-fixed/40 p-5 sm:p-6 shadow-sm flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[20px]">lightbulb</span>
+</span>
+<h3 class="font-label-md text-label-md font-bold text-on-surface">
+                Civic Safety Tip: Always verify before forwarding
+              </h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Scammers frequently use emotional triggers like <strong class="text-primary font-bold">"Free money"</strong> or <strong class="text-primary font-bold">"Last day to apply"</strong> along with urgent requests to <em>"Forward to 5 WhatsApp groups"</em> to spread malware links. Legitimate government schemes are always announced on official <code class="bg-surface-container px-1 py-0.5 rounded text-xs">.gov.in</code> or <code class="bg-surface-container px-1 py-0.5 rounded text-xs">.nic.in</code> portals.
+            </p>
+</div>
+</aside>
+</div>
+<!-- ==================== BOTTOM SECTION (Full width across both columns) ==================== -->
+<section aria-label="Feedback and Integrity Seal" class="mt-8 pt-8 border-t border-surface-container flex flex-col items-center gap-6 text-center">
+<!-- Citizen Feedback Row -->
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+<p class="font-label-lg text-label-lg font-bold text-on-surface">
+            Was this result helpful and clear? • क्या यह परिणाम उपयोगी था?
+          </p>
+<div class="flex items-center gap-2.5">
+<button class="feedback-btn min-h-[48px] px-5 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-bold transition-all flex items-center gap-1.5 shadow-xs" type="button">
+<span>👍 Yes / हाँ</span>
+</button>
+<button class="feedback-btn min-h-[48px] px-5 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-bold transition-all flex items-center gap-1.5 shadow-xs" type="button">
+<span>👎 No / नहीं</span>
+</button>
+</div>
+</div>
+<!-- Issue Reporting Text Link -->
+<a class="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">flag</span>
+          Report an issue with this fact-check or submit correction / सुधार दर्ज करें
+        </a>
+<!-- Open Fact Registry Seal & IFCN Adherence -->
+<div class="p-4 rounded-xl bg-surface-container-low max-w-2xl w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-secondary text-label-sm font-label-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[24px] text-tertiary">verified_user</span>
+<div class="text-left">
+<p class="font-bold text-on-surface">SatyaSetu Open Fact Registry</p>
+<p class="text-xs">Indexed under Public License CC BY 4.0 • IFCN Signatory Principles Adherent</p>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-surface-container-lowest font-mono text-xs font-bold text-secondary shadow-xs">
+            Hash: SHA256-8A9F1C
+          </span>
+</div>
+</section>
+</div>
+</div>
+</div>
+<!-- Micro-Interactions Script -->
+<script>
+  // Language Switcher Logic
+  const langTabs = document.querySelectorAll('.lang-tab');
+  const langContents = {
+    'en': document.getElementById('content-en'),
+    'hi': document.getElementById('content-hi'),
+    'mr': document.getElementById('content-mr')
+  };
+
+  langTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const selectedLang = tab.getAttribute('data-lang');
+
+      // Update Tab Styles
+      langTabs.forEach(t => {
+        t.className = 'lang-tab px-3 py-1.5 rounded-lg text-label-sm font-label-sm font-semibold text-secondary hover:text-on-surface transition-all';
+      });
+      tab.className = 'lang-tab px-3 py-1.5 rounded-lg text-label-sm font-label-sm font-bold bg-primary text-on-primary transition-all';
+
+      // Toggle Content Panes
+      Object.keys(langContents).forEach(lang => {
+        if (lang === selectedLang) {
+          langContents[lang].classList.remove('hidden');
+        } else {
+          langContents[lang].classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  // Expand / Collapse Raw Forward Message
+  const toggleBtn = document.getElementById('toggle-forward-msg');
+  const drawer = document.getElementById('raw-message-drawer');
+  const toggleIcon = document.getElementById('toggle-icon');
+
+  if (toggleBtn && drawer) {
+    toggleBtn.addEventListener('click', () => {
+      const isHidden = drawer.classList.contains('hidden');
+      if (isHidden) {
+        drawer.classList.remove('hidden');
+        drawer.classList.add('flex');
+        toggleIcon.textContent = 'expand_less';
+      } else {
+        drawer.classList.add('hidden');
+        drawer.classList.remove('flex');
+        toggleIcon.textContent = 'expand_more';
+      }
+    });
+  }
+
+  // Audio Play Simulation
+  const audioBtn = document.getElementById('audio-toggle-btn');
+  const audioIcon = document.getElementById('audio-icon');
+  const audioLabel = document.getElementById('audio-label');
+  let isPlaying = false;
+
+  if (audioBtn) {
+    audioBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        audioIcon.textContent = 'pause_circle';
+        audioLabel.textContent = '⏹️ रोकें (Playing voice note...)';
+        audioBtn.classList.add('bg-primary-fixed', 'text-primary');
+      } else {
+        audioIcon.textContent = 'volume_up';
+        audioLabel.textContent = '🔊 आवाज़ में सुनें (Listen Voice Note)';
+        audioBtn.classList.remove('bg-primary-fixed', 'text-primary');
+      }
+    });
+  }
+
+  // Copy Link Micro-Interaction
+  const copyBtn = document.getElementById('copy-link-btn');
+  const copyBtnText = document.getElementById('copy-btn-text');
+
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard?.writeText(window.location.href);
+      copyBtnText.textContent = 'Copied! ✓';
+      setTimeout(() => {
+        copyBtnText.textContent = 'Copy Link';
+      }, 2000);
+    });
+  }
+
+  // Feedback Pill Micro-interactions
+  const feedbackButtons = document.querySelectorAll('.feedback-btn');
+  feedbackButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      feedbackButtons.forEach(b => {
+        b.classList.remove('bg-primary', 'text-on-primary');
+        b.classList.add('bg-surface-container', 'text-on-surface');
+      });
+      btn.classList.remove('bg-surface-container', 'text-on-surface');
+      btn.classList.add('bg-primary', 'text-on-primary');
+    });
+  });
+
+  // WhatsApp Share Trigger
+  const whatsappBtn = document.getElementById('whatsapp-share-btn');
+  if (whatsappBtn) {
+    whatsappBtn.addEventListener('click', () => {
+      const debunkText = encodeURIComponent("⚠️ सावधान! 'PM-योजना के तहत ₹5000 और मुफ्त लैपटॉप' का दावा पूरी तरह झूठा (FALSE) है। यह फिशिंग स्कैम है। सत्यापित रिपोर्ट सत्यसेतु पर देखें: " + window.location.href);
+      window.open(`https://api.whatsapp.com/send?text=${debunkText}`, '_blank');
+    });
+  }
+</script></main><footer class="w-full bg-surface-container-lowest border-t border-surface-container pt-space-xl pb-space-lg"><div class="w-full px-margin-desktop"><div class="grid grid-cols-1 md:grid-cols-4 gap-space-xl pb-space-xl border-b border-surface-container"><div class="md:col-span-2 flex flex-col gap-space-sm"><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[20px]">verified_user</span></div><span class="font-headline-sm text-headline-sm text-on-surface">SatyaSetu | सत्यसेतु</span></div><p class="font-body-md text-body-md text-secondary max-w-xl">A public interest digital trust initiative dedicated to verifying forwarded information, preserving civic clarity, and safeguarding citizens across Bharat against misinformation.</p><div class="flex flex-wrap items-center gap-2 pt-2"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container text-on-secondary-container font-label-sm text-label-sm font-semibold"><span class="material-symbols-outlined text-[16px]">school</span> SDG 4 Quality Education</span><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container text-on-secondary-container font-label-sm text-label-sm font-semibold"><span class="material-symbols-outlined text-[16px]">hub</span> SDG 9 Innovation</span><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container text-on-secondary-container font-label-sm text-label-sm font-semibold"><span class="material-symbols-outlined text-[16px]">balance</span> SDG 16 Peace &amp; Justice</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-lg text-label-lg text-on-surface font-bold">Verification &amp; Tools</span><ul class="flex flex-col gap-2 font-body-md text-body-md text-secondary"><li class="hover:text-on-surface cursor-pointer">WhatsApp Tip-Line</li><li class="hover:text-on-surface cursor-pointer">Audio Fact Summaries</li><li class="hover:text-on-surface cursor-pointer">Official Gazettes &amp; Sources</li><li class="hover:text-on-surface cursor-pointer">Open Verification API</li></ul></div><div class="flex flex-col gap-space-sm"><span class="font-label-lg text-label-lg text-on-surface font-bold">Integrity &amp; Legal</span><ul class="flex flex-col gap-2 font-body-md text-body-md text-secondary"><li class="hover:text-on-surface cursor-pointer">Editorial Code of Ethics</li><li class="hover:text-on-surface cursor-pointer">Citizen Privacy Policy</li><li class="hover:text-on-surface cursor-pointer">Non-Partisanship Charter</li><li class="hover:text-on-surface cursor-pointer">Report a Correction</li></ul></div></div><div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-lg"><p class="font-label-sm text-label-sm text-secondary">© 2025 SatyaSetu Public Trust Foundation. All verifications licensed under CC BY 4.0.</p><p class="font-label-md text-label-md text-on-surface font-medium flex items-center gap-1">Made with ❤️ for Bharat 🇮🇳</p></div></div></footer></body></html>

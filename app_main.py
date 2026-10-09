@@ -159,6 +159,14 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
     )
 
 
+# ── Static files ──────────────────────────────────────────────────────────────
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
+static_path = Path(__file__).resolve().parent / "static"
+if static_path.exists():
+    app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+
 # ── Router registration ───────────────────────────────────────────────────────
 
 from app.routers.check import router as check_router      # noqa: E402
@@ -168,6 +176,7 @@ from app.routers.webhook import router as webhook_router  # noqa: E402
 app.include_router(health_router)
 app.include_router(webhook_router)
 app.include_router(check_router)
+
 
 
 # ── Dev server entrypoint ─────────────────────────────────────────────────────

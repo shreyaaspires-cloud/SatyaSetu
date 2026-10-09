@@ -1,0 +1,1034 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SatyaSetu — AI Fact-Checking Bot (WhatsApp Web)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    /* WhatsApp Chat Wallpaper background */
+    .wa-chat-bg {
+      background-color: #efeae2;
+      background-image: radial-gradient(#d3c7b8 0.75px, transparent 0.75px), radial-gradient(#d3c7b8 0.75px, #efeae2 0.75px);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
+    }
+    /* Custom scrollbars like WhatsApp Web */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    /* Speech bubble tails */
+    .bubble-sent::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: -8px;
+      width: 12px;
+      height: 12px;
+      background: #d9fdd3;
+      clip-path: polygon(0 0, 0 100%, 100% 0);
+    }
+    .bubble-received::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -8px;
+      width: 12px;
+      height: 12px;
+      background: #ffffff;
+      clip-path: polygon(100% 0, 100% 100%, 0 0);
+    }
+  </style>
+</head>
+<body class="bg-[#d1d7db] h-screen w-screen overflow-hidden flex items-center justify-center p-0 md:p-3 select-none">
+
+  <!-- WhatsApp Web App Container -->
+  <div class="w-full h-full max-w-[1700px] bg-white flex shadow-2xl overflow-hidden md:rounded-lg relative border border-gray-300/40">
+
+    <!-- LEFT SIDEBAR (Width: 360px desktop, full width on mobile if sidebar active) -->
+    <aside id="sidebar-panel" class="w-full md:w-[360px] lg:w-[380px] h-full flex flex-col border-r border-[#e9edef] bg-white flex-shrink-0 z-20 transition-all duration-300">
+      
+      <!-- Left Header (#075E54 WhatsApp Classic Green) -->
+      <div class="h-[60px] bg-[#075E54] px-4 flex items-center justify-between text-white flex-shrink-0 shadow-sm">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-full bg-emerald-700/80 border border-emerald-400/30 flex items-center justify-center text-xl shadow-inner">
+            🛡️
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h1 class="font-bold text-[17px] tracking-tight leading-none text-white">SatyaSetu</h1>
+              <span class="bg-[#25D366] text-[#075E54] text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded tracking-wider shadow-sm">Demo</span>
+            </div>
+            <p class="text-[11px] text-emerald-100/80 mt-0.5 font-normal">AI Fact Verification Bot</p>
+          </div>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="flex items-center space-x-4 text-emerald-100 text-[17px]">
+          <button title="Status" class="hover:text-white transition-colors"><i class="fa-solid fa-circle-notch text-[15px]"></i></button>
+          <button title="New Chat" class="hover:text-white transition-colors"><i class="fa-solid fa-message text-[15px]"></i></button>
+          <button title="Menu" class="hover:text-white transition-colors"><i class="fa-solid fa-ellipsis-vertical text-[15px]"></i></button>
+        </div>
+      </div>
+
+      <!-- Search Bar & Filter Row -->
+      <div class="p-2.5 bg-white border-b border-[#f0f2f5] flex items-center space-x-2">
+        <div class="relative flex-1 bg-[#f0f2f5] rounded-lg flex items-center px-3 py-1.5 focus-within:bg-white focus-within:ring-1 focus-within:ring-[#00a884] transition-all">
+          <i class="fa-solid fa-magnifying-glass text-[#54656f] text-xs mr-3"></i>
+          <input type="text" placeholder="Search or start a new fact-check" class="bg-transparent text-[13px] text-[#111b21] w-full focus:outline-none placeholder-[#8696a0]">
+        </div>
+        <button class="text-[#54656f] hover:text-[#111b21] p-1.5 rounded" title="Filter unread">
+          <i class="fa-solid fa-bars-staggered text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Quick Category Chips -->
+      <div class="px-3 py-2 bg-white flex items-center space-x-1.5 overflow-x-auto border-b border-[#f0f2f5] text-[11px] scrollbar-none">
+        <span class="bg-[#e7fce3] text-[#008069] font-medium px-2.5 py-1 rounded-full cursor-pointer whitespace-nowrap">All Chats</span>
+        <span class="bg-[#f0f2f5] text-[#54656f] hover:bg-gray-200 font-medium px-2.5 py-1 rounded-full cursor-pointer whitespace-nowrap">Verified (12)</span>
+        <span class="bg-[#f0f2f5] text-[#54656f] hover:bg-gray-200 font-medium px-2.5 py-1 rounded-full cursor-pointer whitespace-nowrap">Flagged (5)</span>
+        <span class="bg-[#f0f2f5] text-[#54656f] hover:bg-gray-200 font-medium px-2.5 py-1 rounded-full cursor-pointer whitespace-nowrap">Groups</span>
+      </div>
+
+      <!-- Chat List Items -->
+      <div class="flex-1 overflow-y-auto divide-y divide-[#f0f2f5]">
+        
+        <!-- Chat Item 1 (Active/Selected) -->
+        <div class="flex items-center px-3.5 py-3 bg-[#f0f2f5] cursor-pointer relative hover:bg-[#eaecef] transition-colors group">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#054640] via-[#075E54] to-[#128C7E] flex items-center justify-center text-white text-xl shadow-sm flex-shrink-0 relative">
+            🛡️
+            <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#25D366] border-2 border-white rounded-full"></span>
+          </div>
+          <div class="ml-3 flex-1 min-w-0">
+            <div class="flex justify-between items-baseline mb-0.5">
+              <h2 class="text-[15px] font-semibold text-[#111b21] truncate flex items-center gap-1.5">
+                <span class="">SatyaSetu Bot</span> 
+                <span class="text-xs">🛡️</span>
+                <span class="bg-emerald-100 text-emerald-800 text-[10px] px-1 py-0.2 rounded font-medium ml-1">BOT</span>
+              </h2>
+              <span class="text-[12px] text-[#00a884] font-medium flex-shrink-0">10:26</span>
+            </div>
+            <div class="flex items-center justify-between text-[13px]">
+              <p class="text-[#111b21] font-medium truncate flex items-center gap-1">
+                <span class="text-xs">❌</span> 
+                <span class="text-red-600 font-medium">FALSE</span> 
+                <span class="text-gray-500 font-normal">(96% confidence)</span>
+              </p>
+              <span class="bg-[#25D366] text-white text-[11px] font-bold h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center flex-shrink-0">2</span>
+            </div>
+          </div>
+          <!-- Left border highlight bar for active chat -->
+          <div class="absolute left-0 top-0 bottom-0 w-[4px] bg-[#075E54]"></div>
+        </div>
+
+        <!-- Chat Item 2: Family Group -->
+        <div class="flex items-center px-3.5 py-3 bg-white cursor-pointer hover:bg-[#f5f6f6] transition-colors">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-700 to-indigo-500 flex items-center justify-center text-white text-xl shadow-sm flex-shrink-0">
+            👨‍👩‍👧
+          </div>
+          <div class="ml-3 flex-1 min-w-0">
+            <div class="flex justify-between items-baseline mb-0.5">
+              <h2 class="text-[15px] font-medium text-[#111b21] truncate">Family Group 👨‍👩‍👧</h2>
+              <span class="text-[12px] text-[#667781] flex-shrink-0">Yesterday</span>
+            </div>
+            <div class="flex items-center text-[13px] text-[#667781] truncate">
+              <span class="text-sky-500 mr-1 text-[11px]"><i class="fa-solid fa-check-double"></i></span>
+              <p class="truncate">Papa: Oh! Accha hua check kiya 😅</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Item 3: Breaking News Check -->
+        <div class="flex items-center px-3.5 py-3 bg-white cursor-pointer hover:bg-[#f5f6f6] transition-colors">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-rose-600 to-red-400 flex items-center justify-center text-white text-xl shadow-sm flex-shrink-0">
+            📰
+          </div>
+          <div class="ml-3 flex-1 min-w-0">
+            <div class="flex justify-between items-baseline mb-0.5">
+              <h2 class="text-[15px] font-medium text-[#111b21] truncate">Breaking News Check 📰</h2>
+              <span class="text-[12px] text-[#667781] flex-shrink-0">8:04 AM</span>
+            </div>
+            <div class="flex items-center text-[13px] text-[#667781] truncate">
+              <span class="text-amber-500 font-semibold mr-1">⚠️ MISLEADING</span>
+              <span class="truncate">(87% confidence)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional contextual demo chat for realism -->
+        <div class="flex items-center px-3.5 py-3 bg-white cursor-pointer hover:bg-[#f5f6f6] transition-colors">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white text-xl shadow-sm flex-shrink-0">
+            🏥
+          </div>
+          <div class="ml-3 flex-1 min-w-0">
+            <div class="flex justify-between items-baseline mb-0.5">
+              <h2 class="text-[15px] font-medium text-[#111b21] truncate">Health Claims Helpline 🩺</h2>
+              <span class="text-[12px] text-[#667781] flex-shrink-0">Tuesday</span>
+            </div>
+            <div class="flex items-center text-[13px] text-[#667781] truncate">
+              <span class="text-emerald-600 font-semibold mr-1">✅ TRUE</span>
+              <span class="truncate">Verified via ICMR guidelines</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar Footer info -->
+      <div class="p-2.5 bg-[#f0f2f5] border-t border-[#e9edef] text-[11px] text-[#667781] flex items-center justify-between">
+        <div class="flex items-center space-x-1.5">
+          <i class="fa-solid fa-lock text-[10px] text-gray-500"></i>
+          <span class="">Multi-source automated verification</span>
+        </div>
+        <span class="font-mono text-[10px] bg-white px-1.5 py-0.5 rounded border border-gray-200">v2.4-live</span>
+      </div>
+    </aside>
+
+    <!-- RIGHT CHAT AREA -->
+    <main id="chat-panel" class="flex-1 h-full flex flex-col bg-[#efeae2] relative min-w-0 overflow-hidden">
+      
+      <!-- Top Chat Header (#075E54 Classic Dark Green) -->
+      <header class="h-[60px] bg-[#075E54] px-4 flex items-center justify-between text-white flex-shrink-0 shadow-md z-10">
+        
+        <div class="flex items-center space-x-3 min-w-0">
+          <!-- Back button on mobile view -->
+          <button id="mobile-back-btn" class="md:hidden text-white mr-1 text-lg hover:text-emerald-200">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+
+          <!-- Bot Avatar -->
+          <div class="w-10 h-10 rounded-full bg-emerald-800 border border-emerald-400/40 flex items-center justify-center text-lg flex-shrink-0 shadow-inner">
+            🛡️
+          </div>
+
+          <!-- Title & Subtitle + AI Pipeline Badges -->
+          <div class="min-w-0">
+            <div class="flex items-center space-x-2">
+              <h2 class="font-semibold text-[16px] text-white leading-tight truncate">SatyaSetu Bot</h2>
+              <span class="hidden sm:inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-emerald-800 text-emerald-200 border border-emerald-600/40">Verified AI Engine</span>
+            </div>
+            
+            <div class="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-0.5">
+              <span class="text-[11px] text-emerald-100 flex items-center">
+                <span class="w-2 h-2 rounded-full bg-[#25D366] inline-block mr-1.5 animate-pulse"></span>
+                Online • AI Fact-Checking Engine
+              </span>
+
+              <!-- Technology Badges Pill -->
+              <div class="hidden xl:flex items-center space-x-1 ml-2">
+                <span class="bg-[#054c44] text-emerald-200 px-1.5 py-0.5 rounded text-[10px] font-mono border border-emerald-600/30">🎙️ ASR</span>
+                <span class="bg-[#054c44] text-emerald-200 px-1.5 py-0.5 rounded text-[10px] font-mono border border-emerald-600/30">👁️ OCR</span>
+                <span class="bg-[#054c44] text-emerald-200 px-1.5 py-0.5 rounded text-[10px] font-mono border border-emerald-600/30">📄 PDF</span>
+                <span class="bg-[#054c44] text-emerald-200 px-1.5 py-0.5 rounded text-[10px] font-mono border border-emerald-600/30">🌐 NLP</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Header Utility Buttons -->
+        <div class="flex items-center space-x-3.5 text-emerald-100 text-[16px]">
+          <!-- Visible badges on medium screens -->
+          <div class="flex sm:hidden xl:hidden items-center space-x-1">
+            <span class="bg-[#054c44] text-[9px] px-1.5 py-0.5 rounded text-emerald-200">ASR • OCR</span>
+          </div>
+          <button title="Quick Audit" class="hover:text-white transition-colors p-1.5"><i class="fa-solid fa-shield-halved text-[15px]"></i></button>
+          <button title="Search in chat" class="hover:text-white transition-colors p-1.5"><i class="fa-solid fa-magnifying-glass text-[15px]"></i></button>
+          <button title="Chat settings" class="hover:text-white transition-colors p-1.5"><i class="fa-solid fa-ellipsis-vertical text-[15px]"></i></button>
+        </div>
+      </header>
+
+      <!-- Chat History Scroll View -->
+      <div class="flex-1 wa-chat-bg p-3 md:p-6 overflow-y-auto space-y-4">
+
+        <!-- Date separator badge -->
+        <div class="flex justify-center my-2">
+          <span class="bg-white/90 text-[#54656f] text-[11px] font-semibold px-3 py-1 rounded-md shadow-sm uppercase tracking-wide border border-gray-200/50">
+            Today
+          </span>
+        </div>
+
+        <!-- Security encryption reminder like WhatsApp -->
+        <div class="flex justify-center mb-4">
+          <div class="max-w-[540px] bg-[#ffeecd] text-[#54656f] text-[11.5px] px-3.5 py-2 rounded-lg shadow-xs text-center border border-[#fed89c]/40 leading-snug flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-lock text-[10px] text-amber-700"></i>
+            <span class="">Messages are analyzed by <strong>SatyaSetu Multilingual Engine</strong>. Queries and evidence logs are verified via credible press registries and WHO/ICMR databases.</span>
+          </div>
+        </div>
+
+        <!-- MESSAGE 1: (Sent, right) -->
+        <div class="flex justify-end">
+          <div class="relative bubble-sent bg-[#d9fdd3] text-[#111b21] max-w-[85%] md:max-w-[480px] rounded-lg rounded-tr-none px-3.5 py-2 shadow-sm border border-emerald-200/40">
+            <p class="text-[14px] leading-relaxed select-text">
+              Drinking bleach cures viral infections within 24 hours.
+            </p>
+            <div class="flex items-center justify-end space-x-1 text-[11px] text-[#667781] mt-1 float-right pl-3">
+              <span class="">10:23 AM</span>
+              <span class="text-[#53bdeb] text-[12px]"><i class="fa-solid fa-check-double"></i></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- MESSAGE 2: (Received, left) STRUCTURED FACT-CHECK CARD -->
+        <div class="flex justify-start">
+          <div class="relative bubble-received bg-white text-[#111b21] max-w-[94%] md:max-w-[560px] rounded-lg rounded-tl-none p-3.5 shadow-sm border border-gray-200/70">
+            
+            <!-- Structured Fact-Check Card Body -->
+            <div class="bg-[#f8f9fa] rounded-lg border border-[#e2e8f0] p-3 text-[13px] space-y-2.5">
+              
+              <!-- Card Header -->
+              <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+                <div class="flex items-center space-x-2">
+                  <span class="text-base">🔍</span>
+                  <span class="font-bold text-[14px] text-[#075E54] tracking-tight">SatyaSetu Fact Check</span>
+                </div>
+                <span class="text-[10px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                  Verified Report
+                </span>
+              </div>
+
+              <!-- Claim section -->
+              <div>
+                <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">Submitted Claim</span>
+                <p class="text-[13.5px] font-medium text-gray-900 italic bg-white p-2 rounded border border-gray-200/60 mt-0.5">
+                  “Drinking bleach cures viral infections within 24 hours.”
+                </p>
+              </div>
+
+              <!-- Metadata row: Language, Latency, Pipeline stages -->
+              <div class="flex items-center flex-wrap gap-2 text-[11px] font-mono text-gray-600 bg-gray-100/80 px-2.5 py-1.5 rounded-md border border-gray-200/50">
+                <span class="flex items-center gap-1 font-semibold text-gray-700">🌐 Lang: <span class="text-blue-600 font-bold">en</span></span>
+                <span class="text-gray-300">•</span>
+                <span class="flex items-center gap-1">⏱ Latency: <strong class="text-gray-800">1.12s</strong></span>
+                <span class="text-gray-300">•</span>
+                <span class="flex items-center gap-1">⚙️ Pipeline: <span class="bg-gray-200 px-1 py-0.2 rounded text-[10px] font-semibold text-gray-700">5 stages</span></span>
+              </div>
+
+              <!-- Big Red Verdict Badge -->
+              <div class="bg-gradient-to-r from-red-600 to-rose-700 text-white rounded-lg p-2.5 shadow-sm flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="text-xl">❌</span>
+                  <div>
+                    <div class="font-extrabold text-[15px] tracking-wide uppercase">FALSE</div>
+                    <div class="text-[11px] text-red-100 font-normal">Fabricated medical advice</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-base font-black tracking-tight">96%</span>
+                  <div class="text-[10px] text-red-100 uppercase tracking-wider font-medium">Confidence</div>
+                </div>
+              </div>
+
+              <!-- Evidence Bullets -->
+              <div class="space-y-1.5 pt-1">
+                <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block">Corroborated Evidence:</span>
+                
+                <div class="flex items-start space-x-2 text-[12.5px] text-gray-800 bg-white p-2 rounded border border-gray-200/70">
+                  <span class="text-red-500 font-bold text-xs mt-0.5">•</span>
+                  <div>
+                    <strong class="text-[#075E54]">BOOM Live:</strong> 
+                    <span class="text-gray-700">Drinking chlorine dioxide or household bleach is toxic, causes acute gastrointestinal damage, and treats no viral disease.</span>
+                  </div>
+                </div>
+
+                <div class="flex items-start space-x-2 text-[12.5px] text-gray-800 bg-white p-2 rounded border border-gray-200/70">
+                  <span class="text-red-500 font-bold text-xs mt-0.5">•</span>
+                  <div>
+                    <strong class="text-[#075E54]">World Health Organization (WHO):</strong> 
+                    <span class="text-gray-700">No evidence bleach consumption helps infections. Consuming bleach can lead to disability and death.</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Source Link in small text -->
+              <div class="pt-1 flex items-center justify-between text-[11px] border-t border-gray-200">
+                <span class="text-gray-500">Source Verification:</span>
+                <a href="#" class="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 font-medium">
+                  <span class="">who.int/emergencies/disease-advisories</span>
+                  <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                </a>
+              </div>
+
+              <!-- Footer notice -->
+              <div class="pt-1 text-center">
+                <p class="text-[11px] italic text-gray-400">
+                  SatyaSetu — AI-powered multilingual fact checking
+                </p>
+              </div>
+
+            </div>
+
+            <!-- Bubble timestamp & read receipt -->
+            <div class="flex items-center justify-end space-x-1 text-[11px] text-[#667781] mt-1.5">
+              <span class="">10:23 AM</span>
+              <span class="text-[#53bdeb] text-[12px]"><i class="fa-solid fa-check-double"></i></span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- MESSAGE 3: (Sent, right) -->
+        <div class="flex justify-end">
+          <div class="relative bubble-sent bg-[#d9fdd3] text-[#111b21] max-w-[85%] md:max-w-[480px] rounded-lg rounded-tr-none px-3.5 py-2 shadow-sm border border-emerald-200/40">
+            <p class="text-[14px] leading-relaxed select-text">
+              5G towers spread COVID-19?
+            </p>
+            <div class="flex items-center justify-end space-x-1 text-[11px] text-[#667781] mt-1 float-right pl-3">
+              <span class="">10:25 AM</span>
+              <span class="text-[#53bdeb] text-[12px]"><i class="fa-solid fa-check-double"></i></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- MESSAGE 4: (Received, left) SECOND FACT-CHECK CARD -->
+        <div class="flex justify-start">
+          <div class="relative bubble-received bg-white text-[#111b21] max-w-[94%] md:max-w-[560px] rounded-lg rounded-tl-none p-3.5 shadow-sm border border-gray-200/70">
+            
+            <!-- Structured Fact-Check Card Body -->
+            <div class="bg-[#f8f9fa] rounded-lg border border-[#e2e8f0] p-3 text-[13px] space-y-2.5">
+              
+              <!-- Card Header -->
+              <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+                <div class="flex items-center space-x-2">
+                  <span class="text-base">🔍</span>
+                  <span class="font-bold text-[14px] text-[#075E54] tracking-tight">SatyaSetu Fact Check</span>
+                </div>
+                <span class="text-[10px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                  Debunked
+                </span>
+              </div>
+
+              <!-- Claim -->
+              <div>
+                <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">Submitted Claim</span>
+                <p class="text-[13.5px] font-medium text-gray-900 italic bg-white p-2 rounded border border-gray-200/60 mt-0.5">
+                  “5G towers spread COVID-19?”
+                </p>
+              </div>
+
+              <!-- Metadata row -->
+              <div class="flex items-center flex-wrap gap-2 text-[11px] font-mono text-gray-600 bg-gray-100/80 px-2.5 py-1.5 rounded-md border border-gray-200/50">
+                <span class="flex items-center gap-1 font-semibold text-gray-700">🌐 Lang: <span class="text-blue-600 font-bold">en</span></span>
+                <span class="text-gray-300">•</span>
+                <span class="flex items-center gap-1">⏱ Latency: <strong class="text-gray-800">0.89s</strong></span>
+                <span class="text-gray-300">•</span>
+                <span class="flex items-center gap-1">⚙️ Pipeline: <span class="bg-gray-200 px-1 py-0.2 rounded text-[10px] font-semibold text-gray-700">5 stages</span></span>
+              </div>
+
+              <!-- Big Red Verdict Badge: ❌ FALSE 99% -->
+              <div class="bg-gradient-to-r from-red-600 to-rose-700 text-white rounded-lg p-2.5 shadow-sm flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="text-xl">❌</span>
+                  <div>
+                    <div class="font-extrabold text-[15px] tracking-wide uppercase">FALSE</div>
+                    <div class="text-[11px] text-red-100 font-normal">Pseudoscience conspiracy theory</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-base font-black tracking-tight">99%</span>
+                  <div class="text-[10px] text-red-100 uppercase tracking-wider font-medium">Confidence</div>
+                </div>
+              </div>
+
+              <!-- Evidence bullet from AltNews -->
+              <div class="space-y-1.5 pt-1">
+                <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block">Corroborated Evidence:</span>
+                
+                <div class="flex items-start space-x-2 text-[12.5px] text-gray-800 bg-white p-2 rounded border border-gray-200/70">
+                  <span class="text-red-500 font-bold text-xs mt-0.5">•</span>
+                  <div>
+                    <strong class="text-[#075E54]">AltNews Science Desk:</strong> 
+                    <span class="text-gray-700">Viruses cannot travel on radio waves or mobile networks. COVID-19 spread widely in countries without any 5G infrastructure. Radiation from non-ionizing telecom spectrum has no biological connection to respiratory viral replication.</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Source Link: AltNews -->
+              <div class="pt-1 flex items-center justify-between text-[11px] border-t border-gray-200">
+                <span class="text-gray-500">Source:</span>
+                <a href="#" class="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 font-medium">
+                  <span class="">altnews.in/5g-telecom-radiation-virus-myth</span>
+                  <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                </a>
+              </div>
+
+              <!-- Footer -->
+              <div class="pt-1 text-center">
+                <p class="text-[11px] italic text-gray-400">
+                  SatyaSetu — AI-powered multilingual fact checking
+                </p>
+              </div>
+
+            </div>
+
+            <!-- Bubble timestamp & read receipt -->
+            <div class="flex items-center justify-end space-x-1 text-[11px] text-[#667781] mt-1.5">
+              <span class="">10:26 AM</span>
+              <span class="text-[#53bdeb] text-[12px]"><i class="fa-solid fa-check-double"></i></span>
+            </div>
+
+          </div>
+        </div>
+
+      <!-- MESSAGE 5: (Sent, right) Image attachment with caption -->
+<div class="flex justify-end">
+  <div class="relative bubble-sent bg-[#d9fdd3] text-[#111b21] max-w-[85%] md:max-w-[480px] rounded-lg rounded-tr-none p-2 shadow-sm border border-emerald-200/40">
+    <!-- Image preview / forward mockup card -->
+    <div class="rounded-md overflow-hidden border border-[#d1d7db] bg-white mb-2">
+      <div class="bg-gray-100 p-2.5 flex items-center justify-between border-b border-gray-200 text-[11px] text-[#667781]">
+        <div class="flex items-center space-x-1.5">
+          <i class="fa-solid fa-image text-[#075E54]"></i>
+          <span class="font-medium text-[#111b21]">rbi_circular_viral_fwd.jpg</span>
+        </div>
+        <span class="text-[10px] bg-amber-500/10 text-amber-700 px-1.5 py-0.5 rounded font-mono">Forwarded</span>
+      </div>
+      <div class="h-36 bg-gradient-to-tr from-gray-100 to-gray-200 flex flex-col items-center justify-center p-3 text-center relative">
+        <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-red-600 mb-1.5">
+          <i class="fa-solid fa-file-audio text-lg fa-image"></i>
+        </div>
+        <p class="text-[11px] font-semibold text-gray-700">RESERVE BANK OF INDIA — NOTIFICATION CIRCULAR</p>
+        <p class="text-[9px] text-gray-500 font-mono mt-0.5">Doc Ref: RBI/2023-24/CLAIM_REVOKED • Viral WhatsApp Doc</p>
+        <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded">184 KB</span>
+      </div>
+    </div>
+    <p class="text-[14px] leading-relaxed px-1 select-text">
+      Is this RBI 2000 rupee note order real? Forwarded many times
+    </p>
+    <div class="flex items-center justify-end space-x-1 text-[11px] text-[#667781] mt-1 float-right pl-3">
+      <span class="">10:28 AM</span>
+      <span class="text-[#53bdeb] text-[12px]"><i class="fa-solid fa-check-double"></i></span>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGE 6: (Received, left) MULTIMODAL OCR FACT-CHECK CARD -->
+<div class="flex justify-start">
+  <div class="relative bubble-received bg-white text-[#111b21] max-w-[94%] md:max-w-[560px] rounded-lg rounded-tl-none p-3.5 shadow-sm border border-gray-200/70">
+    
+    <!-- Structured Fact-Check Card Body -->
+    <div class="bg-[#f8f9fa] rounded-lg border border-[#e2e8f0] p-3 text-[13px] space-y-2.5">
+      
+      <!-- Card Header -->
+      <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+        <div class="flex items-center space-x-2">
+          <span class="text-base">🔍</span>
+          <span class="font-bold text-[14px] text-[#075E54] tracking-tight">SatyaSetu Fact Check</span>
+          <span class="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300/60 px-1.5 py-0.2 rounded font-mono font-medium">
+            👁️ OCR MULTIMODAL
+          </span>
+        </div>
+        <span class="text-[10px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+          Debunked
+        </span>
+      </div>
+
+      <!-- Extracted Text box via OCR -->
+      <div>
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block">Extracted Text (OCR via Tesseract + Vision AI)</span>
+          <span class="text-[10px] text-emerald-600 font-mono">Confidence: 99.2%</span>
+        </div>
+        <p class="text-[13px] font-mono text-gray-800 bg-white p-2.5 rounded border border-gray-200/80 mt-1 leading-snug border-l-4 border-l-red-500">
+          “Reserve Bank of India notification: All ₹2000 notes banned immediately without exchange window...”
+        </p>
+      </div>
+
+      <!-- Telemetry row -->
+      <div class="flex items-center flex-wrap gap-2 text-[10.5px] font-mono text-gray-600 bg-gray-100/80 px-2.5 py-1.5 rounded-md border border-gray-200/50">
+        <span class="flex items-center gap-1 font-semibold text-gray-700">🌐 Lang: <span class="text-blue-600 font-bold">en/hi</span></span>
+        <span class="text-gray-300">•</span>
+        <span class="flex items-center gap-1">👁️ OCR Engine: <strong class="text-gray-800">Vision v4</strong></span>
+        <span class="text-gray-300">•</span>
+        <span class="flex items-center gap-1">⏱ Latency: <strong class="text-gray-800">1.48s</strong></span>
+        <span class="text-gray-300">•</span>
+        <span class="flex items-center gap-1">⚙️ Pipeline: <span class="bg-gray-200 px-1 py-0.2 rounded text-[10px] font-semibold text-gray-700">Image OCR + Metadata Check</span></span>
+      </div>
+
+      <!-- Large Verdict Banner -->
+      <div class="bg-gradient-to-r from-red-600 to-rose-700 text-white rounded-lg p-2.5 shadow-sm flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">❌</span>
+          <div>
+            <div class="font-extrabold text-[14px] md:text-[15px] tracking-wide uppercase">FAKE CIRCULAR / MORPHED IMAGE</div>
+            <div class="text-[11px] text-red-100 font-normal">Doctored institutional notice with counterfeit seals</div>
+          </div>
+        </div>
+        <div class="text-right flex-shrink-0 ml-2">
+          <span class="text-base font-black tracking-tight">98%</span>
+          <div class="text-[10px] text-red-100 uppercase tracking-wider font-medium">Confidence</div>
+        </div>
+      </div>
+
+      <!-- Forensic Analysis Pills -->
+      <div class="flex flex-wrap gap-1.5 pt-0.5">
+        <span class="text-[10px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+          ⚠️ Font mismatch detected
+        </span>
+        <span class="text-[10px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+          ⚠️ Digital artifact on seal
+        </span>
+        <span class="text-[10px] bg-amber-500/10 text-amber-700 border border-amber-500/30 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+          📅 Exif metadata: 2021 re-circulated
+        </span>
+      </div>
+
+      <!-- Corroborated Evidence Bullets -->
+      <div class="space-y-1.5 pt-1">
+        <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block">Corroborated Evidence:</span>
+        
+        <div class="flex items-start space-x-2 text-[12.5px] text-gray-800 bg-white p-2 rounded border border-gray-200/70">
+          <span class="text-red-500 font-bold text-xs mt-0.5">•</span>
+          <div>
+            <strong class="text-[#075E54]">PIB Fact Check:</strong> 
+            <span class="text-gray-700">RBI has NOT issued any such circular. The viral letterhead format is doctored/morphed.</span>
+          </div>
+        </div>
+
+        <div class="flex items-start space-x-2 text-[12.5px] text-gray-800 bg-white p-2 rounded border border-gray-200/70">
+          <span class="text-red-500 font-bold text-xs mt-0.5">•</span>
+          <div>
+            <strong class="text-[#075E54]">RBI Official Bulletin:</strong> 
+            <span class="text-gray-700">Official press release confirms old phased withdrawal guidelines remain unchanged. Legal tender status continues as per May 2023 directive.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Source Verification Links -->
+      <div class="pt-1 flex items-center justify-between text-[11px] border-t border-gray-200">
+        <span class="text-gray-500">Source Verification:</span>
+        <a href="#" class="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 font-medium">
+          <span class="">rbi.org.in/pressreleases / pib.gov.in</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+        </a>
+      </div>
+
+      <!-- Footer notice -->
+      <div class="pt-1 text-center">
+        <p class="text-[11px] italic text-gray-400">
+          SatyaSetu — Multimodal OCR &amp; Press Registry Verification
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Bubble timestamp & read receipt -->
+    <div class="flex items-center justify-end space-x-1 text-[11px] text-[#667781] mt-1.5">
+      <span class="">10:28 AM</span>
+      <span class="text-[#53bdeb] text-[12px]"><i class="fa-solid fa-check-double"></i></span>
+    </div>
+
+  </div>
+</div><!-- MESSAGE 7: (Sent, right) Forwarded WhatsApp Voice Note -->
+<div class="flex justify-end">
+  <div class="relative bubble-sent bg-[#d9fdd3] text-[#111b21] max-w-[85%] md:max-w-[480px] w-full rounded-lg rounded-tr-none p-3 shadow-sm border border-emerald-200/40">
+    
+    <!-- Forwarded Label -->
+    <div class="flex items-center space-x-1 text-[#667781] text-[11px] mb-2">
+      <i class="fa-solid fa-arrow-up-right-from-square text-[10px] transform -scale-x-100"></i>
+      <span class="italic font-normal">Forwarded</span>
+    </div>
+
+    <!-- WhatsApp Voice Note Player Card -->
+    <div class="bg-white/90 rounded-lg p-2.5 border border-emerald-300/60 flex items-center space-x-3 mb-2 shadow-xs">
+      <!-- Play Button -->
+      <button type="button" class="w-10 h-10 rounded-full bg-[#075E54] hover:bg-[#054640] text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+        <i class="fa-solid fa-play text-xs ml-0.5"></i>
+      </button>
+
+      <!-- Waveform & Scrubber UI -->
+      <div class="flex-1 min-w-0 flex flex-col justify-center space-y-1">
+        <!-- Waveform visualizer bars -->
+        <div class="flex items-center space-x-0.5 h-6 overflow-hidden">
+          <span class="w-1 h-2 bg-[#00a884] rounded-full"></span>
+          <span class="w-1 h-3.5 bg-[#00a884] rounded-full"></span>
+          <span class="w-1 h-5 bg-[#00a884] rounded-full"></span>
+          <span class="w-1 h-3 bg-[#00a884] rounded-full"></span>
+          <span class="w-1 h-4 bg-[#00a884] rounded-full"></span>
+          <span class="w-1 h-6 bg-[#00a884] rounded-full"></span>
+          <span class="w-1 h-5 bg-[#00a884] rounded-full"></span>
+          <span class="w-1 h-3 bg-[#00a884] rounded-full"></span>
+          <span class="w-1 h-4 bg-[#00a884] rounded-full"></span>
+          <span class="w-1 h-2.5 bg-[#00a884] rounded-full"></span>
+          <!-- Scrubber position dot -->
+          <span class="w-2.5 h-2.5 rounded-full bg-[#075E54] shadow-sm -mx-0.5 z-10"></span>
+          <!-- Unplayed waveform bars -->
+          <span class="w-1 h-5 bg-[#d1d7db] rounded-full"></span>
+          <span class="w-1 h-4 bg-[#d1d7db] rounded-full"></span>
+          <span class="w-1 h-6 bg-[#d1d7db] rounded-full"></span>
+          <span class="w-1 h-3 bg-[#d1d7db] rounded-full"></span>
+          <span class="w-1 h-5 bg-[#d1d7db] rounded-full"></span>
+          <span class="w-1 h-2 bg-[#d1d7db] rounded-full"></span>
+          <span class="w-1 h-4 bg-[#d1d7db] rounded-full"></span>
+          <span class="w-1 h-5 bg-[#d1d7db] rounded-full"></span>
+          <span class="w-1 h-3 bg-[#d1d7db] rounded-full"></span>
+          <span class="w-1 h-2 bg-[#d1d7db] rounded-full"></span>
+        </div>
+        <div class="flex justify-between items-center text-[10.5px] text-[#667781] font-mono">
+          <span class="">0:14 / 0:34</span>
+          <span class="flex items-center gap-1 text-[#00a884] font-medium">
+            <i class="fa-solid fa-microphone text-[10px]"></i> Audio Note
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Query Caption -->
+    <p class="text-[13.5px] leading-relaxed px-0.5 select-text text-gray-800">
+      Voice note forwarded in family group claiming UNESCO announced national anthem award.
+    </p>
+
+    <!-- Timestamp & Read Receipt -->
+    <div class="flex items-center justify-end space-x-1 text-[11px] text-[#667781] mt-1 float-right pl-3">
+      <span class="">10:31 AM</span>
+      <span class="text-[#53bdeb] text-[12px]"><i class="fa-solid fa-check-double"></i></span>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGE 8: (Received, left) MULTIMODAL ASR AUDIO FACT-CHECK CARD -->
+<div class="flex justify-start">
+  <div class="relative bubble-received bg-white text-[#111b21] max-w-[94%] md:max-w-[560px] rounded-lg rounded-tl-none p-3.5 shadow-sm border border-gray-200/70">
+    
+    <!-- Structured Fact-Check Card Body -->
+    <div class="bg-[#f8f9fa] rounded-lg border border-[#e2e8f0] p-3 text-[13px] space-y-2.5">
+      
+      <!-- Card Header -->
+      <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+        <div class="flex items-center space-x-2">
+          <span class="text-base">🔍</span>
+          <span class="font-bold text-[14px] text-[#075E54] tracking-tight">SatyaSetu Fact Check</span>
+          <span class="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300/60 px-1.5 py-0.2 rounded font-mono font-medium">
+            🎙️ ASR AUDIO ANALYSIS
+          </span>
+        </div>
+        <span class="text-[10px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+          Debunked
+        </span>
+      </div>
+
+      <!-- Audio Transcription Box -->
+      <div>
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block">
+            Transcribed Audio (Hindi to English / Devanagari):
+          </span>
+          <span class="text-[10px] text-emerald-600 font-mono">Whisper ASR: 98.4% match</span>
+        </div>
+        <div class="bg-white p-2.5 rounded border border-gray-200/80 mt-1 space-y-1.5 border-l-4 border-l-red-500">
+          <p class="text-[13px] font-medium text-gray-800 italic leading-snug">
+            “भाईयों और बहनों, यूनेस्को (UNESCO) ने भारत के राष्ट्रगान जन गण मन को विश्व का सर्वश्रेष्ठ राष्ट्रगान घोषित किया है... तुरंत शेयर करें!”
+          </p>
+          <div class="border-t border-gray-100 pt-1 text-[12px] text-gray-600">
+            <span class="font-semibold text-gray-700 font-mono text-[11px]">Translation: </span>
+            “Brothers and sisters, UNESCO has declared India's national anthem Jana Gana Mana as the best national anthem in the world... share immediately!”
+          </div>
+        </div>
+      </div>
+
+      <!-- Telemetry Strip -->
+      <div class="flex items-center flex-wrap gap-2 text-[10.5px] font-mono text-gray-600 bg-gray-100/80 px-2.5 py-1.5 rounded-md border border-gray-200/50">
+        <span class="flex items-center gap-1 font-semibold text-gray-700">🌐 Lang: <span class="text-blue-600 font-bold">Hindi (hi-IN)</span></span>
+        <span class="text-gray-300">•</span>
+        <span class="flex items-center gap-1">⏱ Latency: <strong class="text-gray-800">1.62s</strong></span>
+        <span class="text-gray-300">•</span>
+        <span class="flex items-center gap-1">⚙️ Pipeline: <span class="bg-gray-200 px-1 py-0.2 rounded text-[10px] font-semibold text-gray-700">Audio ASR → NLP → Cross-Ref</span></span>
+      </div>
+
+      <!-- Large Verdict Banner -->
+      <div class="bg-gradient-to-r from-red-600 to-rose-700 text-white rounded-lg p-2.5 shadow-sm flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">❌</span>
+          <div>
+            <div class="font-extrabold text-[14px] md:text-[15px] tracking-wide uppercase">FALSE — 99% Confidence</div>
+            <div class="text-[11px] text-red-100 font-normal">Viral audio fabrication • Recycled hoax chain</div>
+          </div>
+        </div>
+        <div class="text-right flex-shrink-0 ml-2">
+          <span class="text-base font-black tracking-tight">99%</span>
+          <div class="text-[10px] text-red-100 uppercase tracking-wider font-medium">Confidence</div>
+        </div>
+      </div>
+
+      <!-- Forensic Tags -->
+      <div class="flex flex-wrap gap-1.5 pt-0.5">
+        <span class="text-[10px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+          ⚠️ Classic Zombie Hoax
+        </span>
+        <span class="text-[10px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+          ⚠️ Fabricated Claim
+        </span>
+        <span class="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300/60 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+          ✅ Debunked by UNESCO
+        </span>
+      </div>
+
+      <!-- Corroborated Evidence Bullets -->
+      <div class="space-y-1.5 pt-1">
+        <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block">Corroborated Evidence:</span>
+        
+        <div class="flex items-start space-x-2 text-[12.5px] text-gray-800 bg-white p-2 rounded border border-gray-200/70">
+          </div></div></div></div></div><!-- MESSAGE 7: (Sent, right) Audio Note bubble with player -->
+<div class="flex justify-end">
+  <div class="relative bubble-sent bg-[#d9fdd3] text-[#111b21] max-w-[85%] md:max-w-[480px] rounded-lg rounded-tr-none p-2.5 shadow-sm border border-emerald-200/40 w-full">
+    <!-- Forwarded indicator -->
+    <div class="flex items-center space-x-1 text-[11px] text-[#667781] mb-1.5 italic">
+      <i class="fa-solid fa-paper-plane text-[9px] -rotate-45 text-gray-400"></i>
+      <span class="">Forwarded audio</span>
+    </div>
+    <!-- Audio Player Mockup -->
+    <div class="flex items-center space-x-2.5 bg-white/70 p-2 rounded-lg border border-emerald-300/60">
+      <button class="w-9 h-9 rounded-full bg-[#075E54] text-white flex items-center justify-center flex-shrink-0 shadow-sm hover:bg-[#054c44] transition-colors">
+        <i class="fa-solid fa-file-audio text-sm"></i>
+      </button>
+      <div class="flex-1 min-w-0">
+        <!-- Waveform mock bars -->
+        <div class="flex items-center space-x-0.5 h-6 mb-1">
+          <span class="w-1 h-3 bg-[#075E54] rounded-full"></span>
+          <span class="w-1 h-5 bg-[#075E54] rounded-full"></span>
+          <span class="w-1 h-2 bg-[#075E54] rounded-full"></span>
+          <span class="w-1 h-4 bg-[#075E54] rounded-full"></span>
+          <span class="w-1 h-6 bg-[#075E54] rounded-full"></span>
+          <span class="w-1 h-3 bg-gray-400 rounded-full"></span>
+          <span class="w-1 h-5 bg-gray-400 rounded-full"></span>
+          <span class="w-1 h-2 bg-gray-400 rounded-full"></span>
+          <span class="w-1 h-4 bg-gray-400 rounded-full"></span>
+          <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+          <span class="w-1 h-5 bg-gray-400 rounded-full"></span>
+          <span class="w-1 h-3 bg-gray-400 rounded-full"></span>
+          <span class="w-1 h-6 bg-gray-400 rounded-full"></span>
+          <span class="w-1 h-2 bg-gray-400 rounded-full"></span>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-[#667781]">
+          <span class="">0:34</span>
+          <span class="font-mono text-[10px]">audio_msg_viral.opus</span>
+        </div>
+      </div>
+    </div>
+    <p class="text-[13.5px] leading-relaxed mt-1.5 px-0.5 select-text">
+      Viral audio note received in group saying UNESCO declared Indian anthem best.
+    </p>
+    <div class="flex items-center justify-end space-x-1 text-[11px] text-[#667781] mt-1 float-right pl-3">
+      <span class="">10:31 AM</span>
+      <span class="text-[#53bdeb] text-[12px]"><i class="fa-solid fa-check-double"></i></span>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGE 8: (Received, left) ASR AUDIO FACT-CHECK CARD -->
+<div class="flex justify-start">
+  <div class="relative bubble-received bg-white text-[#111b21] max-w-[94%] md:max-w-[560px] rounded-lg rounded-tl-none p-3.5 shadow-sm border border-gray-200/70">
+    
+    <!-- Structured Fact-Check Card Body -->
+    <div class="bg-[#f8f9fa] rounded-lg border border-[#e2e8f0] p-3 text-[13px] space-y-2.5">
+      
+      <!-- Card Header -->
+      <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+        <div class="flex items-center space-x-2">
+          <span class="text-base">🔍</span>
+          <span class="font-bold text-[14px] text-[#075E54] tracking-tight">SatyaSetu Fact Check</span>
+          <span class="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300/60 px-1.5 py-0.2 rounded font-mono font-medium">
+            🎙️ ASR AUDIO ANALYSIS
+          </span>
+        </div>
+        <span class="text-[10px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+          Debunked
+        </span>
+      </div>
+
+      <!-- Extracted Transcription via ASR -->
+      <div>
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block">Speech-to-Text Transcript (Whisper ASR)</span>
+          <span class="text-[10px] text-emerald-600 font-mono">Confidence: 97.8%</span>
+        </div>
+        <div class="bg-white p-2.5 rounded border border-gray-200/80 mt-1 leading-snug border-l-4 border-l-red-500 text-gray-800 space-y-1">
+          <p class="text-[12.5px] italic text-gray-900 font-medium">
+            “UNESCO ne abhi ghoshna ki hai ki Bharat ka Rashtrageet Jana Gana Mana vishwa ka sarvashrestha rashtrageet chuna gaya hai...”
+          </p>
+          <p class="text-[11.5px] text-gray-500">
+            Translation: “UNESCO just announced India's National Anthem has been declared the best national anthem in the world...”
+          </p>
+        </div>
+      </div>
+
+      <!-- Telemetry row -->
+      <div class="flex items-center flex-wrap gap-2 text-[10.5px] font-mono text-gray-600 bg-gray-100/80 px-2.5 py-1.5 rounded-md border border-gray-200/50">
+        <span class="flex items-center gap-1 font-semibold text-gray-700">🌐 Lang: <span class="text-blue-600 font-bold">hi-IN</span></span>
+        <span class="text-gray-300">•</span>
+        <span class="flex items-center gap-1">🎙️ ASR Model: <strong class="text-gray-800">Whisper-Large-v3</strong></span>
+        <span class="text-gray-300">•</span>
+        <span class="flex items-center gap-1">⏱ Latency: <strong class="text-gray-800">1.62s</strong></span>
+        <span class="text-gray-300">•</span>
+        <span class="flex items-center gap-1">⚙️ Pipeline: <span class="bg-gray-200 px-1 py-0.2 rounded text-[10px] font-semibold text-gray-700">Audio ASR + Claim Match</span></span>
+      </div>
+
+      <!-- Big Red Verdict Banner -->
+      <div class="bg-gradient-to-r from-red-600 to-rose-700 text-white rounded-lg p-2.5 shadow-sm flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">❌</span>
+          <div>
+            <div class="font-extrabold text-[14px] md:text-[15px] tracking-wide uppercase">FALSE / VIRAL HOAX</div>
+            <div class="text-[11px] text-red-100 font-normal">Recurring internet hoax active since 2008</div>
+          </div>
+        </div>
+        <div class="text-right flex-shrink-0 ml-2">
+          <span class="text-base font-black tracking-tight">99%</span>
+          <div class="text-[10px] text-red-100 uppercase tracking-wider font-medium">Confidence</div>
+        </div>
+      </div>
+
+      <!-- Forensic Analysis Pills -->
+      <div class="flex flex-wrap gap-1.5 pt-0.5">
+        <span class="text-[10px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+          ⚠️ No such UNESCO category exists
+        </span>
+        <span class="text-[10px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+          🔁 Recycled yearly WhatsApp hoax
+        </span>
+      </div>
+
+      <!-- Corroborated Evidence Bullets -->
+      <div class="space-y-1.5 pt-1">
+        <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block">Corroborated Evidence:</span>
+        
+        <div class="flex items-start space-x-2 text-[12.5px] text-gray-800 bg-white p-2 rounded border border-gray-200/70">
+          <span class="text-red-500 font-bold text-xs mt-0.5">•</span>
+          <div>
+            <strong class="text-[#075E54]">UNESCO Official Statement:</strong> 
+            <span class="text-gray-700">UNESCO does not rank or rate national anthems of any country. Official spokespersons repeatedly reiterated no such declaration exists.</span>
+          </div>
+        </div>
+
+        <div class="flex items-start space-x-2 text-[12.5px] text-gray-800 bg-white p-2 rounded border border-gray-200/70">
+          <span class="text-red-500 font-bold text-xs mt-0.5">•</span>
+          <div>
+            <strong class="text-[#075E54]">PIB Fact Check:</strong> 
+            <span class="text-gray-700">The claim claiming UNESCO has declared the Indian national anthem as best is completely fake and baseless.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Source Link -->
+      <div class="pt-1 flex items-center justify-between text-[11px] border-t border-gray-200">
+        <span class="text-gray-500">Source Verification:</span>
+        <a href="#" class="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 font-medium">
+          <span class="">unesco.org/en/fact-check / pib.gov.in</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+        </a>
+      </div>
+
+      <!-- Footer notice with Audio Fingerprint ID -->
+      <div class="pt-1 text-center">
+        <p class="text-[11px] italic text-gray-400">
+          SatyaSetu — Multilingual Audio ASR • Fingerprint: #ASR-84920
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Bubble timestamp & read receipt -->
+    <div class="flex items-center justify-end space-x-1 text-[11px] text-[#667781] mt-1.5">
+      <span class="">10:31 AM</span>
+      <span class="text-[#53bdeb] text-[12px]"><i class="fa-solid fa-check-double"></i></span>
+    </div>
+
+  </div>
+</div></div>
+
+      <!-- BOTTOM INPUT BAR (#075E54 Dark Green Bar) -->
+      <footer class="bg-[#075E54] px-3 md:px-4 py-2.5 flex items-center space-x-2 md:space-x-3 z-10 shadow-lg">
+        
+        <!-- Left attachment / emoji tools -->
+        <div class="flex items-center space-x-1 text-emerald-100">
+          <button title="Emoji" class="p-2 hover:text-white hover:bg-emerald-800/60 rounded-full transition-colors text-lg">
+            <i class="fa-regular fa-face-smile"></i>
+          </button>
+          <button title="Attach Media / Document" class="p-2 hover:text-white hover:bg-emerald-800/60 rounded-full transition-colors text-lg">
+            <i class="fa-solid fa-paperclip"></i>
+          </button>
+        </div>
+
+        <!-- Input Field Container -->
+        <div class="flex-1 bg-white rounded-full flex items-center px-4 py-2 shadow-inner">
+          <input id="chat-input" type="text" placeholder="Forward a message to fact-check..." class="w-full text-[14px] text-gray-800 placeholder-gray-400 focus:outline-none bg-transparent">
+          <!-- Inline Input Badges/Actions -->
+          <button title="Attach Audio" class="text-gray-400 hover:text-emerald-700 ml-2">
+            <i class="fa-solid fa-file-audio text-sm"></i>
+          </button>
+          <button title="Image OCR" class="text-gray-400 hover:text-emerald-700 ml-2">
+            <i class="fa-solid fa-image text-sm"></i>
+          </button>
+        </div>
+
+        <!-- Mic Button -->
+        <button title="Voice Message" class="p-2 text-emerald-100 hover:text-white hover:bg-emerald-800/60 rounded-full transition-colors text-lg">
+          <i class="fa-solid fa-microphone"></i>
+        </button>
+
+        <!-- Green Circle Send Button -->
+        <button id="send-btn" title="Send for Fact-Check" class="w-10 h-10 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-[#075E54] flex items-center justify-center shadow-md transition-transform active:scale-95 flex-shrink-0">
+          <i class="fa-solid fa-paper-plane text-base ml-0.5"></i>
+        </button>
+
+      </footer>
+
+    </main>
+
+  </div>
+
+  <!-- Mobile Toggle Script -->
+  <script>
+    // Responsive view toggle
+    const sidebar = document.getElementById('sidebar-panel');
+    const chatPanel = document.getElementById('chat-panel');
+    const mobileBackBtn = document.getElementById('mobile-back-btn');
+    const chatItems = document.querySelectorAll('#sidebar-panel .cursor-pointer');
+
+    function checkScreenSize() {
+      if (window.innerWidth < 768) {
+        // Mobile layout defaults to active chat
+        sidebar.classList.add('hidden');
+        chatPanel.classList.remove('hidden');
+      } else {
+        sidebar.classList.remove('hidden');
+        chatPanel.classList.remove('hidden');
+      }
+    }
+
+    mobileBackBtn.addEventListener('click', () => {
+      if (window.innerWidth < 768) {
+        chatPanel.classList.add('hidden');
+        sidebar.classList.remove('hidden');
+      }
+    });
+
+    chatItems.forEach(item => {
+      item.addEventListener('click', () => {
+        if (window.innerWidth < 768) {
+          sidebar.classList.add('hidden');
+          chatPanel.classList.remove('hidden');
+        }
+      });
+    });
+
+    window.addEventListener('resize', checkScreenSize);
+  </script>
+
+
+
+
+
+
+</body></html>

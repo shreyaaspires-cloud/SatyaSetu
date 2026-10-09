@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SatyaSetu - Verifying Claim</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@500;600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              saffron: '#E85D04',
+              saffronLight: '#FFF4ED',
+              saffronGlow: 'rgba(232, 93, 4, 0.25)',
+              navy: '#1B2A4A',
+              navyMuted: '#3A4B70',
+              emerald: '#16A34A',
+              emeraldLight: '#DCFCE7',
+              grayBg: '#F8F9FA',
+              borderLight: '#E5E7EB',
+            }
+          },
+          fontFamily: {
+            heading: ['Mukta', 'sans-serif'],
+            body: ['Noto Sans', 'sans-serif'],
+          },
+          keyframes: {
+            pulseGlow: {
+              '0%, 100%': { transform: 'scale(1)', filter: 'drop-shadow(0 0 16px rgba(232, 93, 4, 0.35))' },
+              '50%': { transform: 'scale(1.05)', filter: 'drop-shadow(0 0 28px rgba(232, 93, 4, 0.6))' },
+            },
+            spinFast: {
+              '0%': { transform: 'rotate(0deg)' },
+              '100%': { transform: 'rotate(360deg)' },
+            },
+            progressAnim: {
+              '0%': { width: '15%' },
+              '50%': { width: '58%' },
+              '100%': { width: '74%' },
+            },
+            fadeSlide: {
+              '0%': { opacity: '0', transform: 'translateY(6px)' },
+              '15%': { opacity: '1', transform: 'translateY(0)' },
+              '85%': { opacity: '1', transform: 'translateY(0)' },
+              '100%': { opacity: '0', transform: 'translateY(-6px)' }
+            }
+          },
+          animation: {
+            'pulse-glow': 'pulseGlow 2.8s ease-in-out infinite',
+            'spin-slow': 'spinFast 1.4s linear infinite',
+            'progress-bar': 'progressAnim 8s cubic-bezier(0.4, 0, 0.2, 1) forwards',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Noto Sans', sans-serif;
+      background-color: #F8F9FA;
+      color: #1B2A4A;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-heading {
+      font-family: 'Mukta', sans-serif;
+    }
+    /* Subtle reassuring radar ripple */
+    .radar-circle {
+      position: absolute;
+      border-radius: 9999px;
+      border: 1.5px solid rgba(232, 93, 4, 0.25);
+      animation: rippleEffect 3s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    }
+    @keyframes rippleEffect {
+      0% { width: 80px; height: 80px; opacity: 0.9; }
+      100% { width: 170px; height: 170px; opacity: 0; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between py-6 px-4 sm:px-6">
+
+  <!-- Header / Breadcrumb Bar -->
+  <header class="w-full max-w-[680px] flex flex-col items-center gap-2 mb-3">
+    <!-- Centered Brand Identity -->
+    <a href="#" class="inline-flex items-center gap-2.5 transition-opacity hover:opacity-90" aria-label="SatyaSetu Home">
+      <div class="w-9 h-9 rounded-xl bg-brand-navy flex items-center justify-center shadow-sm">
+        <svg class="w-5 h-5 text-brand-saffron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M7 12c2.5-2 7.5-2 10 0" stroke="#FFFFFF" stroke-width="2"/>
+          <path d="M9 12v3M15 12v3" stroke="#FFFFFF" stroke-width="1.8"/>
+        </svg>
+      </div>
+      <div class="flex flex-col text-left">
+        <span class="font-heading font-extrabold text-xl leading-none text-brand-navy tracking-tight">SatyaSetu <span class="text-brand-saffron text-xs font-semibold px-1.5 py-0.5 rounded bg-brand-saffronLight ml-0.5 border border-brand-saffron/20">AI</span></span>
+        <span class="text-[11px] font-medium text-gray-500 leading-tight">सत्यसेतु • Public Fact-Checking Portal</span>
+      </div>
+    </a>
+
+    <!-- Breadcrumbs navigation -->
+    <nav aria-label="Breadcrumb" class="mt-1">
+      <ol class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+        <li>
+          <a href="#" class="hover:text-brand-navy transition-colors">Home</a>
+        </li>
+        <li class="text-gray-400">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z"/></svg>
+        </li>
+        <li>
+          <a href="#" class="hover:text-brand-navy transition-colors">Check Now</a>
+        </li>
+        <li class="text-gray-400">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z"/></svg>
+        </li>
+        <li class="text-brand-saffron font-semibold flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-brand-saffron animate-ping"></span>
+          <span>Verifying...</span>
+        </li>
+      </ol>
+    </nav>
+  </header>
+
+  <!-- Main Processing Card (White Card, max-w-680px) -->
+  <main class="w-full max-w-[680px] my-auto bg-white rounded-2xl shadow-[0_4px_24px_rgba(27,42,74,0.06)] border border-brand-borderLight overflow-hidden relative">
+
+    <!-- Top Ambient Banner Strip -->
+    <div class="h-1.5 w-full bg-gradient-to-r from-brand-saffron via-amber-500 to-brand-emerald"></div>
+
+    <div class="p-6 sm:p-9 flex flex-col items-center text-center">
+
+      <!-- Animated Pulsing Shield Icon (Centerpiece) -->
+      <div class="relative w-28 h-28 flex items-center justify-center my-1">
+        <!-- Soft pulse rings -->
+        <div class="radar-circle"></div>
+        <div class="radar-circle" style="animation-delay: 1.2s;"></div>
+
+        <!-- Saffron Shield Badge with Pulse Animation -->
+        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-saffronLight to-amber-100/90 border border-brand-saffron/30 flex items-center justify-center z-10 shadow-md animate-pulse-glow">
+          <svg class="w-10 h-10 text-brand-saffron" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L4 5.5V11.5C4 16.5 7.4 21.1 12 22C16.6 21.1 20 16.5 20 11.5V5.5L12 2ZM12 4.2L18 6.8V11.5C18 15.3 15.4 18.9 12 19.8C8.6 18.9 6 15.3 6 11.5V6.8L12 4.2Z"/>
+            <!-- Bridge Arch Motif in Shield -->
+            <path d="M8.5 13.5C9.8 12 14.2 12 15.5 13.5" stroke="#E85D04" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <path d="M10 13.5V15.5M14 13.5V15.5" stroke="#E85D04" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Heading & Bilingual Subtitle -->
+      <div class="mt-4 mb-6">
+        <h1 class="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy tracking-tight leading-snug">
+          Verifying your message...
+        </h1>
+        <p class="font-heading font-semibold text-lg text-brand-navy/80 mt-0.5" lang="hi">
+          आपके मैसेज की जाँच हो रही है...
+        </p>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-gray-100 text-gray-500 text-xs font-medium border border-gray-200/80">
+          <svg class="w-3.5 h-3.5 text-gray-400" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-3.25a.75.75 0 0 1 .75.75v2.75h2.25a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1-.75-.75V5.5A.75.75 0 0 1 8 4.75z"/>
+          </svg>
+          <span>Usually under 10 seconds (औसत समय &lt; 10 सेकंड)</span>
+        </div>
+      </div>
+
+      <!-- Progress Steps Container (Generously Spaced Vertical List) -->
+      <div class="w-full max-w-[520px] bg-brand-grayBg/80 rounded-xl p-4 sm:p-5 border border-gray-200 text-left space-y-3.5 shadow-inner">
+
+        <!-- Step 1: Reading your message (Done) -->
+        <div class="flex items-center justify-between bg-white rounded-lg px-3.5 py-3 border border-emerald-100 shadow-sm transition-all duration-300">
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-full bg-brand-emeraldLight flex items-center justify-center text-sm" aria-hidden="true">
+              🔤
+            </div>
+            <div>
+              <p class="font-medium text-sm text-brand-navy leading-tight">Reading your message</p>
+              <p class="text-[11px] text-gray-500" lang="hi">संदेश का विश्लेषण</p>
+            </div>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-emeraldLight text-brand-emerald border border-brand-emerald/20">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+              <path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207z" clip-rule="evenodd" />
+            </svg>
+            Done
+          </span>
+        </div>
+
+        <!-- Step 2: Detecting language (Done) -->
+        <div class="flex items-center justify-between bg-white rounded-lg px-3.5 py-3 border border-emerald-100 shadow-sm transition-all duration-300">
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-full bg-brand-emeraldLight flex items-center justify-center text-sm" aria-hidden="true">
+              🌐
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <p class="font-medium text-sm text-brand-navy leading-tight">Detecting language</p>
+                <span class="text-[10px] font-semibold uppercase px-1.5 py-0.2 rounded bg-gray-100 text-brand-navy border border-gray-200">Hindi + English</span>
+              </div>
+              <p class="text-[11px] text-gray-500" lang="hi">भाषा की पहचान (हिंदी)</p>
+            </div>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-emeraldLight text-brand-emerald border border-brand-emerald/20">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+              <path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207z" clip-rule="evenodd" />
+            </svg>
+            Done
+          </span>
+        </div>
+
+        <!-- Step 3: Searching fact-check databases (In-Progress / Saffron Spinner) -->
+        <div class="flex items-center justify-between bg-white rounded-lg px-3.5 py-3 border-2 border-brand-saffron/60 shadow-sm bg-gradient-to-r from-brand-saffronLight/30 to-white transition-all duration-300">
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-full bg-brand-saffronLight flex items-center justify-center text-sm" aria-hidden="true">
+              🔍
+            </div>
+            <div>
+              <p class="font-semibold text-sm text-brand-navy leading-tight">Searching fact-check databases</p>
+              <p class="text-[11px] text-brand-saffron font-medium" lang="hi">तथ्य-जांच डेटाबेस खोज...</p>
+            </div>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-saffronLight text-brand-saffron border border-brand-saffron/30">
+            <!-- Animated Spinner -->
+            <svg class="w-3.5 h-3.5 animate-spin text-brand-saffron" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Searching...
+          </span>
+        </div>
+
+        <!-- Step 4: Analyzing evidence (Pending) -->
+        <div class="flex items-center justify-between bg-white/70 rounded-lg px-3.5 py-3 border border-gray-200/80 transition-all duration-300 opacity-75">
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-sm" aria-hidden="true">
+              ⚖️
+            </div>
+            <div>
+              <p class="font-medium text-sm text-gray-600 leading-tight">Analyzing evidence</p>
+              <p class="text-[11px] text-gray-400" lang="hi">सबूतों का विश्लेषण</p>
+            </div>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200">
+            <span class="w-2 h-2 rounded-full border border-gray-400"></span>
+            Pending
+          </span>
+        </div>
+
+        <!-- Step 5: Preparing your result (Pending) -->
+        <div class="flex items-center justify-between bg-white/70 rounded-lg px-3.5 py-3 border border-gray-200/80 transition-all duration-300 opacity-75">
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-sm" aria-hidden="true">
+              📝
+            </div>
+            <div>
+              <p class="font-medium text-sm text-gray-600 leading-tight">Preparing your result</p>
+              <p class="text-[11px] text-gray-400" lang="hi">परिणाम तैयार करना</p>
+            </div>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200">
+            <span class="w-2 h-2 rounded-full border border-gray-400"></span>
+            Pending
+          </span>
+        </div>
+
+      </div>
+
+      <!-- Rotating Reassurance Ticker (Live JS rotator every 2.4s) -->
+      <div class="w-full max-w-[520px] mt-5 px-3 py-2.5 rounded-lg bg-amber-50/70 border border-amber-200/60 flex items-center justify-center gap-2 text-xs text-amber-900 font-medium">
+        <svg class="w-4 h-4 text-brand-saffron shrink-0 animate-pulse" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        <div class="overflow-hidden h-5 flex items-center">
+          <p id="reassurance-text" class="transition-opacity duration-300 truncate">
+            Checking 12 trusted sources including Google Fact Check API...
+          </p>
+        </div>
+      </div>
+
+      <!-- Cancel Action Link -->
+      <div class="mt-6 flex items-center justify-center">
+        <button type="button" class="text-xs font-medium text-gray-500 hover:text-gray-800 underline decoration-gray-300 underline-offset-4 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-saffron/40 rounded px-2 py-1">
+          Cancel Verification (रद्द करें)
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Linear Progress Bar at the Very Bottom of the Card -->
+    <div class="w-full bg-gray-100 h-2 overflow-hidden relative" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">
+      <div id="linear-progress-bar" class="h-full bg-brand-saffron animate-progress-bar rounded-r-full shadow-sm"></div>
+    </div>
+
+  </main>
+
+  <!-- Calm Trust Footer Note -->
+  <footer class="w-full max-w-[680px] text-center mt-4">
+    <div class="flex items-center justify-center gap-4 text-[11px] text-gray-500">
+      <span class="inline-flex items-center gap-1">
+        <svg class="w-3.5 h-3.5 text-brand-emerald" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.418 0 8 3.582 8 8s-3.582 8-8 8-8-3.582-8-8 3.582-8 8-8zm3.03 5.47a.75.75 0 0 0-1.06 0L6.75 8.69 5.53 7.47a.75.75 0 1 0-1.06 1.06l1.75 1.75a.75.75 0 0 0 1.06 0l3.75-3.75a.75.75 0 0 0 0-1.06z"/></svg>
+        100% Stateless &amp; Private
+      </span>
+      <span>•</span>
+      <span>IFCN Benchmark Compliant</span>
+      <span>•</span>
+      <span>PIB Certified Registry</span>
+    </div>
+  </footer>
+
+  <!-- Rotating message script -->
+  <script>
+    (function() {
+      const messages = [
+        "Checking 12 trusted sources including Google Fact Check API...",
+        "Cross-referencing with PIB and IFCN-certified fact-checkers...",
+        "Analyzing claim stance and credibility score...",
+        "Scanning verified Indian press archives (AltNews, BOOM)..."
+      ];
+      let currentIndex = 0;
+      const el = document.getElementById("reassurance-text");
+
+      if (el) {
+        setInterval(() => {
+          el.style.opacity = '0';
+          setTimeout(() => {
+            currentIndex = (currentIndex + 1) % messages.length;
+            el.textContent = messages[currentIndex];
+            el.style.opacity = '1';
+          }, 300);
+        }, 2200);
+      }
+    })();
+  </script>
+
+</body>
+</html>
