@@ -74,3 +74,85 @@
   category: test_expired
   last_reviewed: "2023-01-01"
   review_by: "2024-01-01"
+
+- id: cb-005
+  canonical_claim: "Nana Patekar is no more in this world today, passed away recently"
+  variants:
+    - "Nana Patekar passed away"
+    - "There is bad news nana Patekar is no more in this world today"
+    - "नाना पाटेकर यांचे निधन झाले"
+    - "नाना पाटेकर का निधन हो गया"
+  key_details: []
+  verdict: REFUTED
+  explanation_en: "Nana Patekar is alive and in good health. The viral message claiming his demise is a recurring death hoax that has circulated multiple times on social media and has been officially debunked."
+  sources:
+    - url: "https://www.boomlive.in/fact-check/nana-patekar-death-hoax-fact-check"
+      publisher: "BOOM Live"
+      published_date: "2024-06-15"
+      tier: 1
+    - url: "https://www.thequint.com/news/webqoof/nana-patekar-death-hoax-debunked"
+      publisher: "The Quint - WebQoof"
+      published_date: "2024-06-16"
+      tier: 1
+  category: celebrity_hoax
+  last_reviewed: "2026-06-01"
+  review_by: "2027-06-01"
+
+- id: cb-006
+  canonical_claim: "Lemon juice cures cancer in 48 hours without treatment"
+  variants:
+    - "Lemon juice hot water cures cancer completely in 48 hours"
+    - "नींबू का रस पीने से 48 घंटे में कैंसर ठीक हो जाता है"
+    - "Drinking hot lemon water kills cancer cells 10000 times better than chemo"
+  key_details: []
+  verdict: REFUTED
+  explanation_en: "There is no scientific, clinical, or oncological evidence that lemon juice or alkaline water cures cancer. Delaying medical cancer treatment in favor of unverified remedies is dangerous."
+  sources:
+    - url: "https://www.boomlive.in/fact-check/fake-news-hot-lemon-water-cure-cancer-fact-check"
+      publisher: "BOOM Live"
+      published_date: "2023-04-10"
+      tier: 1
+    - url: "https://who.int/news-room/fact-sheets/detail/cancer"
+      publisher: "World Health Organization"
+      published_date: "2023-05-01"
+      tier: 2
+  category: medical_myth
+  last_reviewed: "2026-01-01"
+  review_by: "2027-01-01"
+
+- id: cb-007
+  canonical_claim: "Railway Free Ticket Scheme announced for all senior citizens across India"
+  variants:
+    - "Indian Railways announced free train tickets for all senior citizens"
+    - "रेलवे ने सभी वरिष्ठ नागरिकों के लिए मुफ्त टिकट योजना की घोषणा की"
+    - "Free railway travel for elderly citizens starting this month"
+  key_details: []
+  verdict: REFUTED
+  explanation_en: "PIB Fact Check and Ministry of Railways confirmed that no universal free ticket scheme has been announced or approved for senior citizens. The viral forward is a fabricated scam message."
+  sources:
+    - url: "https://pib.gov.in/FactCheck/RailwaySeniorCitizenScheme"
+      publisher: "PIB Fact Check"
+      published_date: "2024-02-14"
+      tier: 2
+  category: government_scheme
+  last_reviewed: "2026-01-01"
+  review_by: "2027-01-01"
+
+- id: cb-008
+  canonical_claim: "ISRO launched Aditya-L1 solar observation mission to L1 Lagrange point"
+  variants:
+    - "ISRO successfully launched Aditya L1 mission to study the sun"
+    - "इसरो ने आदित्य एल1 मिशन सफलतापूर्वक लॉन्च किया"
+    - "India launched its first dedicated solar observatory Aditya-L1"
+  key_details: []
+  verdict: SUPPORTED
+  explanation_en: "ISRO successfully launched India's premier solar observatory Aditya-L1 on September 2, 2023, and it successfully achieved halo orbit around the Sun-Earth L1 Lagrange point."
+  sources:
+    - url: "https://www.isro.gov.in/Aditya_L1.html"
+      publisher: "ISRO Official"
+      published_date: "2023-09-02"
+      tier: 2
+  category: science_space
+  last_reviewed: "2026-01-01"
+  review_by: "2027-01-01"
+

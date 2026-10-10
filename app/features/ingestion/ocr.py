@@ -149,3 +149,52 @@ def extract_text_from_image(url: str, reader: Optional[Any] = None) -> OCRResult
     except Exception as exc:
         logger.error("EasyOCR inference failed: %s", exc, exc_info=True)
         return OCRResult(text="", confidence=0.0, language="unknown")
+
+
+def extract_text_from_bytes(image_bytes: bytes, reader: Optional[Any] = None) -> OCRResult:
+    """
+    Directly preprocess in-memory image bytes and run EasyOCR.
+    Used by the /api/ocr screenshot upload endpoint.
+    """
+    active_reader = reader or get_ocr_reader()
+    if active_reader is None:
+        logger.warning("OCR reader not loaded. Returning empty result.")
+        return OCRResult(text="", confidence=0.0, language="unknown")
+
+    if not image_bytes or len(image_bytes) > MAX_FILE_BYTES:
+        logger.warning("Image empty or exceeds max file size of %d bytes", MAX_FILE_BYTES)
+        return OCRResult(text="", confidence=0.0, language="unknown")
+
+    try:
+        processed_bytes = preprocess_image(image_bytes)
+    except Exception as exc:
+        logger.warning("Image preprocessing failed: %s", exc)
+        return OCRResult(text="", confidence=0.0, language="unknown")
+
+    try:
+        raw_results = active_reader.readtext(
+            processed_bytes,
+            detail=1,
+            paragraph=False,
+        )
+
+        filtered_lines = [
+            text
+            for (_bbox, text, conf) in raw_results
+            if conf >= CONFIDENCE_THRESHOLD and text.strip()
+        ]
+        full_text = " ".join(filtered_lines).strip()
+
+        confidences = [
+            conf for (_bbox, _text, conf) in raw_results if conf >= CONFIDENCE_THRESHOLD
+        ]
+        avg_confidence = sum(confidences) / len(confidences) if confidences else 0.0
+
+        return OCRResult(
+            text=full_text,
+            confidence=round(avg_confidence, 3),
+            language="auto",
+        )
+    except Exception as exc:
+        logger.error("EasyOCR inference failed on image bytes: %s", exc, exc_info=True)
+        return OCRResult(text="", confidence=0.0, language="unknown")

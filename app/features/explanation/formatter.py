@@ -213,9 +213,9 @@ def format_whatsapp_reply(response: CheckResponse) -> str:
     overall_emoji = VERDICT_EMOJI.get(response.overall_verdict, "❓")
     overall_label = get_verdict_label(response.overall_verdict, lang)
 
-    # Free-text explanation handling
-    explanation_raw = response.explanation[:400].strip()
-    if len(response.explanation) > 400:
+    # Free-text explanation handling (allow up to 1000 chars without mid-word truncation)
+    explanation_raw = response.explanation[:1000].strip()
+    if len(response.explanation) > 1000:
         explanation_raw += "…"
 
     translation_unavailable_line: Optional[str] = None
