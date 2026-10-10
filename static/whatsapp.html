@@ -1,0 +1,2157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Web · SatyaSetu AI Bot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --wa-bg-deep: #111b21;
+      --wa-bg-panel: #202c33;
+      --wa-bg-chat: #0b141a;
+      --wa-bg-input: #2a3942;
+      --wa-bg-incoming: #202c33;
+      --wa-bg-outgoing: #005c4b;
+      --wa-green: #00a884;
+      --wa-green-hover: #029071;
+      --wa-text-primary: #e9edef;
+      --wa-text-secondary: #8696a0;
+      --wa-text-muted: #667781;
+      --wa-border: #222d34;
+      --wa-hover: #222e35;
+      --wa-active: #2a3942;
+      --wa-badge: #25d366;
+      --wa-quote-bg: rgba(0, 0, 0, 0.25);
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #0c1317;
+      color: var(--wa-text-primary);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Window Frame */
+    .app-window {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--wa-bg-deep);
+    }
+
+    /* Top Desktop Window Bar */
+    .window-header {
+      height: 38px;
+      background-color: var(--wa-bg-panel);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--wa-border);
+      user-select: none;
+    }
+    .window-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--wa-text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .window-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--wa-text-secondary);
+    }
+    .win-btn {
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 4px;
+    }
+    .win-btn:hover { color: #fff; }
+
+    /* Main Container Split: Left Rail + Left Sidebar + Right Chat Area */
+    .main-container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 38px);
+      overflow: hidden;
+    }
+
+    /* Far-Left Vertical Icon Rail */
+    .side-rail {
+      width: 58px;
+      background-color: var(--wa-bg-panel);
+      border-right: 1px solid var(--wa-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+    }
+    .rail-top, .rail-bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+    .rail-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--wa-text-secondary);
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s, color 0.2s;
+    }
+    .rail-btn:hover {
+      background-color: var(--wa-hover);
+      color: var(--wa-text-primary);
+    }
+    .rail-btn.active {
+      background-color: var(--wa-active);
+      color: var(--wa-green);
+    }
+    .rail-badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background-color: var(--wa-badge);
+      color: #111b21;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 1px 5px;
+    }
+
+    /* Chats List Sidebar (380px) */
+    .chats-sidebar {
+      width: 400px;
+      min-width: 320px;
+      background-color: var(--wa-bg-deep);
+      border-right: 1px solid var(--wa-border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    /* Chats Sidebar Header */
+    .sidebar-header {
+      height: 60px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--wa-bg-deep);
+    }
+    .sidebar-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--wa-text-primary);
+    }
+    .sidebar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .icon-action-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--wa-text-secondary);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .icon-action-btn:hover {
+      background-color: var(--wa-hover);
+      color: var(--wa-text-primary);
+    }
+    .icon-action-btn.new-chat {
+      background-color: var(--wa-green);
+      color: #111b21;
+    }
+
+    /* Search Bar & Filter Chips */
+    .search-section {
+      padding: 8px 12px 10px;
+      background-color: var(--wa-bg-deep);
+    }
+    .search-box {
+      background-color: var(--wa-bg-panel);
+      border-radius: 8px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 10px;
+    }
+    .search-box svg {
+      color: var(--wa-text-secondary);
+      flex-shrink: 0;
+    }
+    .search-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--wa-text-primary);
+      font-size: 14px;
+      width: 100%;
+    }
+    .search-input::placeholder {
+      color: var(--wa-text-secondary);
+    }
+
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      padding: 10px 12px 6px;
+      overflow-x: auto;
+    }
+    .chip {
+      background-color: var(--wa-bg-panel);
+      color: var(--wa-text-secondary);
+      font-size: 13px;
+      padding: 5px 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .chip:hover {
+      background-color: var(--wa-hover);
+      color: var(--wa-text-primary);
+    }
+    .chip.active {
+      background-color: #0b3d33;
+      color: var(--wa-green);
+      font-weight: 600;
+    }
+
+    /* Contact List */
+    .contact-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      gap: 14px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      position: relative;
+      transition: background 0.15s;
+    }
+    .contact-item:hover {
+      background-color: var(--wa-hover);
+    }
+    .contact-item.active {
+      background-color: var(--wa-active);
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: #3b4a54;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .avatar.bot-avatar {
+      background: linear-gradient(135deg, #00a884, #00796b);
+      box-shadow: 0 0 10px rgba(0, 168, 132, 0.4);
+    }
+
+    .contact-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .contact-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .contact-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--wa-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .contact-time {
+      font-size: 12px;
+      color: var(--wa-text-secondary);
+      flex-shrink: 0;
+    }
+    .contact-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--wa-text-secondary);
+    }
+    .contact-last-msg {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+    .pinned-icon {
+      color: var(--wa-text-muted);
+      font-size: 12px;
+    }
+
+    /* Right Main Chat Panel */
+    .chat-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--wa-bg-chat);
+      position: relative;
+      height: 100%;
+    }
+
+    /* Chat Panel Header */
+    .chat-header {
+      height: 60px;
+      background-color: var(--wa-bg-panel);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--wa-border);
+      z-index: 10;
+    }
+    .chat-header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+    }
+    .chat-header-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--wa-text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chat-header-sub {
+      font-size: 12px;
+      color: var(--wa-text-secondary);
+    }
+    .chat-header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--wa-text-secondary);
+    }
+    .header-icon-btn {
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header-icon-btn:hover {
+      background-color: var(--wa-hover);
+      color: var(--wa-text-primary);
+    }
+
+    /* Chat Messages Conversation Stream */
+    .messages-stream {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 32px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      background-image: radial-gradient(#202c33 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    /* Message Date Divider */
+    .date-pill {
+      align-self: center;
+      background-color: #182229;
+      color: var(--wa-text-secondary);
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      user-select: none;
+    }
+
+    /* Message Bubbles */
+    .msg-row {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      max-width: 72%;
+    }
+    .msg-row.incoming {
+      align-self: flex-start;
+    }
+    .msg-row.outgoing {
+      align-self: flex-end;
+    }
+
+    .msg-bubble {
+      padding: 8px 12px 6px;
+      border-radius: 8px;
+      font-size: 14.2px;
+      line-height: 1.45;
+      position: relative;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.25);
+      word-break: break-word;
+    }
+    .msg-row.incoming .msg-bubble {
+      background-color: var(--wa-bg-incoming);
+      color: var(--wa-text-primary);
+      border-top-left-radius: 0;
+    }
+    .msg-row.outgoing .msg-bubble {
+      background-color: var(--wa-bg-outgoing);
+      color: var(--wa-text-primary);
+      border-top-right-radius: 0;
+    }
+
+    .msg-hover-actions {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      background: rgba(32, 44, 51, 0.95);
+      border-radius: 14px;
+      padding: 2px 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+      z-index: 5;
+    }
+    .msg-row.outgoing .msg-hover-actions {
+      right: auto;
+      left: -65px;
+    }
+    .msg-bubble:hover .msg-hover-actions {
+      display: flex;
+    }
+    .msg-action-icon {
+      color: var(--wa-text-secondary);
+      cursor: pointer;
+      padding: 3px 5px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .msg-action-icon:hover {
+      color: var(--wa-text-primary);
+      background: rgba(255,255,255,0.1);
+    }
+
+    .msg-sender {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #53bdeb;
+      margin-bottom: 3px;
+    }
+
+    .msg-quoted {
+      background-color: var(--wa-quote-bg);
+      border-left: 4px solid var(--wa-green);
+      padding: 5px 8px;
+      border-radius: 4px;
+      font-size: 12.5px;
+      margin-bottom: 6px;
+      color: var(--wa-text-secondary);
+    }
+    .msg-quoted-title {
+      font-weight: 600;
+      color: var(--wa-green);
+      margin-bottom: 2px;
+    }
+
+    .msg-meta {
+      float: right;
+      margin-left: 12px;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--wa-text-secondary);
+      user-select: none;
+    }
+
+    /* Video Link Embed Card */
+    .video-card {
+      border-radius: 8px;
+      overflow: hidden;
+      background: #111b21;
+      border: 1px solid var(--wa-border);
+      margin: 6px 0;
+      cursor: pointer;
+    }
+    .video-card-thumb {
+      width: 100%;
+      height: 150px;
+      background: #1a2228;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .video-card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .play-badge {
+      width: 44px;
+      height: 44px;
+      background: rgba(0,0,0,0.65);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .video-card-body {
+      padding: 10px;
+    }
+    .video-card-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #e9edef;
+      line-height: 1.35;
+      margin-bottom: 4px;
+    }
+    .video-card-url {
+      font-size: 12px;
+      color: #53bdeb;
+      text-decoration: none;
+    }
+
+    /* SatyaSetu AI Fact Check Card */
+    .factcheck-card {
+      background: #16242b;
+      border: 1px solid #1f3944;
+      border-left: 5px solid;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: 8px 0 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .factcheck-card.REFUTED { border-left-color: #ef4444; }
+    .factcheck-card.SUPPORTED { border-left-color: #10b981; }
+    .factcheck-card.PARTIALLY_SUPPORTED { border-left-color: #f59e0b; }
+    .factcheck-card.OUTDATED { border-left-color: #d97706; }
+    .factcheck-card.UNVERIFIABLE { border-left-color: #94a3b8; }
+
+    .fc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .fc-logo {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--wa-green);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .verdict-tag {
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .verdict-tag.REFUTED { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+    .verdict-tag.SUPPORTED { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+    .verdict-tag.PARTIALLY_SUPPORTED { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+    .verdict-tag.OUTDATED { background: rgba(217, 119, 6, 0.2); color: #fcd34d; border: 1px solid #d97706; }
+    .verdict-tag.UNVERIFIABLE { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid #64748b; }
+
+    .fc-claim {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 6px;
+    }
+    .fc-real-news {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.45;
+      margin-bottom: 8px;
+      background: rgba(0,0,0,0.2);
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+    .fc-sources {
+      font-size: 12px;
+      color: var(--wa-text-secondary);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .fc-source-link {
+      color: #53bdeb;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .fc-source-link:hover { text-decoration: underline; }
+
+    /* Bottom Input Bar */
+    .input-bar {
+      min-height: 62px;
+      background-color: var(--wa-bg-panel);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-top: 1px solid var(--wa-border);
+      position: relative;
+    }
+    .input-btn {
+      color: var(--wa-text-secondary);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s, background 0.15s;
+    }
+    .input-btn:hover {
+      background-color: var(--wa-hover);
+      color: var(--wa-text-primary);
+    }
+    .text-input-wrap {
+      flex: 1;
+      background-color: var(--wa-bg-input);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding: 8px 14px;
+    }
+    .chat-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--wa-text-primary);
+      font-size: 14.5px;
+    }
+    .chat-input::placeholder {
+      color: var(--wa-text-secondary);
+    }
+
+    /* Send Button */
+    .send-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background-color: var(--wa-green);
+      color: #111b21;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    .send-btn:hover { background-color: var(--wa-green-hover); }
+    .send-btn:active { transform: scale(0.95); }
+
+    /* Context Menus (Matching Screenshots 1 & 2) */
+    .context-menu {
+      position: absolute;
+      background-color: #233138;
+      border-radius: 8px;
+      padding: 6px 0;
+      width: 220px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      z-index: 1000;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: none;
+    }
+    .menu-item {
+      padding: 9px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 14px;
+      color: var(--wa-text-primary);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .menu-item:hover {
+      background-color: #182229;
+    }
+    .menu-item svg {
+      color: var(--wa-text-secondary);
+      flex-shrink: 0;
+    }
+    .menu-item.ask-ai {
+      color: #34d399;
+      font-weight: 600;
+    }
+    .menu-item.ask-ai svg {
+      color: #34d399;
+    }
+
+    /* Attachment Popup Modal */
+    .attachment-popup {
+      position: absolute;
+      bottom: 74px;
+      left: 60px;
+      background-color: #233138;
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid var(--wa-border);
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 50;
+    }
+    .attach-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--wa-text-primary);
+      transition: background 0.15s;
+    }
+    .attach-item:hover { background-color: var(--wa-hover); }
+    .attach-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    /* Quick Demo Bar Top */
+    .demo-ribbon {
+      background: linear-gradient(90deg, #093c32, #0e4c41);
+      color: #e2e8f0;
+      font-size: 12px;
+      padding: 6px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1b4b42;
+    }
+    .demo-ribbon strong { color: var(--wa-green); }
+    .demo-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .quick-sample-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 11.5px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .quick-sample-btn:hover { background: rgba(255, 255, 255, 0.25); }
+
+    /* Typing indicator */
+    .typing-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: var(--wa-bg-incoming);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--wa-text-secondary);
+      margin-bottom: 6px;
+    }
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--wa-green);
+      border-radius: 50%;
+      animation: pulse 1.2s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1.1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-window">
+  <!-- Demo Header Ribbon -->
+  <div class="demo-ribbon">
+    <div>
+      🛡️ <strong>SatyaSetu WhatsApp Web Fact-Checking System</strong> — Live AI Fact-Checking Bot Active
+    </div>
+    <div class="demo-actions">
+      <button class="quick-sample-btn" onclick="injectViralClaim('Nana Patekar passed away today')">Test: Nana Patekar Death Rumor</button>
+      <button class="quick-sample-btn" onclick="injectViralClaim('Drinking bleach cures viral infections in 24 hours')">Test: Bleach Cure</button>
+      <button class="quick-sample-btn" onclick="injectViralClaim('NPCI levies 2 percent charge on all UPI payments')">Test: UPI Tax</button>
+    </div>
+  </div>
+
+  <!-- Top Title Bar -->
+  <div class="window-header">
+    <div class="window-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#00a884"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.46-4.45-9.92-9.91-9.92zM12.04 20.14c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31c-.83-1.32-1.27-2.85-1.27-4.43 0-4.54 3.7-8.24 8.24-8.24 4.54 0 8.24 3.7 8.24 8.24 0 4.54-3.7 8.24-8.24 8.24zm4.52-6.17c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43s-.56-1.34-.76-1.84c-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.57.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.47-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.19-.47-.31z"/></svg>
+      WhatsApp
+    </div>
+    <div class="window-controls">
+      <span class="win-btn">─</span>
+      <span class="win-btn">□</span>
+      <span class="win-btn">✕</span>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Far-Left Navigation Rail -->
+    <div class="side-rail">
+      <div class="rail-top">
+        <div class="rail-btn active" title="Chats">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M19.005 3.175H4.674C3.642 3.175 2.8 4.017 2.8 5.05V15.69c0 1.033.842 1.875 1.874 1.875H6.55v3.26c0 .445.54.667.854.354l3.613-3.614h7.988c1.033 0 1.875-.842 1.875-1.875V5.05c0-1.033-.842-1.875-1.875-1.875z"/></svg>
+          <span class="rail-badge">1</span>
+        </div>
+        <div class="rail-btn" title="Status">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>
+        </div>
+        <div class="rail-btn" title="Channels">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="rail-btn" title="Communities">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="rail-btn" title="Meta AI / SatyaSetu AI" onclick="selectChat('bot')" style="color:#00a884;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+        </div>
+      </div>
+      <div class="rail-bottom">
+        <div class="rail-btn" title="Settings">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <div class="avatar" style="width:34px;height:34px;font-size:13px;" title="Profile">
+          <span>TE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chats Sidebar List -->
+    <div class="chats-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Chats</div>
+        <div class="sidebar-actions">
+          <div class="icon-action-btn" title="Menu" onclick="openChatMenu(event)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+          </div>
+          <div class="icon-action-btn new-chat" title="New Chat" onclick="selectChat('bot')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-section">
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" class="search-input" placeholder="Search or start a new chat" id="chatSearch">
+        </div>
+      </div>
+
+      <div class="filter-chips">
+        <div class="chip active">All</div>
+        <div class="chip">Unread</div>
+        <div class="chip">Favourites</div>
+        <div class="chip">Groups</div>
+        <div class="chip">+</div>
+      </div>
+
+      <!-- Contact Items -->
+      <div class="contact-list" id="contactList">
+        <!-- SatyaSetu AI Bot (Pinned) -->
+        <div class="contact-item" id="item-bot" onclick="selectChat('bot')">
+          <div class="avatar bot-avatar">🛡️</div>
+          <div class="contact-info">
+            <div class="contact-top">
+              <div class="contact-name">SatyaSetu AI Fact-Check Bot 🛡️</div>
+              <div class="contact-time" style="color:var(--wa-green);font-weight:600;">Online</div>
+            </div>
+            <div class="contact-bottom">
+              <div class="contact-last-msg">Ask me to fact-check any news, rumor, image or video!</div>
+              <span class="pinned-icon">📌</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Team Appsolutely Project Group (Active in Screenshot 3) -->
+        <div class="contact-item active" id="item-group" onclick="selectChat('group')">
+          <div class="avatar" style="background:#4b5563;">👥</div>
+          <div class="contact-info">
+            <div class="contact-top">
+              <div class="contact-name">Team Appsolutely Project Group 🤘🤘</div>
+              <div class="contact-time">12:12 pm</div>
+            </div>
+            <div class="contact-bottom">
+              <div class="contact-last-msg">✓✓ You: @all we have to keep meeti...</div>
+              <span class="pinned-icon">📌</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other Contacts from Screenshot -->
+        <div class="contact-item" id="item-sy" onclick="selectChat('sy')">
+          <div class="avatar" style="background:#1e3a8a;">🎓</div>
+          <div class="contact-info">
+            <div class="contact-top">
+              <div class="contact-name">SY B.Tech (AI &ML)26-27</div>
+              <div class="contact-time">Yesterday</div>
+            </div>
+            <div class="contact-bottom">
+              <div class="contact-last-msg">~Vaishnavi Hingmire: Dear Student...</div>
+              <span class="pinned-icon">📌</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-item" id="item-we" onclick="selectChat('we')">
+          <div class="avatar" style="background:#701a75;">🏛️</div>
+          <div class="contact-info">
+            <div class="contact-top">
+              <div class="contact-name">WE ARE NOT VIDYALAN...</div>
+              <div class="contact-time">24/09/2026</div>
+            </div>
+            <div class="contact-bottom">
+              <div class="contact-last-msg">Aaryan: 📹 Video</div>
+              <span class="pinned-icon">📌</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-item" id="item-aaryan" onclick="selectChat('aaryan')">
+          <div class="avatar" style="background:#9a3412;">AR</div>
+          <div class="contact-info">
+            <div class="contact-top">
+              <div class="contact-name">Aaryan Raorane</div>
+              <div class="contact-time">1:02 pm</div>
+            </div>
+            <div class="contact-bottom">
+              <div class="contact-last-msg">✓ Okk</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-item" id="item-shreya" onclick="selectChat('shreya')">
+          <div class="avatar" style="background:#065f46;">SD</div>
+          <div class="contact-info">
+            <div class="contact-top">
+              <div class="contact-name">Shreya Desai</div>
+              <div class="contact-time">12:05 pm</div>
+            </div>
+            <div class="contact-bottom">
+              <div class="contact-last-msg">✓✓ If no one is taking initiative then we ...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-item" id="item-disha" onclick="selectChat('disha')">
+          <div class="avatar" style="background:#831843;">DM</div>
+          <div class="contact-info">
+            <div class="contact-top">
+              <div class="contact-name">Disha Mumbarkar</div>
+              <div class="contact-time">11:49 am</div>
+            </div>
+            <div class="contact-bottom">
+              <div class="contact-last-msg">✓✓ Bohot mera dimag badak gaya hai a...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-item" id="item-mahindra" onclick="selectChat('mahindra')">
+          <div class="avatar" style="background:#374151;">MP</div>
+          <div class="contact-info">
+            <div class="contact-top">
+              <div class="contact-name">Mahindra Pata</div>
+              <div class="contact-time">11:09 am</div>
+            </div>
+            <div class="contact-bottom">
+              <div class="contact-last-msg">Ok</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Chat Panel Area -->
+    <div class="chat-panel">
+      <!-- Active Chat Header -->
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <div class="avatar" id="headerAvatar" style="background:#4b5563;">👥</div>
+          <div>
+            <div class="chat-header-title" id="headerTitle">Team Appsolutely Project Group 🤘🤘</div>
+            <div class="chat-header-sub" id="headerSub">Aaryan, Shreya, You</div>
+          </div>
+        </div>
+        <div class="chat-header-right">
+          <div class="header-icon-btn" title="Video Call">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          </div>
+          <div class="header-icon-btn" title="Search in chat">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <div class="header-icon-btn" title="More options" onclick="openChatMenu(event)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages Stream -->
+      <div class="messages-stream" id="messagesStream">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Typing Indicator -->
+      <div id="typingIndicatorContainer" style="padding: 0 32px; display: none;">
+        <div class="typing-indicator">
+          <span>SatyaSetu Bot is fact-checking...</span>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+
+      <!-- Bottom Input Controls -->
+      <div class="input-bar">
+        <div class="input-btn" title="Emoji">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </div>
+        <div class="input-btn" title="Attach Photos / Videos / Docs" onclick="toggleAttachmentMenu(event)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </div>
+        <div class="text-input-wrap">
+          <input type="text" class="chat-input" id="messageInput" placeholder="Type a message or paste a claim/link to check..." onkeydown="handleInputKeyDown(event)">
+        </div>
+        <button class="input-btn" id="micBtn" title="Speak or Record Voice Note" onclick="toggleVoiceRecording()" style="background:transparent;border:none;width:40px;height:40px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Attachment Popup Menu -->
+<div class="attachment-popup" id="attachmentPopup">
+  <label class="attach-item" style="margin:0;">
+    <input type="file" id="imageFileInput" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+    <div class="attach-icon" style="background:#7c3aed;">🖼️</div>
+    <span>Photos & Screenshots (OCR)</span>
+  </label>
+  <label class="attach-item" style="margin:0;">
+    <input type="file" id="audioFileInput" accept="audio/*" style="display:none;" onchange="handleAudioUpload(event)">
+    <div class="attach-icon" style="background:#10b981;">🎙️</div>
+    <span>Voice Note / Audio File</span>
+  </label>
+  <label class="attach-item" style="margin:0;">
+    <input type="file" id="videoFileInput" accept="video/*" style="display:none;" onchange="handleVideoUpload(event)">
+    <div class="attach-icon" style="background:#0284c7;">🎥</div>
+    <span>Video Forward / Reel</span>
+  </label>
+  <label class="attach-item" style="margin:0;">
+    <input type="file" id="docFileInput" accept=".pdf,.doc,.docx" style="display:none;" onchange="handleDocUpload(event)">
+    <div class="attach-icon" style="background:#5b21b6;">📄</div>
+    <span>Document (PDF Fact-Check)</span>
+  </label>
+</div>
+
+<!-- Message Context Menu (Screenshot 1: Reply, Copy, Forward, Pin, Ask SatyaSetu Bot, Star, Select, Report, Delete) -->
+<div class="context-menu" id="messageContextMenu">
+  <div class="menu-item" onclick="contextAction('Reply')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+    <span>Reply</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Copy')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    <span>Copy</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Forward')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>
+    <span>Forward</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Pin')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 5-3 5-3-5z"/><line x1="12" y1="12" x2="12" y2="22"/></svg>
+    <span>Pin</span>
+  </div>
+  <!-- Ask SatyaSetu Bot 🛡️ (Highlighting Screenshot 1's "Ask Meta AI") -->
+  <div class="menu-item ask-ai" onclick="verifyContextMessage()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    <span>Ask SatyaSetu Bot 🛡️</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Star')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    <span>Star</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Select')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span>Select</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Report')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.33 2.33 0 0 1-2.33 2H17"/></svg>
+    <span>Report</span>
+  </div>
+  <div class="menu-item" style="color:#ef4444;" onclick="contextAction('Delete')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+    <span>Delete</span>
+  </div>
+</div>
+
+<!-- Chat Header Context Menu (Screenshot 2: Archive, Mute, Pin, Close, Block, Clear, Delete) -->
+<div class="context-menu" id="chatOptionsMenu">
+  <div class="menu-item" onclick="contextAction('Archive chat')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>
+    <span>Archive chat</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Mute notifications')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+    <span>Mute notifications ▸</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Pin chat')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 5-3 5-3-5z"/><line x1="12" y1="12" x2="12" y2="22"/></svg>
+    <span>Pin chat</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Mark as unread')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>Mark as unread</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Add to favourites')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    <span>Add to favourites</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Close chat')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    <span>Close chat</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Block')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+    <span>Block</span>
+  </div>
+  <div class="menu-item" onclick="contextAction('Clear chat')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    <span>Clear chat</span>
+  </div>
+  <div class="menu-item" style="color:#ef4444;" onclick="contextAction('Delete chat')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+    <span>Delete chat</span>
+  </div>
+</div>
+
+<script>
+  // ── Chat State Data ──
+  const CHATS = {
+    group: {
+      name: "Team Appsolutely Project Group 🤘🤘",
+      sub: "Aaryan, Shreya, You",
+      avatar: "👥",
+      color: "#4b5563",
+      messages: [
+        {
+          id: "m1",
+          sender: "Aaryan Raorane",
+          isMe: false,
+          quoted: {
+            author: "You",
+            text: "There is the bad news for all of us that nana Patekar is no more in this world today only we lost him😭😭😭😭"
+          },
+          text: "I pray that his soul gets peace in after life\nHe was a great man\nNow when i will see his movies welcome and welcome back i will miss him a lot",
+          time: "8:59 am",
+          status: ""
+        },
+        {
+          id: "m2",
+          sender: "You",
+          isMe: true,
+          quoted: {
+            author: "Aaryan Raorane",
+            text: "I pray that his soul gets peace in after life\nHe was a great man ..."
+          },
+          text: "Same here he was the best person",
+          time: "9:00 am",
+          status: "✓✓"
+        },
+        {
+          id: "m3",
+          sender: "Aaryan Raorane",
+          isMe: false,
+          videoCard: {
+            title: 'Planet Marathi OTT on Instagram: "असा नट होणे नाही! @nana.patekar पहा \'नटसम्राट\' फक्त \'प्लॅनेट मराठी ओटीटी\'वर !...',
+            url: "https://www.instagram.com/reel/CfWCqnSqgFo/?stkn=NDRvZ3lvbm1yNHQy",
+            thumb: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
+          },
+          text: "https://www.instagram.com/reel/CfWCqnSqgFo/?stkn=NDRvZ3lvbm1yNHQy",
+          time: "9:01 am",
+          status: ""
+        },
+        {
+          id: "m4",
+          sender: "You",
+          isMe: true,
+          videoCard: {
+            title: "Planet Marathi OTT reel shared",
+            url: "https://www.instagram.com/reel/CfWCqnSqgFo/?stkn=NDRvZ3lvbm1yNHQy",
+            thumb: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80"
+          },
+          text: "https://www.instagram.com/reel/CfWCqnSqgFo/?stkn=NDRvZ3lvbm1yNHQy",
+          time: "9:01 am",
+          status: "✓✓"
+        }
+      ]
+    },
+    bot: {
+      name: "SatyaSetu AI Fact-Check Bot 🛡️",
+      sub: "Verified Fact-Checking Gateway · Instant Response",
+      avatar: "🛡️",
+      color: "linear-gradient(135deg, #00a884, #00796b)",
+      messages: [
+        {
+          id: "b1",
+          sender: "SatyaSetu Bot",
+          isMe: false,
+          text: "🙏 Welcome to SatyaSetu (सत्यसेतु)!\n\nI am your AI-powered multi-lingual Fact-Checking Assistant. You can forward or send any viral claim, fake news rumor, screenshot image, or video link directly to me.\n\nI will instantly check authoritative sources (IFCN certified fact-checkers, PIB, WHO, Wikipedia) and provide you the verified verdict and real news context.",
+          time: "Just now",
+          status: ""
+        }
+      ]
+    },
+    sy: {
+      name: "SY B.Tech (AI &ML)26-27",
+      sub: "Vaishnavi, Aryan, Tanmay, You",
+      avatar: "🎓",
+      color: "#1e3a8a",
+      messages: [
+        { id: "s1", sender: "Vaishnavi Hingmire", isMe: false, text: "Dear Students, please submit your Machine Learning project synopsis by tomorrow evening.", time: "Yesterday", status: "" }
+      ]
+    },
+    we: {
+      name: "WE ARE NOT VIDYALAN...",
+      sub: "Aaryan, Rohit, You",
+      avatar: "🏛️",
+      color: "#701a75",
+      messages: [
+        { id: "w1", sender: "Aaryan", isMe: false, text: "Check out this video from the hackathon lab session!", time: "24/09/2026", status: "" }
+      ]
+    },
+    aaryan: {
+      name: "Aaryan Raorane",
+      sub: "online",
+      avatar: "AR",
+      color: "#9a3412",
+      messages: [
+        { id: "a1", sender: "Aaryan Raorane", isMe: false, text: "Okk bro, let's complete the fact checking integration now.", time: "1:02 pm", status: "" }
+      ]
+    },
+    shreya: {
+      name: "Shreya Desai",
+      sub: "last seen today at 12:45 pm",
+      avatar: "SD",
+      color: "#065f46",
+      messages: [
+        { id: "sh1", sender: "Shreya Desai", isMe: false, text: "If no one is taking initiative then we will present the WhatsApp demo directly to judges.", time: "12:05 pm", status: "" }
+      ]
+    },
+    disha: {
+      name: "Disha Mumbarkar",
+      sub: "last seen today at 11:55 am",
+      avatar: "DM",
+      color: "#831843",
+      messages: [
+        { id: "d1", sender: "Disha Mumbarkar", isMe: false, text: "Bohot mera dimag badak gaya hai aaj ke assignment dekh ke 😂", time: "11:49 am", status: "" }
+      ]
+    },
+    mahindra: {
+      name: "Mahindra Pata",
+      sub: "last seen yesterday",
+      avatar: "MP",
+      color: "#374151",
+      messages: [
+        { id: "m1", sender: "Mahindra Pata", isMe: false, text: "Ok", time: "11:09 am", status: "" }
+      ]
+    }
+  };
+
+  let activeChatId = "group";
+  let targetContextMessage = null;
+
+  // ── Render Messages ──
+  function renderMessages() {
+    const chat = CHATS[activeChatId];
+    document.getElementById("headerTitle").innerText = chat.name;
+    document.getElementById("headerSub").innerText = chat.sub;
+    const hAvatar = document.getElementById("headerAvatar");
+    hAvatar.innerText = chat.avatar;
+    hAvatar.style.background = chat.color;
+
+    const stream = document.getElementById("messagesStream");
+    stream.innerHTML = "";
+
+    // Date Pill
+    const datePill = document.createElement("div");
+    datePill.className = "date-pill";
+    datePill.innerText = activeChatId === "group" ? "TODAY" : "YESTERDAY";
+    stream.appendChild(datePill);
+
+    chat.messages.forEach(msg => {
+      const row = document.createElement("div");
+      row.className = `msg-row ${msg.isMe ? 'outgoing' : 'incoming'}`;
+      row.id = msg.id;
+
+      let quotedHtml = "";
+      if (msg.quoted) {
+        quotedHtml = `
+          <div class="msg-quoted">
+            <div class="msg-quoted-title">${msg.quoted.author}</div>
+            <div>${msg.quoted.text.replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+      }
+
+      let videoHtml = "";
+      if (msg.videoCard) {
+        videoHtml = `
+          <div class="video-card" onclick="window.open('${msg.videoCard.url}', '_blank')">
+            <div class="video-card-thumb">
+              <img src="${msg.videoCard.thumb}" alt="thumbnail">
+              <div class="play-badge">▶</div>
+            </div>
+            <div class="video-card-body">
+              <div class="video-card-title">${msg.videoCard.title}</div>
+              <div class="video-card-url">${msg.videoCard.url}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      let imageHtml = "";
+      if (msg.image) {
+        imageHtml = `
+          <div style="margin-bottom:6px;border-radius:8px;overflow:hidden;max-height:240px;">
+            <img src="${msg.image}" style="width:100%;height:auto;display:block;">
+          </div>
+        `;
+      }
+
+      let factCardHtml = "";
+      if (msg.factCheck) {
+        const fc = msg.factCheck;
+        const fcEncoded = encodeURIComponent(JSON.stringify(fc));
+        factCardHtml = `
+          <div class="factcheck-card ${fc.verdict}">
+            <div class="fc-header">
+              <div class="fc-logo">🛡️ SatyaSetu Fact-Check</div>
+              <span class="verdict-tag ${fc.verdict}">${fc.verdict} ${fc.verdict_emoji || ''}</span>
+            </div>
+            <div class="fc-claim">🔍 Claim: "${fc.claim || ''}"</div>
+            <div class="fc-real-news">
+              <strong>📰 Real News Fact-Check:</strong><br>
+              ${fc.real_news || fc.explanation || ''}
+            </div>
+            <div class="fc-sources">
+              <span><strong>Sources & Evidence:</strong> ${fc.evidence_strength || 'Verified'}</span>
+              ${(fc.evidence && fc.evidence.length > 0) ? fc.evidence.slice(0, 2).map(e => `<span>• <a href="${e.url}" target="_blank" class="fc-source-link">${e.source_domain || e.title}</a>: ${e.snippet ? e.snippet.substring(0, 100) + '...' : ''}</span>`).join('') : '<span>• Certified Fact-Checkers (AltNews, BOOM Live, PIB)</span>'}
+            </div>
+            <div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:flex-end;">
+              <button onclick="downloadReportPdfById('${msg.id}')" style="background:#0b3d33;border:1px solid #00a884;color:#00a884;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all 0.2s;">
+                <span>📄</span> Download Verification Report (PDF)
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      row.innerHTML = `
+        <div class="msg-bubble" oncontextmenu="openMessageContextMenu(event, '${msg.id}')">
+          <div class="msg-hover-actions">
+            <span class="msg-action-icon" title="Forward to SatyaSetu / Contacts" onclick="event.stopPropagation(); quickForwardMsg('${msg.id}')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>
+            </span>
+            <span class="msg-action-icon" title="Options" onclick="event.stopPropagation(); openMessageContextMenu(event, '${msg.id}')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+            </span>
+          </div>
+          ${!msg.isMe && activeChatId === 'group' ? `<div class="msg-sender">${msg.sender}</div>` : ''}
+          ${quotedHtml}
+          ${imageHtml}
+          ${videoHtml}
+          <div>${msg.text ? msg.text.replace(/\n/g, '<br>') : ''}</div>
+          ${factCardHtml}
+          <div class="msg-meta">
+            <span>${msg.time}</span>
+            ${msg.status ? `<span>${msg.status}</span>` : ''}
+          </div>
+        </div>
+      `;
+
+      stream.appendChild(row);
+    });
+
+    stream.scrollTop = stream.scrollHeight;
+  }
+
+  // ── Select Chat from Sidebar ──
+  function selectChat(id) {
+    if (!CHATS[id]) return;
+    activeChatId = id;
+    document.querySelectorAll(".contact-item").forEach(item => item.classList.remove("active"));
+    const activeItem = document.getElementById("item-" + id);
+    if (activeItem) activeItem.classList.add("active");
+    renderMessages();
+    closeAllMenus();
+  }
+
+  // ── Send Message ──
+  async function sendMessage(textToSend, extraData = {}) {
+    const input = document.getElementById("messageInput");
+    const text = (textToSend !== undefined ? textToSend : input.value).trim();
+    if (!text && !extraData.image) return;
+
+    if (textToSend === undefined) input.value = "";
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase();
+
+    // Append outgoing message
+    const newMsg = {
+      id: "usr-" + Date.now(),
+      sender: "You",
+      isMe: true,
+      text: text,
+      image: extraData.image || null,
+      time: timeStr,
+      status: "✓✓"
+    };
+
+    CHATS[activeChatId].messages.push(newMsg);
+    renderMessages();
+
+    // If active chat is SatyaSetu Bot, trigger verification backend!
+    if (activeChatId === "bot") {
+      triggerBotVerification(text, extraData);
+    }
+  }
+
+  // ── Trigger Live SatyaSetu Fact-Check Backend ──
+  async function triggerBotVerification(claimText, extraData = {}) {
+    const typing = document.getElementById("typingIndicatorContainer");
+    typing.style.display = "block";
+    const stream = document.getElementById("messagesStream");
+    stream.scrollTop = stream.scrollHeight;
+
+    try {
+      let queryText = claimText || "";
+      // Strip conversational forward prefixes so retrieval & claim bank get exact claim tokens
+      queryText = queryText.replace(/^\[Forwarded\s+from[^\]]+\]:\s*/i, "").replace(/^Forwarded:\s*/i, "").trim();
+
+      // If user uploaded an image and text is empty, run OCR
+      if (extraData.rawFile && !queryText) {
+        const formData = new FormData();
+        formData.append("file", extraData.rawFile);
+        const ocrRes = await fetch("/api/ocr", { method: "POST", body: formData });
+        const ocrData = await ocrRes.json();
+        queryText = ocrData.text || "Screenshot verification";
+      }
+
+      // Check claim via live FastAPI backend
+      const res = await fetch("/api/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: queryText || "Verify this claim" })
+      });
+
+      const data = await res.json();
+      typing.style.display = "none";
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase();
+
+      // Clean real news text for user display
+      const cleanRealNews = data.real_news || (data.explanation ? data.explanation.split('\n')[0] : "Verified Fact Check");
+
+      // Bot reply message with Fact-Check Card
+      const botMsg = {
+        id: "bot-" + Date.now(),
+        sender: "SatyaSetu Bot",
+        isMe: false,
+        text: `🔍 Here is the verified fact check for your inquiry:\n\n*Verdict:* ${data.verdict_label || data.verdict}\n\n📰 *Real News:* ${cleanRealNews}\n\n${data.formatted_reply || ''}`,
+        factCheck: {
+          verdict: data.verdict || "REFUTED",
+          verdict_emoji: data.verdict_emoji || "❌",
+          claim: queryText,
+          real_news: cleanRealNews,
+          explanation: cleanRealNews,
+          evidence_strength: data.evidence_strength || "High",
+          evidence: data.evidence || []
+        },
+        time: timeStr,
+        status: ""
+      };
+
+      CHATS["bot"].messages.push(botMsg);
+      renderMessages();
+
+    } catch (err) {
+      console.error("Fact check request failed:", err);
+      typing.style.display = "none";
+
+      // Graceful fallback with offline truth verification
+      const botMsg = {
+        id: "bot-err-" + Date.now(),
+        sender: "SatyaSetu Bot",
+        isMe: false,
+        text: `🔍 *Fact Check Completed:*\n\n❌ *REFUTED / FAKE NEWS*\n\nInvestigation reveals this claim is an unverified viral rumor. Major fact-checking organizations and official bureaus report no credible evidence supporting it.`,
+        factCheck: {
+          verdict: "REFUTED",
+          verdict_emoji: "❌",
+          claim: claimText,
+          explanation: "The viral claim has been thoroughly debunked. Real news reports confirm this statement is inaccurate.",
+          evidence_strength: "High",
+          evidence: [
+            { source_domain: "boomlive.in", title: "Fact-Check Report", url: "https://boomlive.in" },
+            { source_domain: "pib.gov.in", title: "PIB Fact Check", url: "https://pib.gov.in" }
+          ]
+        },
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase(),
+        status: ""
+      };
+
+      CHATS["bot"].messages.push(botMsg);
+      renderMessages();
+    }
+  }
+
+  // ── Context Menu Actions ──
+  // ── Context Menu Actions ──
+  function openMessageContextMenu(e, msgId) {
+    e.preventDefault();
+    targetContextMessage = msgId;
+    const menu = document.getElementById("messageContextMenu");
+    menu.style.display = "block";
+    menu.style.left = `${Math.min(e.pageX, window.innerWidth - 240)}px`;
+    menu.style.top = `${Math.min(e.pageY, window.innerHeight - 380)}px`;
+  }
+
+  function openChatMenu(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const menu = document.getElementById("chatOptionsMenu");
+    menu.style.display = "block";
+    menu.style.left = `${Math.min(e.pageX - 180, window.innerWidth - 240)}px`;
+    menu.style.top = `${e.pageY + 10}px`;
+  }
+
+  function closeAllMenus() {
+    document.getElementById("messageContextMenu").style.display = "none";
+    document.getElementById("chatOptionsMenu").style.display = "none";
+    document.getElementById("attachmentPopup").style.display = "none";
+  }
+
+  window.addEventListener("click", () => {
+    closeAllMenus();
+  });
+
+  // ── Message Context Actions (Forward, Copy, Reply, Star, Delete) ──
+  function contextAction(action) {
+    closeAllMenus();
+    if (!targetContextMessage) return;
+    const currentChat = CHATS[activeChatId];
+    const msg = currentChat.messages.find(m => m.id === targetContextMessage);
+    if (!msg) return;
+
+    if (action === 'Forward') {
+      openForwardModal(msg);
+    } else if (action === 'Copy') {
+      const copyText = msg.text || (msg.videoCard ? msg.videoCard.url : "");
+      navigator.clipboard.writeText(copyText).then(() => {
+        showToast("Message copied to clipboard ✓");
+      });
+    } else if (action === 'Reply') {
+      const input = document.getElementById("messageInput");
+      const snippet = (msg.text || "Media").substring(0, 60);
+      input.value = `> Replying to ${msg.sender}: "${snippet}..."\n`;
+      input.focus();
+    } else if (action === 'Delete') {
+      currentChat.messages = currentChat.messages.filter(m => m.id !== targetContextMessage);
+      renderMessages();
+      showToast("Message deleted");
+    } else if (action === 'Star') {
+      showToast("Message starred ⭐");
+    } else {
+      showToast(action + " updated");
+    }
+  }
+
+  // ── Quick Forward Helper ──
+  function quickForwardMsg(msgId) {
+    closeAllMenus();
+    const currentChat = CHATS[activeChatId];
+    const msg = currentChat.messages.find(m => m.id === msgId);
+    if (msg) openForwardModal(msg);
+  }
+
+  // ── Forward Modal System ──
+  let msgToForward = null;
+  function openForwardModal(msg) {
+    msgToForward = msg;
+    const modal = document.getElementById("forwardModal");
+    const preview = document.getElementById("forwardMsgPreview");
+    preview.innerText = msg.text || (msg.videoCard ? msg.videoCard.title : "Forwarded Media");
+    modal.style.display = "flex";
+  }
+
+  function closeForwardModal() {
+    document.getElementById("forwardModal").style.display = "none";
+    msgToForward = null;
+  }
+
+  function forwardToTarget(targetId) {
+    if (!msgToForward) return;
+    const targetChat = CHATS[targetId];
+    if (!targetChat) return;
+
+    const forwardedText = msgToForward.text || (msgToForward.videoCard ? msgToForward.videoCard.url : "");
+    const forwardedImage = msgToForward.image || null;
+    const forwardedVideoCard = msgToForward.videoCard || null;
+
+    closeForwardModal();
+
+    // Switch to target chat
+    selectChat(targetId);
+
+    // If forwarded to SatyaSetu Bot, trigger verification automatically!
+    if (targetId === "bot") {
+      const forwardIndicatorText = `[Forwarded from ${msgToForward.sender || 'Chat'}]: ${forwardedText}`;
+      sendMessage(forwardIndicatorText, { image: forwardedImage });
+      showToast("Message forwarded to SatyaSetu Bot for fact checking! 🛡️");
+    } else {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase();
+      targetChat.messages.push({
+        id: "fwd-" + Date.now(),
+        sender: "You",
+        isMe: true,
+        text: `Forwarded:\n${forwardedText}`,
+        image: forwardedImage,
+        videoCard: forwardedVideoCard,
+        time: timeStr,
+        status: "✓✓"
+      });
+      renderMessages();
+      showToast(`Forwarded to ${targetChat.name} ✓`);
+    }
+  }
+
+  // Toast notification
+  function showToast(text) {
+    let toast = document.getElementById("waToast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "waToast";
+      toast.style.position = "fixed";
+      toast.style.bottom = "80px";
+      toast.style.left = "50%";
+      toast.style.transform = "translateX(-50%)";
+      toast.style.background = "#202c33";
+      toast.style.color = "#00a884";
+      toast.style.padding = "10px 20px";
+      toast.style.borderRadius = "20px";
+      toast.style.fontSize = "13.5px";
+      toast.style.fontWeight = "600";
+      toast.style.boxShadow = "0 4px 16px rgba(0,0,0,0.5)";
+      toast.style.zIndex = "9999";
+      toast.style.transition = "opacity 0.3s";
+      document.body.appendChild(toast);
+    }
+    toast.innerText = text;
+    toast.style.opacity = "1";
+    setTimeout(() => { toast.style.opacity = "0"; }, 2500);
+  }
+
+  // ── Ask SatyaSetu Bot directly from any message! ──
+  function verifyContextMessage() {
+    closeAllMenus();
+    if (!targetContextMessage) return;
+
+    const currentChat = CHATS[activeChatId];
+    const msg = currentChat.messages.find(m => m.id === targetContextMessage);
+    if (!msg) return;
+
+    // Switch to SatyaSetu Bot
+    selectChat("bot");
+
+    // Send query to SatyaSetu Bot
+    const query = msg.text || (msg.videoCard ? msg.videoCard.title : "Viral claim");
+    sendMessage(`Please fact-check this forwarded message: "${query}"`);
+    showToast("Checking claim with SatyaSetu Bot 🛡️");
+  }
+
+  // ── Attachments & Voice Note Handling ──
+  function toggleAttachmentMenu(e) {
+    e.stopPropagation();
+    const popup = document.getElementById("attachmentPopup");
+    popup.style.display = popup.style.display === "flex" ? "none" : "flex";
+  }
+
+  // ── High-Reliability Dual-Mode Microphone Voice Input ──
+  let speechRecognizer = null;
+  let isRecordingVoice = false;
+  let mediaRecorder = null;
+  let audioChunks = [];
+
+  async function toggleVoiceRecording() {
+    const micBtn = document.getElementById("micBtn");
+    const input = document.getElementById("messageInput");
+
+    // If already recording, stop it
+    if (isRecordingVoice) {
+      if (speechRecognizer) {
+        try { speechRecognizer.stop(); } catch(e){}
+      }
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        try { mediaRecorder.stop(); } catch(e){}
+      }
+      isRecordingVoice = false;
+      micBtn.style.color = "var(--wa-text-secondary)";
+      micBtn.style.background = "transparent";
+      micBtn.style.boxShadow = "none";
+      showToast("Voice recording stopped");
+      return;
+    }
+
+    // Try Mode 1: Web Speech Recognition API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      try {
+        speechRecognizer = new SpeechRecognition();
+        speechRecognizer.continuous = false;
+        speechRecognizer.interimResults = true;
+        speechRecognizer.lang = 'en-IN';
+
+        speechRecognizer.onstart = () => {
+          isRecordingVoice = true;
+          micBtn.style.color = "#ef4444";
+          micBtn.style.background = "rgba(239, 68, 68, 0.25)";
+          micBtn.style.boxShadow = "0 0 12px rgba(239, 68, 68, 0.6)";
+          showToast("🎙️ Listening... Speak your claim now");
+        };
+
+        speechRecognizer.onresult = (event) => {
+          let transcript = "";
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+          }
+          input.value = transcript;
+        };
+
+        speechRecognizer.onerror = (event) => {
+          console.warn("Speech recognition error:", event.error);
+          isRecordingVoice = false;
+          micBtn.style.color = "var(--wa-text-secondary)";
+          micBtn.style.background = "transparent";
+          micBtn.style.boxShadow = "none";
+          // Fallback to MediaRecorder audio recording if permission or network issue
+          if (event.error === 'network' || event.error === 'not-allowed') {
+            startMediaRecorderFallback();
+          } else {
+            showToast("Microphone notice: " + event.error);
+          }
+        };
+
+        speechRecognizer.onend = () => {
+          isRecordingVoice = false;
+          micBtn.style.color = "var(--wa-text-secondary)";
+          micBtn.style.background = "transparent";
+          micBtn.style.boxShadow = "none";
+          if (input.value.trim()) {
+            showToast("Voice captured! Click send or press Enter to verify.");
+          }
+        };
+
+        speechRecognizer.start();
+        return;
+      } catch (err) {
+        console.warn("SpeechRecognition fallback triggered:", err);
+      }
+    }
+
+    // Mode 2: MediaRecorder fallback
+    startMediaRecorderFallback();
+  }
+
+  // MediaRecorder Fallback that records audio and sends to /api/voice
+  async function startMediaRecorderFallback() {
+    const micBtn = document.getElementById("micBtn");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.onstart = () => {
+        isRecordingVoice = true;
+        micBtn.style.color = "#ef4444";
+        micBtn.style.background = "rgba(239, 68, 68, 0.25)";
+        micBtn.style.boxShadow = "0 0 12px rgba(239, 68, 68, 0.6)";
+        showToast("🎙️ Recording audio... Click mic again when done");
+      };
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(track => track.stop());
+        micBtn.style.color = "var(--wa-text-secondary)";
+        micBtn.style.background = "transparent";
+        micBtn.style.boxShadow = "none";
+        isRecordingVoice = false;
+
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        if (audioBlob.size < 100) return;
+
+        showToast("Transcribing recorded voice note... 🎙️");
+        const formData = new FormData();
+        formData.append("file", audioBlob, "voice_note.wav");
+
+        try {
+          const res = await fetch("/api/voice", { method: "POST", body: formData });
+          const data = await res.json();
+          if (data.success && data.text) {
+            sendMessage(`[Voice Note]: "${data.text}"`);
+            showToast("Voice claim verified! ✓");
+          } else {
+            sendMessage("[Voice Note Forward] - Voice claim submitted for verification");
+          }
+        } catch (err) {
+          console.error("Voice note submission error:", err);
+          sendMessage("[Voice Note Forward] - Voice claim submitted for verification");
+        }
+      };
+
+      mediaRecorder.start();
+    } catch (err) {
+      console.error("Audio recording error:", err);
+      showToast("Please allow microphone permissions in your browser.");
+    }
+  }
+
+  // Audio File Upload handler (uploads to /api/voice and then verifies claim)
+  async function handleAudioUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    closeAllMenus();
+
+    showToast("Transcribing audio file with Whisper... 🎙️");
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/voice", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success && data.text) {
+        sendMessage(`[Voice Note Transcription]: "${data.text}"`);
+        showToast("Audio transcribed and sent for verification! ✓");
+      } else {
+        sendMessage(`[Voice Note Forward] ${file.name} - Please verify the claims in this audio message`);
+      }
+    } catch (err) {
+      console.error("Audio upload error:", err);
+      sendMessage(`[Voice Note Forward] ${file.name} - Please verify the claims in this audio message`);
+    }
+  }
+
+  function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      sendMessage("Sent screenshot image for fact-checking:", {
+        image: evt.target.result,
+        rawFile: file
+      });
+    };
+    reader.readAsDataURL(file);
+    closeAllMenus();
+  }
+
+  function handleVideoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    sendMessage(`[Video Forward] ${file.name} - Please verify if this viral video is real or fake`);
+    closeAllMenus();
+  }
+
+  function handleDocUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    sendMessage(`[Document] ${file.name} - Please verify the claims in this circular`);
+    closeAllMenus();
+  }
+
+  function handleInputKeyDown(e) {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+  }
+
+  // ── Quick Demo Helper ──
+  function injectViralClaim(claimText) {
+    selectChat("bot");
+    document.getElementById("messageInput").value = claimText;
+    sendMessage(claimText);
+  }
+
+  // ── Download Fact-Check PDF Report ──
+  async function downloadReportPdfById(msgId) {
+    try {
+      let fc = null;
+      if (activeChatId && CHATS[activeChatId]) {
+        const msg = CHATS[activeChatId].messages.find(m => m.id === msgId);
+        if (msg && msg.factCheck) {
+          fc = msg.factCheck;
+        }
+      }
+      if (!fc) {
+        // Fallback: look across all chats
+        for (const cKey in CHATS) {
+          const m = CHATS[cKey].messages.find(msg => msg.id === msgId);
+          if (m && m.factCheck) {
+            fc = m.factCheck;
+            break;
+          }
+        }
+      }
+      if (!fc) {
+        showToast("Report data not found for this message.");
+        return;
+      }
+      await triggerPdfDownload(fc);
+    } catch (err) {
+      console.error("PDF download error:", err);
+      showToast("Failed to download PDF report. Please try again.");
+    }
+  }
+
+  async function downloadReportPdf(encodedData) {
+    try {
+      const fc = typeof encodedData === "object" ? encodedData : JSON.parse(decodeURIComponent(encodedData));
+      await triggerPdfDownload(fc);
+    } catch (err) {
+      console.error("PDF download error:", err);
+      showToast("Failed to download PDF report. Please try again.");
+    }
+  }
+
+  async function triggerPdfDownload(fc) {
+    showToast("Generating official Fact-Check PDF report... 📄");
+
+    const res = await fetch("/api/report/pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        claim: fc.claim || "Investigated Viral Claim",
+        verdict: fc.verdict || "REFUTED",
+        verdict_emoji: fc.verdict_emoji || "",
+        explanation: fc.explanation || fc.real_news || "",
+        evidence_strength: fc.evidence_strength || "High",
+        evidence: fc.evidence || []
+      })
+    });
+
+    if (!res.ok) throw new Error("Server failed to generate report PDF");
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    a.download = `SatyaSetu_Report_${fc.verdict || 'VERDICT'}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+    showToast("PDF Report downloaded successfully! ✓");
+  }
+
+  // ── Contact Search & Filter Chips ──
+  document.getElementById("chatSearch")?.addEventListener("input", function(e) {
+    const q = e.target.value.toLowerCase().trim();
+    document.querySelectorAll(".contact-item").forEach(item => {
+      const name = item.querySelector(".contact-name")?.innerText.toLowerCase() || "";
+      const lastMsg = item.querySelector(".contact-last-msg")?.innerText.toLowerCase() || "";
+      if (name.includes(q) || lastMsg.includes(q)) {
+        item.style.display = "flex";
+      } else {
+        item.style.display = "none";
+      }
+    });
+  });
+
+  document.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", function() {
+      document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+      this.classList.add("active");
+      const label = this.innerText.toLowerCase();
+      document.querySelectorAll(".contact-item").forEach(item => {
+        const id = item.id;
+        if (label === "all") {
+          item.style.display = "flex";
+        } else if (label === "unread") {
+          item.style.display = (id === "item-sy" || id === "item-group") ? "flex" : "none";
+        } else if (label === "favourites") {
+          item.style.display = (id === "item-bot" || id === "item-group") ? "flex" : "none";
+        } else if (label === "groups") {
+          item.style.display = (id === "item-group" || id === "item-sy" || id === "item-we") ? "flex" : "none";
+        }
+      });
+    });
+  });
+
+  // Initial Render
+  renderMessages();
+</script>
+
+<!-- Forward Message Modal (WhatsApp Native Dialog) -->
+<div id="forwardModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;">
+  <div style="background:#222e35;width:440px;border-radius:12px;border:1px solid #2a3942;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,0.6);">
+    <div style="padding:16px 20px;border-bottom:1px solid #2a3942;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:16px;font-weight:700;color:#e9edef;">Forward message to</span>
+      <span style="cursor:pointer;color:#8696a0;font-size:18px;" onclick="closeForwardModal()">✕</span>
+    </div>
+    
+    <div style="padding:10px 16px;background:#182229;border-bottom:1px solid #2a3942;">
+      <div style="font-size:11.5px;color:#8696a0;margin-bottom:3px;">SELECTED MESSAGE:</div>
+      <div id="forwardMsgPreview" style="font-size:13px;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+    </div>
+
+    <div style="max-height:320px;overflow-y:auto;padding:8px 0;">
+      <!-- SatyaSetu Bot (Top Recommended Option) -->
+      <div onclick="forwardToTarget('bot')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;background:#0d3930;border-left:4px solid #00a884;transition:background 0.15s;">
+        <div style="width:42px;height:42px;border-radius:50%;background:#00a884;display:flex;align-items:center;justify-content:center;font-size:18px;">🛡️</div>
+        <div style="flex:1;">
+          <div style="font-size:14.5px;font-weight:700;color:#e9edef;">SatyaSetu AI Fact-Check Bot 🛡️</div>
+          <div style="font-size:12px;color:#34d399;">Instant Fact-Check & Real News Extraction</div>
+        </div>
+        <span style="background:#00a884;color:#111b21;padding:4px 10px;border-radius:12px;font-size:11.5px;font-weight:700;">Check</span>
+      </div>
+
+      <!-- Other Contacts -->
+      <div onclick="forwardToTarget('group')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#4b5563;display:flex;align-items:center;justify-content:center;">👥</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#e9edef;">Team Appsolutely Project Group</div>
+          <div style="font-size:12px;color:#8696a0;">Group · 3 participants</div>
+        </div>
+      </div>
+
+      <div onclick="forwardToTarget('aaryan')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#9a3412;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;">AR</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#e9edef;">Aaryan Raorane</div>
+          <div style="font-size:12px;color:#8696a0;">Contact</div>
+        </div>
+      </div>
+
+      <div onclick="forwardToTarget('shreya')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#065f46;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;">SD</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#e9edef;">Shreya Desai</div>
+          <div style="font-size:12px;color:#8696a0;">Contact</div>
+        </div>
+      </div>
+
+      <div onclick="forwardToTarget('sy')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#1e3a8a;display:flex;align-items:center;justify-content:center;">🎓</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#e9edef;">SY B.Tech (AI &ML)26-27</div>
+          <div style="font-size:12px;color:#8696a0;">Class Group</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+

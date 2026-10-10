@@ -67,8 +67,13 @@ def load_claim_bank(force_reload: bool = False) -> List[Dict[str, Any]]:
 
 
 def _tokenize(text: str) -> set[str]:
-    """Tokenize text into lowercase alpha words, excluding simple stopwords."""
-    stopwords = {"the", "a", "an", "is", "are", "in", "on", "of", "to", "and", "or", "for", "with", "causes", "issue", "issues"}
+    """Tokenize text into lowercase alpha words, excluding conversational and grammatical stopwords."""
+    stopwords = {
+        "the", "a", "an", "is", "are", "in", "on", "of", "to", "and", "or", "for", "with",
+        "causes", "issue", "issues", "there", "that", "this", "us", "we", "all", "our",
+        "only", "him", "her", "he", "she", "it", "they", "them", "from", "at", "by", "be",
+        "was", "were", "been", "has", "have", "had", "do", "does", "did", "bad", "news",
+    }
     words = re.findall(r"\b[a-zA-Z0-9]{2,}\b", text.lower())
     return {w for w in words if w not in stopwords}
 
@@ -115,7 +120,10 @@ def lookup_claim_bank(claim: str, min_overlap: float = 0.5) -> Optional[ClaimBan
                 continue
 
             intersection = claim_tokens.intersection(cand_tokens)
-            score = len(intersection) / max(len(claim_tokens), len(cand_tokens))
+            # Use max of Jaccard and overlap coefficient so long forwards match concise claims
+            overlap_coeff = len(intersection) / min(len(claim_tokens), len(cand_tokens))
+            jaccard = len(intersection) / max(len(claim_tokens), len(cand_tokens))
+            score = max(jaccard, 0.85 * overlap_coeff)
 
             if score > highest_score and score >= min_overlap:
                 # 2. Key detail conflict check (AT33)

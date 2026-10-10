@@ -58,6 +58,20 @@ def _template_explanation(result: ClaimResult) -> str:
     strength_label, strength_detail = compute_evidence_strength(result.evidence)
     ev_text = _top_evidence_text(result)
 
+    # If we have an exact gold match from the pre-verified claim bank or authoritative debunking
+    if result.reason_code == "CLAIM_BANK_MATCH" and result.evidence:
+        real_fact = result.evidence[0].snippet.strip()
+        lines = [
+            f"Verdict: {emoji} {label}",
+            f"Real News Fact Check: {real_fact}",
+            f"Evidence strength: {strength_label} · {strength_detail}",
+            f'Claim: "{result.claim[:200]}"',
+            "",
+            "Evidence summary:",
+            ev_text,
+        ]
+        return "\n".join(lines)
+
     lines = [
         f"Verdict: {emoji} {label}",
         f"Evidence strength: {strength_label} · {strength_detail}",

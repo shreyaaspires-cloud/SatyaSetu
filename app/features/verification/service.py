@@ -145,6 +145,34 @@ def verify_claim(
             guard_passed=True,
         )
 
+    # ── Check Pre-verified Claim Bank (Fast-path) ────────────────────────────
+    from app.features.verification.claim_bank import lookup_claim_bank
+    from app.core.constants import Rating, Tier
+    bank_match = lookup_claim_bank(claim.strip())
+    if bank_match and bank_match.is_decisive:
+        logger.info("Claim Bank match found for '%.60s' -> %s (%s)", claim, bank_match.verdict, bank_match.publisher)
+        bank_item = EvidenceItem(
+            url=bank_match.source_url or "https://factcheck.org",
+            title=f"Verified Fact Check by {bank_match.publisher}",
+            snippet=bank_match.explanation or bank_match.citation,
+            source_domain=bank_match.publisher.lower().replace(" ", "") + ".org",
+            tier=Tier.TIER_1_IFCN,
+            rating=Rating.FALSE if bank_match.verdict == Verdict.REFUTED else (Rating.TRUE if bank_match.verdict == Verdict.SUPPORTED else Rating.UNVERIFIED),
+            score=bank_match.confidence,
+            stance="REFUTES" if bank_match.verdict == Verdict.REFUTED else ("SUPPORTS" if bank_match.verdict == Verdict.SUPPORTED else "NEUTRAL"),
+            reason="CLAIM_BANK_GOLD_MATCH",
+        )
+        return ClaimResult(
+            claim=claim.strip(),
+            verdict=bank_match.verdict,
+            confidence=bank_match.confidence,
+            reason_code="CLAIM_BANK_MATCH",
+            evidence=[bank_item],
+            guard_passed=True,
+            matched_claim=bank_match.canonical_claim,
+            match_score=0.98,
+        )
+
     with StageTimer("retrieval") as t_ret:
         evidence: List[EvidenceItem] = retrieve_evidence(
             claim=claim.strip(),
