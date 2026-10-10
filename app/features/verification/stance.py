@@ -89,6 +89,28 @@ _REFUTE_KEYWORDS = {
 }
 
 
+def _has_negated_refute_signal(premise_lower: str) -> bool:
+    """
+    Returns True only when a REFUTE keyword appears AND is NOT preceded by
+    a negation word within 50 characters before it.
+
+    "NOT a hoax"     → False   "claim is a hoax" → True
+    "no evidence"    → False   "confirmed false"  → True
+    """
+    _NEGATION_PATTERN = r"\b(not|no|never|deny|denying|debunking the|isn't|aren't|doesn't|don't)\b"
+
+    for kw in _REFUTE_KEYWORDS:
+        if kw not in premise_lower:
+            continue
+        kw_idx = premise_lower.find(kw)
+        lookbehind_window = premise_lower[max(0, kw_idx - 50): kw_idx]
+        if re.search(_NEGATION_PATTERN, lookbehind_window):
+            continue  # negation precedes keyword → skip
+        return True  # genuine refute signal
+
+    return False
+
+
 def _gemini_stance_batch(claim: str, evidence_items: List[EvidenceItem]) -> bool:
     """
     Classify the stance of evidence items against the claim in a single Gemini call.
@@ -255,14 +277,15 @@ def score_stance(
     if _gemini_stance_batch(claim, _to_score):
         return evidence_items
 
-    # 3. Upgraded lexical fallback
+    # 3. Negation-aware lexical fallback
     for item in _to_score:
         premise = f"{item.title}. {item.snippet}"[:500].strip()
         premise_lower = premise.lower()
         overlap = _lexical_overlap_score(claim, premise)
-        has_refute_signal = any(kw in premise_lower for kw in _REFUTE_KEYWORDS)
 
-        if has_refute_signal and overlap > 0.15:
+        genuine_refute_signal = _has_negated_refute_signal(premise_lower)
+
+        if genuine_refute_signal and overlap > 0.20:   # raised from 0.15
             item.stance = "REFUTES"
             item.score = round(min(0.90, max(0.60, overlap + 0.3)), 3)
         elif overlap > 0.50:

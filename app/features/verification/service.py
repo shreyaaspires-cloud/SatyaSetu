@@ -117,7 +117,7 @@ Output strictly valid JSON with NO markdown formatting:
 def verify_claim(
     claim: str,
     keywords: Optional[List[str]] = None,
-    budget_ms: int = 8000,
+    budget_ms: int = 12000,
 ) -> ClaimResult:
     """
     Run end-to-end verification for a single claim.
@@ -157,24 +157,54 @@ def verify_claim(
     from app.core.constants import Rating, Tier
     bank_match = lookup_claim_bank(claim.strip())
     if bank_match and bank_match.is_decisive:
-        logger.info("Claim Bank match found for '%.60s' -> %s (%s)", claim, bank_match.verdict, bank_match.publisher)
+        logger.info(
+            "Claim Bank match found for '%.60s' -> %s (%s)",
+            claim, bank_match.verdict, bank_match.publisher,
+        )
         bank_item = EvidenceItem(
             url=bank_match.source_url or "https://factcheck.org",
             title=f"Verified Fact Check by {bank_match.publisher}",
             snippet=bank_match.explanation or bank_match.citation,
             source_domain=bank_match.publisher.lower().replace(" ", "") + ".org",
             tier=Tier.TIER_1_IFCN,
-            rating=Rating.FALSE if bank_match.verdict == Verdict.REFUTED else (Rating.TRUE if bank_match.verdict == Verdict.SUPPORTED else Rating.UNVERIFIED),
+            rating=(
+                Rating.FALSE if bank_match.verdict == Verdict.REFUTED
+                else Rating.TRUE if bank_match.verdict == Verdict.SUPPORTED
+                else Rating.UNVERIFIED
+            ),
             score=bank_match.confidence,
-            stance="REFUTES" if bank_match.verdict == Verdict.REFUTED else ("SUPPORTS" if bank_match.verdict == Verdict.SUPPORTED else "NEUTRAL"),
+            stance=(
+                "REFUTES" if bank_match.verdict == Verdict.REFUTED
+                else "SUPPORTS" if bank_match.verdict == Verdict.SUPPORTED
+                else "NEUTRAL"
+            ),
             reason="CLAIM_BANK_GOLD_MATCH",
         )
+
+        # For SUPPORTED (TRUE) claims: also fetch live evidence for richer explanation.
+        # For REFUTED: skip — bank match is authoritative, don't risk adding noise.
+        if bank_match.verdict == Verdict.SUPPORTED:
+            try:
+                live_evidence = retrieve_evidence(
+                    claim=claim.strip(),
+                    keywords=None,
+                    budget_ms=6000,
+                )
+                combined_evidence = [bank_item] + live_evidence[:3]
+            except Exception as exc:
+                logger.warning(
+                    "Live evidence fetch failed for TRUE bank claim: %s. Bank item only.", exc
+                )
+                combined_evidence = [bank_item]
+        else:
+            combined_evidence = [bank_item]
+
         return ClaimResult(
             claim=claim.strip(),
             verdict=bank_match.verdict,
             confidence=bank_match.confidence,
             reason_code="CLAIM_BANK_MATCH",
-            evidence=[bank_item],
+            evidence=combined_evidence,
             guard_passed=True,
             matched_claim=bank_match.canonical_claim,
             match_score=0.98,
@@ -234,7 +264,7 @@ def verify_claim(
 def batch_verify_claims(
     claims: List[str],
     keywords: Optional[List[str]] = None,
-    budget_ms: int = 8000,
+    budget_ms: int = 12000,
 ) -> List[ClaimResult]:
     """
     Verify multiple claims sequentially.

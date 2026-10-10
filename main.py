@@ -25,5 +25,5 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=settings.port,
-        reload=settings.is_development,
+        reload=settings.env == "development",
     )

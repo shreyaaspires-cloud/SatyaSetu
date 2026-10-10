@@ -71,7 +71,7 @@ class Settings(BaseSettings):
         description="Google Gemini Flash API key",
     )
     gemini_model: str = Field(
-        default="gemini-2.5-flash",
+        default="gemini-3.8-flash",
         description="Gemini model identifier",
     )
     google_fact_check_api_key: str = Field(
@@ -125,7 +125,7 @@ class Settings(BaseSettings):
         description="Maximum claims extracted and verified per incoming message",
     )
     retrieval_budget_ms: int = Field(
-        default=8000,
+        default=12000,
         description="Total time budget in milliseconds for retrieval and verification",
     )
 

@@ -39,9 +39,16 @@ VERDICT_LABEL: dict = {
 }
 
 
-def _top_evidence_text(result: ClaimResult, max_items: int = 3) -> str:
-    """Extract the most relevant evidence snippets as a numbered bullet list."""
-    items = sorted(result.evidence, key=lambda e: -e.score)[:max_items]
+def _top_evidence_text(result: ClaimResult, max_items: int = 5) -> str:
+    """
+    Extract most relevant evidence. Prioritises SUPPORTS/REFUTES over NEUTRAL
+    so Gemini sees decisive evidence first regardless of score ordering.
+    """
+    def _sort_key(e):
+        stance_priority = 0 if e.stance in ("SUPPORTS", "REFUTES") else 1
+        return (stance_priority, -e.score)
+
+    items = sorted(result.evidence, key=_sort_key)[:max_items]
     lines: List[str] = []
     for idx, item in enumerate(items, 1):
         stance_tag = f"[{item.stance}] " if item.stance else ""
@@ -95,47 +102,51 @@ def _template_explanation(result: ClaimResult) -> str:
 
 
 def _gemini_explanation(result: ClaimResult) -> str | None:
-    """
-    Use Gemini Flash to write a fluent, objective 2-3 sentence explanation.
-    Returns None if Gemini key is missing or call fails.
-    """
+    """Use Gemini Flash to write a detailed, objective fact-check explanation."""
     if not settings.gemini_api_key:
         return None
 
     label = VERDICT_LABEL.get(result.verdict, str(result.verdict))
-    ev_text = _top_evidence_text(result, max_items=3)
+    ev_text = _top_evidence_text(result, max_items=5)
 
     from app.core.redaction import redact_for_external
     redacted_claim = redact_for_external(result.claim[:300])
 
     prompt = textwrap.dedent(f"""
-        You are an expert fact-checking assistant for an Indian WhatsApp misinformation detection service.
-        Write a concise, objective 2-3 sentence explanation of the following fact-check verdict.
-        Do NOT use markdown formatting (no bold, asterisks, bullet points, or headers).
-        Keep it under 150 words and suitable for WhatsApp.
+        You are an expert fact-checking journalist for an Indian WhatsApp misinformation detection service.
+        Write a detailed, objective explanation (150-250 words) of the following fact-check verdict.
+        Do NOT use markdown formatting (no bold, asterisks, bullet points, headers, or backticks).
+        Keep it readable as plain WhatsApp text.
 
         Claim: "{redacted_claim}"
         Assessed Verdict: {label}
         Retrieved Evidence:
         {ev_text}
 
-        Guidelines:
-        - If the verdict is REFUTED, explicitly state that the claim is false, a myth, or unscientific, explaining what experts or evidence actually say.
-        - If the verdict is SUPPORTED, summarize the key evidence confirming the fact.
-        - If MISLEADING, clarify what aspect is inaccurate, exaggerated, or pseudoscientific.
-        - Output ONLY the plain text explanation.
+        Your explanation MUST:
+        1. State clearly whether the claim is TRUE, FALSE, MISLEADING, OUTDATED, or UNVERIFIABLE.
+        2. Explain WHY — cite specific facts, numbers, or named sources from the evidence above.
+        3. Provide context — what IS actually true about this topic.
+        4. Name the authoritative sources checked (PIB, WHO, AltNews, BOOM, Factly, etc.) if present.
+        5. If TRUE: explain what makes it accurate and well-corroborated.
+        6. If FALSE: explain exactly what is wrong and what the real fact is.
+        7. Use simple language suitable for Indian WhatsApp users.
+
+        Output ONLY the plain text explanation, no bullet points, no asterisks, no backticks.
     """).strip()
 
     try:
         from google import genai
-
         client = genai.Client(api_key=settings.gemini_api_key)
-        response = client.models.generate_content(
-            model=settings.gemini_model,
-            contents=prompt,
-        )
+        response = client.models.generate_content(model=settings.gemini_model, contents=prompt)
         if response and response.text:
-            cleaned = response.text.strip().replace("*", "").replace("#", "")
+            cleaned = (
+                response.text.strip()
+                .replace("**", "")
+                .replace("*", "")
+                .replace("#", "")
+                .replace("`", "")
+            )
             return cleaned
     except Exception as exc:
         logger.warning("Gemini explanation generation failed: %s", exc)
@@ -173,55 +184,45 @@ def _is_grounded(sentence: str, word_pool: set[str]) -> bool:
     return bool(tokens & word_pool)
 
 
-def _validate_explanation(text: str, result: ClaimResult) -> bool:
+def _filter_explanation_sentences(text: str, result: ClaimResult) -> str:
     """
-    Validate every sentence in the Gemini explanation against evidence.
-    Returns True only if all sentences are grounded in evidence or the claim.
-    When evidence is empty, any non-empty text is considered ungrounded.
+    Filter out ungrounded sentences rather than rejecting the whole explanation.
+    Returns the grounded portion, or empty string to trigger template fallback.
     """
     if not result.evidence:
-        # No evidence retrieved → any generated text is ungrounded
-        return False
+        return ""
 
     import re as _re
     word_pool = _evidence_word_pool(result)
     sentences = [s.strip() for s in _re.split(r"(?<=[.!?])\s+", text.strip()) if s.strip()]
 
+    grounded_sentences = []
     for sentence in sentences:
-        if not _is_grounded(sentence, word_pool):
-            logger.warning(
-                "Explanation sentence has no evidence grounding — rejecting Gemini output. "
-                "Sentence: '%.80s'", sentence
-            )
-            return False
-    return True
+        if _is_grounded(sentence, word_pool):
+            grounded_sentences.append(sentence)
+        else:
+            logger.debug("Filtering out ungrounded sentence: '%.80s'", sentence)
+
+    return " ".join(grounded_sentences)
 
 
 def generate_explanation(result: ClaimResult) -> str:
     """
     Generate a human-readable explanation for a single ClaimResult.
 
-    Steps (T5 hardened):
-      1. Call Gemini for a fluent 2-3 sentence explanation.
-      2. Validate every sentence against evidence word-overlap.
-         If any sentence is ungrounded → discard and fall back to template.
-      3. Fall back to deterministic template if Gemini is unavailable.
-
-    Args:
-        result: A fully-populated ClaimResult (verdict, confidence, evidence).
-
-    Returns:
-        Plain-text explanation string (no markdown).
+    Steps:
+      1. Call Gemini for a detailed 150-250 word explanation.
+      2. Filter individual ungrounded sentences (not all-or-nothing rejection).
+      3. Fall back to deterministic template if Gemini fails or all filtered.
     """
     gemini_text = _gemini_explanation(result)
     if gemini_text:
-        if _validate_explanation(gemini_text, result):
-            logger.debug("Using Gemini-generated explanation (grounding validated).")
-            return gemini_text
-        logger.warning(
-            "Gemini explanation failed grounding check — using template fallback."
-        )
+        filtered = _filter_explanation_sentences(gemini_text, result)
+        if filtered:
+            logger.debug("Using Gemini explanation (%d chars, grounding passed).", len(filtered))
+            return filtered
+        logger.warning("All Gemini sentences failed grounding — falling back to template.")
 
-    logger.debug("Using template explanation (Gemini unavailable or failed grounding).")
+    logger.debug("Using template explanation.")
     return _template_explanation(result)
 

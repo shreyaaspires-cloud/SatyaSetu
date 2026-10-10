@@ -353,7 +353,7 @@ def create_fact_check_pdf(
 
     # Header Ribbon
     page.draw_rect(fitz.Rect(0, 0, 595.3, 70), color=None, fill=(0.04, 0.42, 0.33))  # SatyaSetu green
-    page.insert_text((40, 42), "SATYASETU (सत्यसेतु) 🛡️", fontsize=18, color=(1, 1, 1), fontname="helv")
+    page.insert_text((40, 42), "SATYASETU", fontsize=18, color=(1, 1, 1), fontname="helv")
     page.insert_text((40, 58), "AI-Powered WhatsApp Fact-Checking & Misinformation Verification Engine", fontsize=9, color=(0.8, 0.95, 0.9), fontname="helv")
 
     # Document Metadata Box
@@ -362,67 +362,77 @@ def create_fact_check_pdf(
     page.insert_text((400, 48), f"Generated: {date_str}", fontsize=8.5, color=(1, 1, 1), fontname="helv")
     page.insert_text((400, 60), "Status: Cryptographically Verified", fontsize=8.5, color=(0.7, 1, 0.8), fontname="helv")
 
-    y = 105
+    y = 95
 
     # Section 1: Ingested Viral Claim Box
-    page.draw_rect(fitz.Rect(40, y, 555, y + 65), color=(0.85, 0.85, 0.85), fill=(0.96, 0.97, 0.98))
-    page.insert_text((55, y + 20), "INVESTIGATED CLAIM STATEMENT:", fontsize=10, color=(0.3, 0.3, 0.3), fontname="helv")
+    page.draw_rect(fitz.Rect(40, y, 555, y + 55), color=(0.85, 0.85, 0.85), fill=(0.96, 0.97, 0.98))
+    page.insert_text((55, y + 18), "INVESTIGATED CLAIM STATEMENT:", fontsize=9.5, color=(0.3, 0.3, 0.3), fontname="helv")
     claim_text = (claim[:220] + "...") if len(claim) > 220 else claim
-    page.insert_textbox(fitz.Rect(55, y + 26, 540, y + 60), f'"{claim_text}"', fontsize=11, color=(0.1, 0.1, 0.1), fontname="helv")
+    page.insert_textbox(fitz.Rect(55, y + 22, 540, y + 50), f'"{claim_text}"', fontsize=10.5, color=(0.1, 0.1, 0.1), fontname="helv")
 
-    y += 85
+    y += 70
 
     # Section 2: Verification Verdict Banner
     v_upper = (verdict or "UNVERIFIABLE").upper()
     fill_color = (0.95, 0.88, 0.88) if v_upper == "REFUTED" else ((0.88, 0.95, 0.90) if v_upper == "SUPPORTED" else (0.98, 0.94, 0.85))
     text_color = (0.8, 0.1, 0.1) if v_upper == "REFUTED" else ((0.05, 0.5, 0.2) if v_upper == "SUPPORTED" else (0.7, 0.4, 0.0))
 
-    page.draw_rect(fitz.Rect(40, y, 555, y + 45), color=None, fill=fill_color)
-    page.insert_text((55, y + 28), f"OFFICIAL VERDICT: {v_upper}", fontsize=14, color=text_color, fontname="helv")
-    page.insert_text((400, y + 28), f"Evidence Reliability: {evidence_strength}", fontsize=10, color=(0.3, 0.3, 0.3), fontname="helv")
+    page.draw_rect(fitz.Rect(40, y, 555, y + 40), color=None, fill=fill_color)
+    page.insert_text((55, y + 25), f"OFFICIAL VERDICT: {v_upper}", fontsize=13, color=text_color, fontname="helv")
+    page.insert_text((400, y + 25), f"Evidence Reliability: {evidence_strength}", fontsize=9.5, color=(0.3, 0.3, 0.3), fontname="helv")
 
-    y += 65
+    y += 55
 
     # Section 3: Verified Real News Explanation
     page.insert_text((40, y), "FACTUAL ANALYSIS & REAL NEWS CONTEXT:", fontsize=11, color=(0.04, 0.42, 0.33), fontname="helv")
-    y += 14
+    y += 12
     page.draw_line(fitz.Point(40, y), fitz.Point(555, y), color=(0.04, 0.42, 0.33), width=1.5)
     y += 10
 
-    clean_exp = explanation.replace("*", "").replace("`", "")
-    page.insert_textbox(fitz.Rect(40, y, 555, y + 160), clean_exp, fontsize=10, color=(0.15, 0.15, 0.15), fontname="helv")
+    clean_exp = explanation.replace("*", "").replace("`", "").strip()
 
-    y += 180
+    # Dynamic box height and font size calculation to guarantee full text visibility without clipping
+    box_height = 220 if len(clean_exp) > 700 else (170 if len(clean_exp) > 350 else 120)
+    font_size = 8.8 if len(clean_exp) > 1000 else (9.2 if len(clean_exp) > 600 else 9.8)
+
+    page.draw_rect(fitz.Rect(40, y, 555, y + box_height), color=(0.88, 0.92, 0.90), fill=(0.98, 0.99, 0.99))
+    overflow = page.insert_textbox(fitz.Rect(48, y + 10, 547, y + box_height - 10), clean_exp, fontsize=font_size, color=(0.12, 0.12, 0.12), fontname="helv")
+    if overflow < 0:
+        # Fallback with smaller font if extraordinarily long
+        page.draw_rect(fitz.Rect(40, y, 555, y + box_height), color=(0.88, 0.92, 0.90), fill=(0.98, 0.99, 0.99))
+        page.insert_textbox(fitz.Rect(48, y + 10, 547, y + box_height - 10), clean_exp, fontsize=8.0, color=(0.12, 0.12, 0.12), fontname="helv")
+
+    y += box_height + 20
 
     # Section 4: Authoritative Evidentiary Sources
     page.insert_text((40, y), "PRIMARY CITATIONS & INDEPENDENT FACT-CHECKERS:", fontsize=11, color=(0.04, 0.42, 0.33), fontname="helv")
-    y += 14
+    y += 12
     page.draw_line(fitz.Point(40, y), fitz.Point(555, y), color=(0.04, 0.42, 0.33), width=1.5)
-    y += 15
+    y += 12
 
     if evidence and len(evidence) > 0:
-        for idx, ev in enumerate(evidence[:4], 1):
+        for idx, ev in enumerate(evidence[:3], 1):
             src_domain = ev.get("source_domain") or ev.get("title") or "Verified Source"
             snippet = ev.get("snippet", "")[:120]
             url = ev.get("url", "")
 
-            page.draw_rect(fitz.Rect(40, y, 555, y + 42), color=(0.9, 0.9, 0.9), fill=(0.98, 0.99, 1.0))
-            page.insert_text((50, y + 16), f"[{idx}] {src_domain.upper()} (IFCN Certified / Official Agency)", fontsize=9.5, color=(0.1, 0.2, 0.4), fontname="helv")
-            page.insert_text((50, y + 30), f"Snippet: {snippet}...", fontsize=8.5, color=(0.35, 0.35, 0.35), fontname="helv")
+            page.draw_rect(fitz.Rect(40, y, 555, y + 38), color=(0.9, 0.9, 0.9), fill=(0.98, 0.99, 1.0))
+            page.insert_text((50, y + 14), f"[{idx}] {src_domain.upper()} (IFCN Certified / Official Agency)", fontsize=9, color=(0.1, 0.2, 0.4), fontname="helv")
+            page.insert_text((50, y + 26), f"Snippet: {snippet}...", fontsize=8, color=(0.35, 0.35, 0.35), fontname="helv")
             if url:
-                page.insert_text((50, y + 40), f"URL: {url[:75]}", fontsize=8, color=(0.0, 0.4, 0.8), fontname="helv")
-            y += 48
+                page.insert_text((50, y + 36), f"URL: {url[:75]}", fontsize=7.5, color=(0.0, 0.4, 0.8), fontname="helv")
+            y += 42
     else:
-        page.draw_rect(fitz.Rect(40, y, 555, y + 40), color=(0.9, 0.9, 0.9), fill=(0.98, 0.98, 0.98))
+        page.draw_rect(fitz.Rect(40, y, 555, y + 42), color=(0.9, 0.9, 0.9), fill=(0.98, 0.98, 0.98))
         page.insert_text((50, y + 18), "• International Fact-Checking Network (IFCN) signatories (AltNews, BOOM Live, Factly)", fontsize=9, color=(0.2, 0.2, 0.2), fontname="helv")
         page.insert_text((50, y + 32), "• Press Information Bureau (PIB) Fact Check & Official Government Portals", fontsize=9, color=(0.2, 0.2, 0.2), fontname="helv")
         y += 50
 
     # Footer Notice
-    y = 790
+    y = 800
     page.draw_line(fitz.Point(40, y), fitz.Point(555, y), color=(0.85, 0.85, 0.85), width=1)
-    page.insert_text((40, y + 18), "SatyaSetu (सत्यसेतु) is built for Hack on Track 2026. Automated fact verification and RAG evidence retrieval.", fontsize=8, color=(0.5, 0.5, 0.5), fontname="helv")
-    page.insert_text((440, y + 18), "https://satyasetu.org", fontsize=8, color=(0.04, 0.42, 0.33), fontname="helv")
+    page.insert_text((40, y + 16), "SatyaSetu is built for Hack on Track 2026. Automated fact verification and RAG evidence retrieval.", fontsize=8, color=(0.5, 0.5, 0.5), fontname="helv")
+    page.insert_text((440, y + 16), "https://satyasetu.org", fontsize=8, color=(0.04, 0.42, 0.33), fontname="helv")
 
     pdf_bytes = doc.tobytes()
     doc.close()

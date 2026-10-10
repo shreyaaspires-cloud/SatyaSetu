@@ -854,11 +854,6 @@
     <div>
       🛡️ <strong>SatyaSetu WhatsApp Web Fact-Checking System</strong> — Live AI Fact-Checking Bot Active
     </div>
-    <div class="demo-actions">
-      <button class="quick-sample-btn" onclick="injectViralClaim('Nana Patekar passed away today')">Test: Nana Patekar Death Rumor</button>
-      <button class="quick-sample-btn" onclick="injectViralClaim('Drinking bleach cures viral infections in 24 hours')">Test: Bleach Cure</button>
-      <button class="quick-sample-btn" onclick="injectViralClaim('NPCI levies 2 percent charge on all UPI payments')">Test: UPI Tax</button>
-    </div>
   </div>
 
   <!-- Top Title Bar -->
@@ -1414,16 +1409,31 @@
       if (msg.factCheck) {
         const fc = msg.factCheck;
         const fcEncoded = encodeURIComponent(JSON.stringify(fc));
+
+        // Human-friendly clear verdict badge
+        let verdictBadgeText = fc.verdict;
+        if (fc.verdict === "REFUTED") {
+          verdictBadgeText = "❌ FAKE / FALSE CLAIM";
+        } else if (fc.verdict === "SUPPORTED") {
+          verdictBadgeText = "✅ VERIFIED TRUE";
+        } else if (fc.verdict === "PARTIALLY_SUPPORTED" || fc.verdict === "MISLEADING") {
+          verdictBadgeText = "⚠️ MISLEADING CLAIM";
+        } else if (fc.verdict === "OUTDATED") {
+          verdictBadgeText = "⏳ OUTDATED CLAIM";
+        } else if (fc.verdict === "UNVERIFIABLE") {
+          verdictBadgeText = "❓ UNVERIFIABLE";
+        }
+
         factCardHtml = `
           <div class="factcheck-card ${fc.verdict}">
             <div class="fc-header">
               <div class="fc-logo">🛡️ SatyaSetu Fact-Check</div>
-              <span class="verdict-tag ${fc.verdict}">${fc.verdict} ${fc.verdict_emoji || ''}</span>
+              <span class="verdict-tag ${fc.verdict}">${verdictBadgeText}</span>
             </div>
-            <div class="fc-claim">🔍 Claim: "${fc.claim || ''}"</div>
-            <div class="fc-real-news">
-              <strong>📰 Real News Fact-Check:</strong><br>
-              ${fc.real_news || fc.explanation || ''}
+            <div class="fc-claim"><strong>Forwarded Claim:</strong> "${fc.claim || ''}"</div>
+            <div class="fc-real-news" style="background: rgba(0, 168, 132, 0.12); border-left: 3px solid #00a884; padding: 10px; border-radius: 6px; margin: 8px 0;">
+              <strong style="color: #25d366; font-size: 13px;">✅ The Verified Truth / Real News:</strong><br>
+              <span style="color: #e9edef; font-size: 13.5px; line-height: 1.45;">${fc.real_news || fc.explanation || ''}</span>
             </div>
             <div class="fc-sources">
               <span><strong>Sources & Evidence:</strong> ${fc.evidence_strength || 'Verified'}</span>
@@ -1452,7 +1462,7 @@
           ${quotedHtml}
           ${imageHtml}
           ${videoHtml}
-          <div>${msg.text ? msg.text.replace(/\n/g, '<br>') : ''}</div>
+          ${msg.factCheck ? `<div style="font-weight:600;font-size:13px;color:#aebac1;margin-bottom:6px;">🔍 SatyaSetu Fact-Check Report:</div>` : (msg.text ? `<div>${msg.text.replace(/\n/g, '<br>')}</div>` : '')}
           ${factCardHtml}
           <div class="msg-meta">
             <span>${msg.time}</span>
@@ -1521,13 +1531,23 @@
       // Strip conversational forward prefixes so retrieval & claim bank get exact claim tokens
       queryText = queryText.replace(/^\[Forwarded\s+from[^\]]+\]:\s*/i, "").replace(/^Forwarded:\s*/i, "").trim();
 
-      // If user uploaded an image and text is empty, run OCR
-      if (extraData.rawFile && !queryText) {
-        const formData = new FormData();
-        formData.append("file", extraData.rawFile);
-        const ocrRes = await fetch("/api/ocr", { method: "POST", body: formData });
-        const ocrData = await ocrRes.json();
-        queryText = ocrData.text || "Screenshot verification";
+      // If user uploaded an image (or forwarded an image), run OCR if text is generic
+      const isGenericPrompt = !queryText || /^Sent screenshot image for fact-checking:?$/i.test(queryText) || /^Screenshot verification$/i.test(queryText);
+      if (extraData.rawFile && isGenericPrompt) {
+        try {
+          const formData = new FormData();
+          formData.append("file", extraData.rawFile);
+          const ocrRes = await fetch("/api/ocr", { method: "POST", body: formData });
+          const ocrData = await ocrRes.json();
+          if (ocrData.text && ocrData.text.trim()) {
+            queryText = ocrData.text.trim();
+          } else {
+            queryText = "Screenshot verification";
+          }
+        } catch (ocrErr) {
+          console.warn("OCR failed:", ocrErr);
+          queryText = "Screenshot verification";
+        }
       }
 
       // Check claim via live FastAPI backend
@@ -1699,7 +1719,10 @@
     // If forwarded to SatyaSetu Bot, trigger verification automatically!
     if (targetId === "bot") {
       const forwardIndicatorText = `[Forwarded from ${msgToForward.sender || 'Chat'}]: ${forwardedText}`;
-      sendMessage(forwardIndicatorText, { image: forwardedImage });
+      sendMessage(forwardIndicatorText, {
+        image: forwardedImage,
+        rawFile: msgToForward.rawFile || null
+      });
       showToast("Message forwarded to SatyaSetu Bot for fact checking! 🛡️");
     } else {
       const now = new Date();

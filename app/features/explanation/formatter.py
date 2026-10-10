@@ -74,7 +74,7 @@ VERDICT_LABEL: dict = {
     Verdict.UNVERIFIABLE: "UNVERIFIABLE",
 }
 
-MAX_REPLY_LEN = 1400          # Soft cap — trim if exceeded
+MAX_REPLY_LEN = 3000          # Raised from 1400 — allows detailed explanations
 WHATSAPP_HARD_CAP = 4096      # Hard WhatsApp limit
 
 
@@ -213,9 +213,9 @@ def format_whatsapp_reply(response: CheckResponse) -> str:
     overall_emoji = VERDICT_EMOJI.get(response.overall_verdict, "❓")
     overall_label = get_verdict_label(response.overall_verdict, lang)
 
-    # Free-text explanation handling (allow up to 1000 chars without mid-word truncation)
-    explanation_raw = response.explanation[:1000].strip()
-    if len(response.explanation) > 1000:
+    # Free-text explanation handling (allow up to 2000 chars without mid-word truncation)
+    explanation_raw = response.explanation[:2000].strip()
+    if len(response.explanation) > 2000:
         explanation_raw += "…"
 
     translation_unavailable_line: Optional[str] = None

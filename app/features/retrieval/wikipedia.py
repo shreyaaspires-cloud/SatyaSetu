@@ -6,6 +6,7 @@ Enforces timeout, SSRF protection via safe_get, character capping, and D8/D15 fi
 from __future__ import annotations
 
 import logging
+import sys
 import urllib.parse
 from typing import List, Optional
 
@@ -89,7 +90,6 @@ def search_wikipedia(query: str, lang: str = "en") -> List[EvidenceItem]:
             except Exception as exc:
                 logger.debug("Failed fetching Wikipedia summary for %s: %s", title, exc)
 
-        logger.info("Wikipedia retrieval found %d evidence articles.", len(evidence_items))
         return evidence_items
 
     except Exception as exc:
