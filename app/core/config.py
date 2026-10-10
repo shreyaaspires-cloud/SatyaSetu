@@ -117,8 +117,8 @@ class Settings(BaseSettings):
         description="Cache backend: 'memory' or 'redis'",
     )
     rate_limit_per_minute: int = Field(
-        default=20,
-        description="Allowed requests per minute per phone number / IP",
+        default=10,
+        description="Allowed requests per 10-minute window per phone number (matches PRD FR-08)",
     )
     max_claims_per_message: int = Field(
         default=3,
@@ -132,6 +132,12 @@ class Settings(BaseSettings):
     # Redis (Optional)
     upstash_redis_url: str = Field(default="", description="Upstash Redis REST URL")
     upstash_redis_token: str = Field(default="", description="Upstash Redis REST Token")
+
+    # Admin Dashboard
+    admin_api_key: str = Field(
+        default="",
+        description="API key for /admin/* endpoints. Set a strong random value in production.",
+    )
 
 
 settings = Settings()

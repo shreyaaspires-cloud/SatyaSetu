@@ -53,6 +53,27 @@ def clear_processed_sids() -> None:
         _processed_sids.clear()
 
 
+def _start_sid_cleanup_daemon() -> None:
+    """LOOPHOLE-03: Periodically purge expired entries from _processed_sids."""
+    def _cleanup_loop() -> None:
+        while True:
+            time.sleep(300)  # every 5 minutes
+            now = time.monotonic()
+            with _sids_lock:
+                expired = [k for k, ts in list(_processed_sids.items()) if now - ts > 600]
+                for k in expired:
+                    del _processed_sids[k]
+            if expired:
+                logger.debug("SID cache cleanup: removed %d expired entries", len(expired))
+
+    t = threading.Thread(target=_cleanup_loop, daemon=True, name="sid-cache-cleanup")
+    t.start()
+
+
+# Start background cleanup on module import
+_start_sid_cleanup_daemon()
+
+
 def _is_duplicate_message(sid: str) -> bool:
     """Return True if message with this MessageSid has already been processed within 10 minutes."""
     if not sid:
@@ -75,14 +96,16 @@ def _hash_sender(phone: str) -> str:
     return hashlib.sha256(phone.encode()).hexdigest()[:12]
 
 
+RATE_WINDOW_SECONDS = 600.0  # 10-minute sliding window (matches PRD FR-08)
+
+
 def _is_rate_limited(sender_hash: str) -> bool:
-    """Return True if this sender has exceeded rate_limit_per_minute."""
+    """Return True if this sender has exceeded rate_limit_per_minute within RATE_WINDOW_SECONDS."""
     now = time.monotonic()
-    window = 600.0
     with _rate_lock:
         timestamps = _rate_store[sender_hash]
-        # Purge entries older than 1 minute
-        _rate_store[sender_hash] = [ts for ts in timestamps if now - ts < 60.0]
+        # Purge entries outside the rate window (BUG-05: was incorrectly 60s)
+        _rate_store[sender_hash] = [ts for ts in timestamps if now - ts < RATE_WINDOW_SECONDS]
         if len(_rate_store[sender_hash]) >= settings.rate_limit_per_minute:
             return True
         _rate_store[sender_hash].append(now)
@@ -99,13 +122,14 @@ async def _validate_twilio_signature(request: Request) -> None:
     if not settings.require_twilio_signature:
         return
 
-    from app.core.security import twilio_media_auth
+    from twilio.request_validator import RequestValidator
 
     signature = request.headers.get("X-Twilio-Signature", "")
     form_data: Dict[str, Any] = dict(await request.form())
     url = str(request.url)
 
-    if not twilio_media_auth(signature=signature, url=url, params=form_data):
+    validator = RequestValidator(settings.twilio_auth_token)
+    if not validator.validate(url, form_data, signature):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid Twilio signature",
@@ -163,11 +187,12 @@ async def twilio_webhook(
     # ── Rate limiting ──────────────────────────────────────────────────────────
     if _is_rate_limited(sender_hash):
         logger.warning("[%s] Rate limit exceeded for sender=%s…", request_id, sender_hash)
+        # BUG-13: must return HTTP 200 — Twilio retries on any non-200 response
         return PlainTextResponse(
             content=_twiml_message(
-                "⏳ You've sent too many messages. Please wait a minute and try again."
+                "⏳ You've sent too many messages. Please wait a few minutes and try again."
             ),
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            status_code=200,
             media_type="application/xml",
         )
 

@@ -145,6 +145,13 @@ def verify_claim(
             guard_passed=True,
         )
 
+    # MISSING-02: Check dynamic claim-level cache
+    from app.core.cache import claim_cache_get, claim_cache_set
+    cached_claim = claim_cache_get(claim.strip())
+    if cached_claim:
+        logger.info("Claim-level cache hit for: '%.60s'", claim)
+        return ClaimResult(**cached_claim)
+
     # ── Check Pre-verified Claim Bank (Fast-path) ────────────────────────────
     from app.features.verification.claim_bank import lookup_claim_bank
     from app.core.constants import Rating, Tier
@@ -189,10 +196,15 @@ def verify_claim(
             claim=claim.strip(),
             evidence_items=evidence,
         )
-        # T5: the aggregator result is always final.
-        # Gemini is only permitted to classify per-item stance (score_stance),
-        # not to override the verdict produced by evidence sufficiency rules.
         verdict, confidence, reason_code = agg_verdict, agg_conf, agg_reason
+
+    # BUG-07: _gemini_verify_claim was never called. Use it as a secondary layer
+    # when evidence exists but aggregation could not reach a decisive verdict.
+    if verdict == Verdict.UNVERIFIABLE and evidence:
+        gemini_result = _gemini_verify_claim(claim.strip(), evidence)
+        if gemini_result:
+            verdict, confidence, reason_code = gemini_result
+            logger.info("Gemini override applied: verdict=%s conf=%.2f", verdict, confidence)
 
     logger.info(
         "Claim verdict=%s confidence=%.2f reason=%s evidence_count=%d",
@@ -202,7 +214,7 @@ def verify_claim(
         len(evidence),
     )
 
-    return ClaimResult(
+    result = ClaimResult(
         claim=claim.strip(),
         verdict=verdict,
         confidence=confidence,
@@ -210,6 +222,13 @@ def verify_claim(
         evidence=evidence,
         guard_passed=True,
     )
+    # MISSING-02: Save into claim-level cache
+    try:
+        claim_cache_set(claim.strip(), result.model_dump())
+    except Exception as exc:
+        logger.warning("Failed to set claim-level cache: %s", exc)
+
+    return result
 
 
 def batch_verify_claims(

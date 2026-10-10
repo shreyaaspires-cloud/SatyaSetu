@@ -97,10 +97,13 @@ def is_public_http_url(url: str) -> bool:
         return False
 
 
-def twilio_media_auth(url: str) -> Optional[Tuple[str, str]]:
+def get_twilio_media_auth(url: str) -> Optional[Tuple[str, str]]:
     """
-    Return Twilio HTTP Basic Auth credentials ONLY for official Twilio endpoints.
-    Protects against leaking Twilio credentials to untrusted media hosts.
+    Return Basic Auth (sid, token) for Twilio URLs only. Never for non-Twilio hosts.
+
+    BUG-12: Previously misnamed 'twilio_media_auth' causing BUG-01 in webhook.py
+    where it was incorrectly called as a validator. This function is a credential
+    helper only — it returns (account_sid, auth_token) or None.
     """
     if not url or not isinstance(url, str):
         return None
@@ -113,6 +116,10 @@ def twilio_media_auth(url: str) -> Optional[Tuple[str, str]]:
         return None
     except Exception:
         return None
+
+
+# BUG-12 backwards-compat alias — callers in ocr.py, asr.py, pdf.py use this name
+twilio_media_auth = get_twilio_media_auth
 
 
 def safe_get(
@@ -136,8 +143,11 @@ def safe_get(
                 f"Blocked potential SSRF access to non-public URL: {current_url}"
             )
 
-        # Only pass Twilio credentials if the target is api.twilio.com
-        req_auth = auth if (auth and twilio_media_auth(current_url)) else None
+        # BUG-06 / Credential isolation: only attach Twilio auth if destination is
+        # still api.twilio.com. get_twilio_media_auth(url) returns None for any
+        # non-Twilio host, so auth is automatically dropped on CDN redirect hops.
+        should_send_auth = auth is not None and get_twilio_media_auth(current_url) is not None
+        req_auth = auth if should_send_auth else None
 
         req_headers = {"User-Agent": "SatyaSetu/1.0 (+https://satyasetu.org)"}
         if headers:

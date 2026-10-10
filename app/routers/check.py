@@ -13,7 +13,8 @@ from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.contracts.models import IngestedMessage, InputType
+from app.contracts.models import IngestedMessage
+from app.core.constants import InputType
 from app.features.explanation.formatter import (
     VERDICT_EMOJI,
     get_ui_string,
@@ -46,7 +47,8 @@ class CheckRequest(BaseModel):
     language: Optional[str] = None
 
 
-class CheckResponse(BaseModel):
+class CheckAPIResponse(BaseModel):
+    """API response model for /api/check — distinct from contracts.models.CheckResponse."""
     model_config = ConfigDict(extra="ignore")
     verdict: str
     verdict_label: str = ""
@@ -66,8 +68,8 @@ class CheckResponse(BaseModel):
     timings_ms: Dict[str, float] = Field(default_factory=dict)
 
 
-@router.post("/api/check", response_model=CheckResponse, summary="Verify claim JSON endpoint")
-def check_claim_api(req: CheckRequest) -> CheckResponse:
+@router.post("/api/check", response_model=CheckAPIResponse, summary="Verify claim JSON endpoint")
+def check_claim_api(req: CheckRequest) -> CheckAPIResponse:
     """Verify a forwarded claim or text snippet and return structured verdict and explanation."""
     raw_text = (req.text or req.claim or "").strip()
     if not raw_text:
@@ -148,7 +150,7 @@ def check_claim_api(req: CheckRequest) -> CheckResponse:
             # Fallback to first sentence of explanation
             real_news_text = result.explanation.split("\n")[0].strip()
 
-    return CheckResponse(
+    return CheckAPIResponse(
         verdict=v_str,
         verdict_label=label_en,
         verdict_label_hi=label_hi,
@@ -257,6 +259,32 @@ async def voice_endpoint(file: UploadFile = File(...)):
     except Exception as exc:
         logger.warning("Voice endpoint error: %s", exc)
         return {"success": False, "error": str(exc), "text": ""}
+
+
+@router.post("/api/pdf", summary="Extract text from uploaded PDF document")
+async def pdf_endpoint(file: UploadFile = File(...)):
+    """Extract text from uploaded PDF document for verification."""
+    try:
+        content = await file.read()
+        if not content:
+            return {"success": False, "error": "Empty PDF file uploaded.", "text": ""}
+
+        from app.features.ingestion.pdf import extract_text_from_pdf_bytes
+        from app.features.ingestion.ocr import get_ocr_reader
+        reader = get_ocr_reader()
+        result = extract_text_from_pdf_bytes(content, reader=reader)
+        extracted = (result.get("text") or "").strip()
+
+        return {
+            "success": bool(extracted),
+            "text": extracted,
+            "page_count": result.get("page_count", 0),
+            "extraction_method": result.get("extraction_method", "empty"),
+        }
+    except Exception as exc:
+        logger.warning("PDF endpoint error: %s", exc)
+        return {"success": False, "error": str(exc), "text": ""}
+
 
 
 

@@ -17,6 +17,7 @@ from app.contracts.models import CheckResponse, ClaimResult, IngestedMessage
 from app.core.constants import Verdict
 from app.core.config import settings
 from app.core.timing import StageTimer
+from app.core.cache import cache_get, cache_set
 from app.features.explanation.formatter import format_whatsapp_reply, translate_reply_back
 from app.features.explanation.generator import generate_explanation
 from app.features.nlp.claims import extract_claims
@@ -79,6 +80,17 @@ def run_pipeline(message: IngestedMessage) -> CheckResponse:
     t_start = time.monotonic()
     timings: dict[str, float] = {}
 
+    # ── Stage 0: Cache Check (BUG-08) ────────────────────────────────────────────
+    cached_data = cache_get(message.raw_text)
+    if cached_data:
+        try:
+            cached_response = CheckResponse(**cached_data)
+            cached_response.cached = True
+            logger.info("Cache HIT for claim (%.60s)", message.raw_text)
+            return cached_response
+        except Exception as exc:
+            logger.warning("Failed to deserialize cached response: %s", exc)
+
     # ── Stage 1: Language Detection ────────────────────────────────────────────
     with StageTimer("language_detection") as t:
         lang_code, lang_conf = detect_language(message.raw_text)
@@ -126,6 +138,21 @@ def run_pipeline(message: IngestedMessage) -> CheckResponse:
             timings_ms=timings,
             cached=False,
             flags=["non_claim"],
+        )
+
+    # BUG-09: worthiness gate — skip retrieval for very low-signal inputs
+    if worthiness_score < 0.30 and not claims:
+        logger.info("Low check-worthiness (%.2f) with no claims — short-circuiting.", worthiness_score)
+        timings["total_ms"] = round((time.monotonic() - t_start) * 1000, 1)
+        return CheckResponse(
+            claim_results=[],
+            overall_verdict=Verdict.UNVERIFIABLE,
+            explanation="This message doesn't appear to contain a verifiable factual claim.",
+            formatted_reply="❓ No verifiable claim found in this message. Please forward a factual claim to check.",
+            language=lang_code,
+            timings_ms=timings,
+            cached=False,
+            flags=["low_worthiness"],
         )
 
     # ── Stage 6: Verification ─────────────────────────────────────────────────
@@ -183,7 +210,7 @@ def run_pipeline(message: IngestedMessage) -> CheckResponse:
         len(claim_results),
     )
 
-    return CheckResponse(
+    final_response = CheckResponse(
         claim_results=claim_results,
         overall_verdict=overall_verdict,
         explanation=explanation,
@@ -193,3 +220,29 @@ def run_pipeline(message: IngestedMessage) -> CheckResponse:
         cached=False,
         flags=all_flags,
     )
+
+    # BUG-08: persist to cache for subsequent identical claims
+    try:
+        cache_set(message.raw_text, final_response.model_dump())
+    except Exception as exc:
+        logger.warning("Failed to cache pipeline result: %s", exc)
+
+    # MISSING-05: persist to SQLite claims log for admin dashboard
+    try:
+        from app.db.claims_db import log_claim
+        log_claim(
+            raw_text=message.raw_text,
+            input_type=str(message.input_type.value if hasattr(message.input_type, "value") else message.input_type),
+            from_number_hash=message.from_number,
+            language=lang_code,
+            overall_verdict=str(overall_verdict.value if hasattr(overall_verdict, "value") else overall_verdict),
+            confidence=float(claim_results[0].confidence if claim_results else 0.0),
+            explanation=explanation,
+            claim_results=[c.model_dump() for c in claim_results],
+            timings=timings,
+            cached=False,
+        )
+    except Exception as exc:
+        logger.warning("Failed to log claim to DB: %s", exc)
+
+    return final_response

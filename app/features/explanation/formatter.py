@@ -242,13 +242,11 @@ def format_whatsapp_reply(response: CheckResponse) -> str:
         "_SatyaSetu — AI-powered multilingual fact checking_",
     ])
 
-    sections = (
-        header_parts
-        + [("\n\n" + divider + "\n").join(claim_blocks)]
-        + footer_parts
-    )
-
-    reply = "\n".join(sections)
+    # BUG-17: was wrapping claim_blocks in a list which caused no leading/trailing
+    # newlines around the claim section, making it run into dividers.
+    claim_section = ("\n\n" + divider + "\n\n").join(claim_blocks)
+    all_lines = header_parts + [claim_section] + footer_parts
+    reply = "\n".join(all_lines)
 
     # Safety trim
     if len(reply) > MAX_REPLY_LEN:
@@ -286,11 +284,7 @@ def translate_reply_back(
         return english_reply
 
     try:
-        from app.features.nlp.translation import translate_to_english
-
-        # We reuse the same translation pipeline — note M2M100 can translate
-        # English → Indic when src_lang is set correctly.
-        # For the reverse direction we use Gemini (it handles en→hi well).
+        # English → Indic translation uses Gemini only (M2M100 is Indic→English only)
         from app.core.config import settings as cfg
 
         if not cfg.gemini_api_key:

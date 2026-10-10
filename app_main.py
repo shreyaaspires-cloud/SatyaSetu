@@ -64,6 +64,41 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.error("[ERROR] Whisper failed to load: %s", exc)
         app.state.whisper_model = None
 
+    # NLI model (BUG-02: was lazily loaded on first request; pre-load now)
+    try:
+        from app.features.verification.stance import _load_nli_model
+        app.state.nli_model = _load_nli_model(settings.nli_model_name)
+        logger.info("[OK] NLI model '%s' loaded", settings.nli_model_name)
+    except Exception as exc:
+        logger.error("[ERROR] NLI model failed to load: %s", exc)
+        app.state.nli_model = None
+
+    # fastText LID model (MISSING-03: was never loaded at startup)
+    import os
+    try:
+        import fasttext  # type: ignore
+        from app.features.nlp.language import set_ft_model
+        lid_path = "models/lid.176.bin" if os.path.exists("models/lid.176.bin") else "lid.176.bin"
+        if os.path.exists(lid_path):
+            ft_inst = fasttext.load_model(lid_path)
+            app.state.ft_model = ft_inst
+            set_ft_model(ft_inst)
+            logger.info("[OK] fastText LID model loaded from %s", lid_path)
+        else:
+            logger.warning("[WARN] fastText LID model not found at %s; using heuristic detection", lid_path)
+            app.state.ft_model = None
+    except Exception as exc:
+        logger.warning("[WARN] fastText not available (%s); using heuristic detection", exc)
+        app.state.ft_model = None
+
+    # Initialize SQLite ClaimLog database (MISSING-05)
+    try:
+        from app.db.claims_db import init_db
+        init_db()
+        logger.info("[OK] Claims SQLite database initialized")
+    except Exception as exc:
+        logger.warning("[WARN] Failed to initialize claims SQLite database: %s", exc)
+
     logger.info("=" * 60)
     logger.info("SatyaSetu startup complete. Accepting requests.")
     logger.info("  GET  /health           — liveness probe")
@@ -104,7 +139,7 @@ app.add_middleware(
 # ── IP-based Rate Limiter (OWASP API4:2023) ──────────────────────────────────
 _ip_rate_store: dict[str, list[float]] = defaultdict(list)
 _ip_rate_lock = Lock()
-IP_RATE_LIMIT_PER_MINUTE = 60
+IP_RATE_LIMIT_PER_MINUTE = 10  # LOOPHOLE-01: tightened to match per-sender limit (was 60)
 
 
 @app.middleware("http")
@@ -172,10 +207,12 @@ if static_path.exists():
 from app.routers.check import router as check_router      # noqa: E402
 from app.routers.health import router as health_router    # noqa: E402
 from app.routers.webhook import router as webhook_router  # noqa: E402
+from app.routers.admin import router as admin_router      # noqa: E402
 
 app.include_router(health_router)
 app.include_router(webhook_router)
 app.include_router(check_router)
+app.include_router(admin_router)
 
 
 

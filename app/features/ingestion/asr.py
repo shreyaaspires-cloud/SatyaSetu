@@ -13,7 +13,7 @@ import tempfile
 from typing import Any, Optional, TypedDict
 
 from app.core.config import settings
-from app.core.security import safe_get, twilio_media_auth
+from app.core.security import get_twilio_media_auth, safe_get
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ def download_audio(url: str) -> bytes:
     Download audio with SSRF protection and isolated Twilio credentials.
     Enforces a strict 2 MB limit.
     """
-    auth = twilio_media_auth(url)
+    auth = get_twilio_media_auth(url)
     resp = safe_get(url, timeout=10, auth=auth)
     resp.raise_for_status()
 
@@ -90,14 +90,35 @@ def transcribe_audio(url: str, model: Optional[Any] = None) -> ASRResult:
         logger.warning("Whisper model not loaded. Returning empty result.")
         return ASRResult(text="", language="unknown", duration_seconds=0.0)
 
-    try:
-        audio_bytes = download_audio(url)
-    except Exception as exc:
-        logger.warning("Failed to download audio from %s: %s", url, exc)
-        return ASRResult(text="", language="unknown", duration_seconds=0.0)
-
     tmp_path: Optional[str] = None
     try:
+        audio_bytes = download_audio(url)
+
+        # LOOPHOLE-05: Audio duration pre-check before heavy Whisper inference
+        try:
+            import io
+            if audio_bytes.startswith(b"RIFF") and b"WAVE" in audio_bytes[:16]:
+                import wave
+                with wave.open(io.BytesIO(audio_bytes), "rb") as w:
+                    frames = w.getnframes()
+                    rate = w.getframerate()
+                    dur = frames / float(rate) if rate else 0.0
+                    if dur > MAX_AUDIO_DURATION_SEC:
+                        logger.warning("Audio duration %.1fs exceeds max %0.1fs. Rejecting.", dur, MAX_AUDIO_DURATION_SEC)
+                        return ASRResult(text="", language="unknown", duration_seconds=dur)
+            else:
+                try:
+                    from pydub import AudioSegment  # type: ignore
+                    seg = AudioSegment.from_file(io.BytesIO(audio_bytes))
+                    dur = len(seg) / 1000.0
+                    if dur > MAX_AUDIO_DURATION_SEC:
+                        logger.warning("Audio duration %.1fs exceeds max %0.1fs. Rejecting.", dur, MAX_AUDIO_DURATION_SEC)
+                        return ASRResult(text="", language="unknown", duration_seconds=dur)
+                except Exception:
+                    pass
+        except Exception as probe_err:
+            logger.debug("Audio duration pre-check skipped: %s", probe_err)
+
         with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as tmp:
             tmp.write(audio_bytes)
             tmp_path = tmp.name

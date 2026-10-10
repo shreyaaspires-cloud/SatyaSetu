@@ -11,6 +11,18 @@ from typing import Any, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
+_ft_model: Any = None
+
+
+def get_ft_model() -> Any:
+    return _ft_model
+
+
+def set_ft_model(model: Any) -> None:
+    global _ft_model
+    _ft_model = model
+
+
 # Common Romanized Hindi markers for Hinglish detection
 HINGLISH_VOCABULARY = {
     "yeh", "ye", "woh", "wo", "karo", "kare", "karna", "hoga", "hogi", "honge",
@@ -80,10 +92,11 @@ def detect_language(text: str, ft_model: Optional[Any] = None) -> Tuple[str, flo
         logger.info("Detected Hinglish via vocabulary heuristic.")
         return "hi-Latn", 0.90
 
-    # 2. Use fastText LID model if provided
-    if ft_model is not None:
+    # 2. Use fastText LID model if provided or loaded
+    active_ft = ft_model if ft_model is not None else get_ft_model()
+    if active_ft is not None:
         try:
-            predictions = ft_model.predict(cleaned, k=3)
+            predictions = active_ft.predict(cleaned, k=3)
             labels = predictions[0]
             scores = predictions[1]
             if labels and len(labels) > 0:

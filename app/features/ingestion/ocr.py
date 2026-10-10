@@ -13,7 +13,7 @@ from typing import Any, Optional, TypedDict
 from PIL import Image
 
 from app.core.config import settings
-from app.core.security import safe_get, twilio_media_auth
+from app.core.security import get_twilio_media_auth, safe_get
 
 logger = logging.getLogger(__name__)
 
@@ -66,8 +66,12 @@ def set_ocr_reader(reader: Any) -> None:
 
 def preprocess_image(image_bytes: bytes) -> bytes:
     """
-    Resize image to max 800px width and convert to grayscale.
+    Resize image to max 800px width for OCR.
     Returns JPEG bytes ready for EasyOCR.
+
+    BUG-15: Removed img.convert('L') grayscale step — EasyOCR handles colour
+    input natively and greyscale conversion hurts Devanagari accuracy on
+    coloured or low-contrast backgrounds.
     """
     with Image.open(io.BytesIO(image_bytes)) as img:
         if img.mode in ("RGBA", "P"):
@@ -78,10 +82,9 @@ def preprocess_image(image_bytes: bytes) -> bytes:
             new_height = int(img.height * ratio)
             img = img.resize((MAX_IMAGE_WIDTH, new_height), Image.LANCZOS)
 
-        img = img.convert("L")
-
+        # Do NOT convert to grayscale — EasyOCR handles colour; greyscale hurts Hindi OCR
         buf = io.BytesIO()
-        img.save(buf, format="JPEG", quality=85)
+        img.save(buf, format="JPEG", quality=90)
         return buf.getvalue()
 
 
@@ -90,7 +93,7 @@ def download_image(url: str) -> bytes:
     Download image from URL with SSRF protection and isolated Twilio credentials.
     Enforces a strict 2 MB limit.
     """
-    auth = twilio_media_auth(url)
+    auth = get_twilio_media_auth(url)
     resp = safe_get(url, timeout=10, auth=auth)
     resp.raise_for_status()
 

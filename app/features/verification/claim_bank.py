@@ -8,6 +8,7 @@ from __future__ import annotations
 import logging
 import os
 import re
+import threading
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
@@ -19,6 +20,7 @@ from app.features.verification.details import check_detail_conflict
 logger = logging.getLogger(__name__)
 
 _CLAIM_BANK_CACHE: Optional[List[Dict[str, Any]]] = None
+_claim_bank_lock = threading.Lock()  # BUG-10: guard against concurrent first-load race
 
 
 class ClaimBankMatch(BaseModel):
@@ -44,26 +46,27 @@ def get_claim_bank_path() -> str:
 
 
 def load_claim_bank(force_reload: bool = False) -> List[Dict[str, Any]]:
-    """Load entries from data/claim_bank.yaml."""
+    """Load entries from data/claim_bank.yaml. Thread-safe via _claim_bank_lock."""
     global _CLAIM_BANK_CACHE
-    if _CLAIM_BANK_CACHE is not None and not force_reload:
-        return _CLAIM_BANK_CACHE
-
-    bank_path = get_claim_bank_path()
-    if not os.path.exists(bank_path):
-        logger.warning("Claim bank not found at %s", bank_path)
-        _CLAIM_BANK_CACHE = []
-        return _CLAIM_BANK_CACHE
-
-    try:
-        with open(bank_path, "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f) or []
-            _CLAIM_BANK_CACHE = data
+    with _claim_bank_lock:  # BUG-10: prevents double-write race on concurrent cold starts
+        if _CLAIM_BANK_CACHE is not None and not force_reload:
             return _CLAIM_BANK_CACHE
-    except Exception as exc:
-        logger.error("Failed to load claim bank from %s: %s", bank_path, exc)
-        _CLAIM_BANK_CACHE = []
-        return _CLAIM_BANK_CACHE
+
+        bank_path = get_claim_bank_path()
+        if not os.path.exists(bank_path):
+            logger.warning("Claim bank not found at %s", bank_path)
+            _CLAIM_BANK_CACHE = []
+            return _CLAIM_BANK_CACHE
+
+        try:
+            with open(bank_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or []
+                _CLAIM_BANK_CACHE = data
+                return _CLAIM_BANK_CACHE
+        except Exception as exc:
+            logger.error("Failed to load claim bank from %s: %s", bank_path, exc)
+            _CLAIM_BANK_CACHE = []
+            return _CLAIM_BANK_CACHE
 
 
 def _tokenize(text: str) -> set[str]:

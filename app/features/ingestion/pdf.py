@@ -14,7 +14,7 @@ try:
 except ImportError:
     import fitz  # Fallback for older PyMuPDF versions
 
-from app.core.security import safe_get, twilio_media_auth
+from app.core.security import get_twilio_media_auth, safe_get
 from app.features.ingestion.ocr import CONFIDENCE_THRESHOLD, get_ocr_reader
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ def download_pdf(url: str) -> bytes:
     Download PDF from URL with SSRF protection and isolated Twilio credentials.
     Enforces a strict 2 MB limit.
     """
-    auth = twilio_media_auth(url)
+    auth = get_twilio_media_auth(url)
     resp = safe_get(url, timeout=10, auth=auth)
     resp.raise_for_status()
 
@@ -45,10 +45,11 @@ def download_pdf(url: str) -> bytes:
     return content
 
 
-def extract_native_text(doc: fitz.Document) -> str:
+def extract_native_text(doc: Any) -> str:
     """
     Extract text natively from all pages of the PDF.
     Capped at MAX_TEXT_CHARS.
+    BUG-14: doc is typed as Any to prevent mypy/runtime errors when aliasing pymupdf as fitz.
     """
     pages_text: list[str] = []
     for page in doc:
@@ -60,7 +61,7 @@ def extract_native_text(doc: fitz.Document) -> str:
     return combined[:MAX_TEXT_CHARS]
 
 
-def extract_ocr_fallback(doc: fitz.Document, reader: Optional[Any] = None) -> str:
+def extract_ocr_fallback(doc: Any, reader: Optional[Any] = None) -> str:
     """
     For scanned / image-only PDFs, render the first page to an image
     and run EasyOCR.
@@ -88,19 +89,12 @@ def extract_ocr_fallback(doc: fitz.Document, reader: Optional[Any] = None) -> st
         return ""
 
 
-def extract_text_from_pdf(url: str, reader: Optional[Any] = None) -> PDFResult:
+def extract_text_from_pdf_bytes(pdf_bytes: bytes, reader: Optional[Any] = None) -> PDFResult:
     """
-    Download PDF from url and extract text.
+    Extract text directly from PDF bytes.
     Uses native PyMuPDF text extraction first, falling back to EasyOCR
     if the document is scanned.
-    Never raises exceptions. On failure, returns empty text.
     """
-    try:
-        pdf_bytes = download_pdf(url)
-    except Exception as exc:
-        logger.warning("Failed to download PDF from %s: %s", url, exc)
-        return PDFResult(text="", page_count=0, extraction_method="empty")
-
     try:
         with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
             page_count = len(doc)
@@ -132,5 +126,20 @@ def extract_text_from_pdf(url: str, reader: Optional[Any] = None) -> PDFResult:
                 extraction_method=method,
             )
     except Exception as exc:
-        logger.error("Failed to parse PDF from %s: %s", url, exc, exc_info=True)
+        logger.error("Failed to parse PDF bytes: %s", exc, exc_info=True)
         return PDFResult(text="", page_count=0, extraction_method="empty")
+
+
+def extract_text_from_pdf(url: str, reader: Optional[Any] = None) -> PDFResult:
+    """
+    Download PDF from url and extract text.
+    Never raises exceptions. On failure, returns empty text.
+    """
+    try:
+        pdf_bytes = download_pdf(url)
+    except Exception as exc:
+        logger.warning("Failed to download PDF from %s: %s", url, exc)
+        return PDFResult(text="", page_count=0, extraction_method="empty")
+
+    return extract_text_from_pdf_bytes(pdf_bytes, reader=reader)
+

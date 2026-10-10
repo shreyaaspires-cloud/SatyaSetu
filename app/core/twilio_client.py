@@ -36,6 +36,12 @@ def send_twilio_message(to_number: str, body: str) -> bool:
         if to_number.startswith("whatsapp:") and not from_num.startswith("whatsapp:"):
             from_num = f"whatsapp:{from_num}"
 
+        # LOOPHOLE-06: Hard WhatsApp character limit guard (4096 chars)
+        # translate_reply_back() can produce longer output than the English source
+        WHATSAPP_MAX_CHARS = 4096
+        if len(body) > WHATSAPP_MAX_CHARS:
+            body = body[:WHATSAPP_MAX_CHARS - 3] + "…"
+
         msg = client.messages.create(
             body=body,
             from_=from_num,
