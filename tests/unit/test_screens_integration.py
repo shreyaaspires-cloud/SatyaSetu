@@ -44,17 +44,14 @@ def test_whatsapp_screen_served(client):
         assert "SatyaSetu Bot" in resp.text
 
 
-def test_sample_claims_endpoint(client):
-    """GET /api/sample-claims should return curated claims."""
+def test_sample_claims_endpoint_removed(client):
+    """GET /api/sample-claims should return 404 (removed in Phase 1 cleanup)."""
     resp = client.get("/api/sample-claims")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert "samples" in data
-    assert len(data["samples"]) >= 3
+    assert resp.status_code == 404
 
 
 def test_api_check_with_rich_metadata(client):
-    """POST /api/check should return verdict, labels, explanations, and evidence."""
+    """POST /api/check should return clean CheckAPIResponse with authentic evidence strength."""
     mock_res = CheckResponse(
         overall_verdict=Verdict.REFUTED,
         explanation="Lemon juice does not cure cancer.",
@@ -69,11 +66,16 @@ def test_api_check_with_rich_metadata(client):
         assert resp.status_code == 200
         data = resp.json()
         assert data["verdict"] == "REFUTED"
-        assert "verdict_label" in data
-        assert "verdict_label_hi" in data
+        assert data["verdict_label"] == "REFUTED"
+        assert data["verdict_emoji"] == "❌"
         assert "evidence_strength" in data
-        assert "explanations" in data
+        assert "evidence_strength_detail" in data
+        assert "explanation" in data
+        assert "formatted_reply" in data
         assert "evidence" in data
+        assert "confidence" not in data
+        assert "real_news" not in data
+        assert "explanations" not in data
 
 
 def test_api_ocr_endpoint_empty_file(client):

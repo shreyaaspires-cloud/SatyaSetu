@@ -13,11 +13,12 @@ from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.contracts.api import CheckAPIResponse, CheckRequest
 from app.contracts.models import IngestedMessage
 from app.core.constants import InputType
 from app.features.explanation.formatter import (
     VERDICT_EMOJI,
-    get_ui_string,
+    compute_evidence_strength,
     get_verdict_label,
 )
 from app.pipeline import run_pipeline
@@ -40,34 +41,6 @@ def _read_html_page(filename: str, fallback_title: str) -> str:
     return f"<!DOCTYPE html><html><head><title>{fallback_title}</title></head><body><h1>{fallback_title}</h1><p>Static file {filename} is loading...</p></body></html>"
 
 
-class CheckRequest(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    text: Optional[str] = None
-    claim: Optional[str] = None
-    language: Optional[str] = None
-
-
-class CheckAPIResponse(BaseModel):
-    """API response model for /api/check — distinct from contracts.models.CheckResponse."""
-    model_config = ConfigDict(extra="ignore")
-    verdict: str
-    verdict_label: str = ""
-    verdict_label_hi: str = ""
-    verdict_label_mr: str = ""
-    verdict_emoji: str = ""
-    evidence_strength: str = "HIGH"
-    confidence: float = 0.92
-    explanation: str
-    real_news: str = ""
-    explanations: Dict[str, str] = Field(default_factory=dict)
-    formatted_reply: str
-    claim: str = ""
-    claim_results: List[Any] = Field(default_factory=list)
-    evidence: List[Dict[str, Any]] = Field(default_factory=list)
-    flags: List[str] = Field(default_factory=list)
-    timings_ms: Dict[str, float] = Field(default_factory=dict)
-
-
 @router.post("/api/check", response_model=CheckAPIResponse, summary="Verify claim JSON endpoint")
 def check_claim_api(req: CheckRequest) -> CheckAPIResponse:
     """Verify a forwarded claim or text snippet and return structured verdict and explanation."""
@@ -88,13 +61,15 @@ def check_claim_api(req: CheckRequest) -> CheckAPIResponse:
 
     # Flatten evidence list for easy frontend rendering
     evidence_list: List[Dict[str, Any]] = []
+    all_raw_evidence: List[Any] = []
     for cr in result.claim_results:
         for ev in cr.evidence:
+            all_raw_evidence.append(ev)
             evidence_list.append(
                 {
                     "title": ev.title,
                     "url": ev.url,
-                    "source_domain": ev.source_domain,
+                    "domain": ev.source_domain,
                     "snippet": ev.snippet,
                     "tier": ev.tier.value if hasattr(ev.tier, "value") else str(ev.tier),
                     "rating": ev.rating.value if hasattr(ev.rating, "value") else str(ev.rating),
@@ -107,70 +82,24 @@ def check_claim_api(req: CheckRequest) -> CheckAPIResponse:
     v_str = v_enum.value if hasattr(v_enum, "value") else str(v_enum)
     v_emoji = VERDICT_EMOJI.get(v_enum, "❓")
     label_en = get_verdict_label(v_enum, "en")
-    label_hi = get_verdict_label(v_enum, "hi")
-    label_mr = get_verdict_label(v_enum, "mr")
 
-    # Evidence strength & confidence estimation
-    strength = "HIGH"
-    conf_score = 0.92
-    if result.claim_results and hasattr(result.claim_results[0], "confidence"):
-        c = result.claim_results[0].confidence
-        if isinstance(c, (int, float)) and c > 0:
-            conf_score = round(float(c), 2)
-    elif len(evidence_list) == 0:
-        conf_score = 0.70
-    elif len(evidence_list) < 2:
-        conf_score = 0.82
-
-    if len(evidence_list) == 0:
-        strength = "LOW"
-    elif len(evidence_list) < 2:
-        strength = "MEDIUM"
-
-    exp_en = result.explanation
-    exp_hi = f"{label_hi}: {exp_en}"
-    exp_mr = f"{label_mr}: {exp_en}"
-
-    # Extract single clean real_news sentence for direct frontend display
-    real_news_text = ""
-    for cr in result.claim_results:
-        if getattr(cr, "reason_code", "") == "CLAIM_BANK_MATCH" and cr.evidence:
-            real_news_text = cr.evidence[0].snippet.strip()
-            break
-        elif getattr(cr, "reason_code", "") == "AUTHORITATIVE_FACT_CHECK" and cr.evidence:
-            real_news_text = cr.evidence[0].snippet.strip()
-            break
-    if not real_news_text:
-        # Check if explanation contains 'Real News Fact Check: '
-        if "Real News Fact Check: " in result.explanation:
-            parts = result.explanation.split("Real News Fact Check: ")
-            if len(parts) > 1:
-                real_news_text = parts[1].split("\n")[0].strip()
-        else:
-            # Fallback to first sentence of explanation
-            real_news_text = result.explanation.split("\n")[0].strip()
+    # Authentic evidence strength computed strictly from tiers and evidence count
+    strength_label, strength_detail = compute_evidence_strength(all_raw_evidence)
 
     return CheckAPIResponse(
         verdict=v_str,
         verdict_label=label_en,
-        verdict_label_hi=label_hi,
-        verdict_label_mr=label_mr,
         verdict_emoji=v_emoji,
-        evidence_strength=strength,
-        confidence=conf_score,
+        evidence_strength=strength_label,
+        evidence_strength_detail=strength_detail,
         explanation=result.explanation,
-        real_news=real_news_text,
-        explanations={
-            "en": exp_en,
-            "hi": exp_hi,
-            "mr": exp_mr,
-        },
         formatted_reply=result.formatted_reply,
         claim=raw_text,
         claim_results=result.claim_results,
         evidence=evidence_list,
         flags=result.flags,
         timings_ms=result.timings_ms,
+        language=result.language or "en",
     )
 
 
@@ -288,199 +217,6 @@ async def pdf_endpoint(file: UploadFile = File(...)):
 
 
 
-@router.get("/api/sample-claims", summary="Curated viral claims for quick testing")
-def sample_claims():
-    """Return a curated list of sample viral forwards for demo purposes."""
-    return {
-        "samples": [
-            {
-                "claim": "Famous fictional actor John Doe passed away in Mumbai today",
-                "category": "Celebrity Rumors",
-                "expected_verdict": "REFUTED",
-                "real_news": "The viral forward regarding fictional actor John Doe is completely fabricated.",
-            },
-            {
-                "claim": "Lemon juice cures cancer in 48 hours without treatment",
-                "category": "Health & Medical",
-                "expected_verdict": "REFUTED",
-                "real_news": "There is no scientific or medical evidence that lemon juice cures cancer. Consult an oncologist.",
-            },
-            {
-                "claim": "Railway Free Ticket Scheme announced for all senior citizens across India",
-                "category": "Government Schemes",
-                "expected_verdict": "REFUTED",
-                "real_news": "PIB Fact Check confirmed no such universal free ticket scheme has been approved.",
-            },
-            {
-                "claim": "NPCI charges 2 percent transaction fee on normal person-to-person UPI payments",
-                "category": "Banking & Finance",
-                "expected_verdict": "REFUTED",
-                "real_news": "Normal bank-to-bank UPI transfers remain 100% free for consumers.",
-            },
-            {
-                "claim": "ISRO launched Aditya-L1 solar observation mission to L1 Lagrange point",
-                "category": "Science & Space",
-                "expected_verdict": "SUPPORTED",
-                "real_news": "ISRO successfully launched Aditya-L1 on September 2, 2023, and it is actively orbiting L1.",
-            },
-        ]
-    }
-
-
-class PDFReportRequest(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    claim: str
-    verdict: str
-    verdict_emoji: Optional[str] = ""
-    explanation: str
-    evidence_strength: Optional[str] = "High"
-    evidence: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
-
-
-def create_fact_check_pdf(
-    claim: str,
-    verdict: str,
-    explanation: str,
-    evidence_strength: str = "High",
-    evidence: Optional[List[Dict[str, Any]]] = None,
-) -> bytes:
-    """Generate a clean, professional SatyaSetu Verification Report PDF using PyMuPDF."""
-    import fitz
-    from datetime import datetime
-
-    doc = fitz.open()
-    page = doc.new_page(width=595.3, height=841.9)  # Standard A4 dimensions in points
-
-    # Header Ribbon
-    page.draw_rect(fitz.Rect(0, 0, 595.3, 70), color=None, fill=(0.04, 0.42, 0.33))  # SatyaSetu green
-    page.insert_text((40, 42), "SATYASETU", fontsize=18, color=(1, 1, 1), fontname="helv")
-    page.insert_text((40, 58), "AI-Powered WhatsApp Fact-Checking & Misinformation Verification Engine", fontsize=9, color=(0.8, 0.95, 0.9), fontname="helv")
-
-    # Document Metadata Box
-    # Document Metadata Box
-    date_str = datetime.now().strftime("%d %B %Y, %I:%M %p")
-    page.insert_text((400, 36), f"Report ID: STY-{int(datetime.now().timestamp())}", fontsize=8.5, color=(1, 1, 1), fontname="helv")
-    page.insert_text((400, 48), f"Generated: {date_str}", fontsize=8.5, color=(1, 1, 1), fontname="helv")
-    import hashlib, json as _json
-    report_payload = {"claim": claim, "verdict": verdict, "explanation": explanation}
-    report_hash = hashlib.sha256(
-        _json.dumps(report_payload, sort_keys=True).encode()
-    ).hexdigest()[:16]
-    page.insert_text(
-        (400, 60),
-        f"Report Hash: {report_hash} (AI-generated, not audited)",
-        fontsize=8.5, color=(0.7, 1, 0.8), fontname="helv"
-    )
-
-    y = 95
-
-    # Section 1: Ingested Viral Claim Box
-    page.draw_rect(fitz.Rect(40, y, 555, y + 55), color=(0.85, 0.85, 0.85), fill=(0.96, 0.97, 0.98))
-    page.insert_text((55, y + 18), "INVESTIGATED CLAIM STATEMENT:", fontsize=9.5, color=(0.3, 0.3, 0.3), fontname="helv")
-    claim_text = (claim[:220] + "...") if len(claim) > 220 else claim
-    page.insert_textbox(fitz.Rect(55, y + 22, 540, y + 50), f'"{claim_text}"', fontsize=10.5, color=(0.1, 0.1, 0.1), fontname="helv")
-
-    y += 70
-
-    # Section 2: Verification Verdict Banner
-    v_upper = (verdict or "UNVERIFIABLE").upper()
-    fill_color = (0.95, 0.88, 0.88) if v_upper == "REFUTED" else ((0.88, 0.95, 0.90) if v_upper == "SUPPORTED" else (0.98, 0.94, 0.85))
-    text_color = (0.8, 0.1, 0.1) if v_upper == "REFUTED" else ((0.05, 0.5, 0.2) if v_upper == "SUPPORTED" else (0.7, 0.4, 0.0))
-
-    page.draw_rect(fitz.Rect(40, y, 555, y + 40), color=None, fill=fill_color)
-    page.insert_text((55, y + 25), f"OFFICIAL VERDICT: {v_upper}", fontsize=13, color=text_color, fontname="helv")
-    page.insert_text((400, y + 25), f"Evidence Reliability: {evidence_strength}", fontsize=9.5, color=(0.3, 0.3, 0.3), fontname="helv")
-
-    y += 55
-
-    # Section 3: Verified Real News Explanation
-    page.insert_text((40, y), "FACTUAL ANALYSIS & REAL NEWS CONTEXT:", fontsize=11, color=(0.04, 0.42, 0.33), fontname="helv")
-    y += 12
-    page.draw_line(fitz.Point(40, y), fitz.Point(555, y), color=(0.04, 0.42, 0.33), width=1.5)
-    y += 10
-
-    clean_exp = explanation.replace("*", "").replace("`", "").strip()
-
-    # Dynamic box height and font size calculation to guarantee full text visibility without clipping
-    box_height = 220 if len(clean_exp) > 700 else (170 if len(clean_exp) > 350 else 120)
-    font_size = 8.8 if len(clean_exp) > 1000 else (9.2 if len(clean_exp) > 600 else 9.8)
-
-    page.draw_rect(fitz.Rect(40, y, 555, y + box_height), color=(0.88, 0.92, 0.90), fill=(0.98, 0.99, 0.99))
-    overflow = page.insert_textbox(fitz.Rect(48, y + 10, 547, y + box_height - 10), clean_exp, fontsize=font_size, color=(0.12, 0.12, 0.12), fontname="helv")
-    if overflow < 0:
-        # Fallback with smaller font if extraordinarily long
-        page.draw_rect(fitz.Rect(40, y, 555, y + box_height), color=(0.88, 0.92, 0.90), fill=(0.98, 0.99, 0.99))
-        page.insert_textbox(fitz.Rect(48, y + 10, 547, y + box_height - 10), clean_exp, fontsize=8.0, color=(0.12, 0.12, 0.12), fontname="helv")
-
-    y += box_height + 20
-
-    # Section 4: Authoritative Evidentiary Sources
-    page.insert_text((40, y), "PRIMARY CITATIONS & INDEPENDENT FACT-CHECKERS:", fontsize=11, color=(0.04, 0.42, 0.33), fontname="helv")
-    y += 12
-    page.draw_line(fitz.Point(40, y), fitz.Point(555, y), color=(0.04, 0.42, 0.33), width=1.5)
-    y += 12
-
-    TIER_LABELS = {
-        "tier_1_ifcn":       "IFCN-Certified Fact-Checker",
-        "tier_2_gov_pib":    "Official Government Source",
-        "tier_3_mainstream": "Mainstream News",
-        "tier_4_wikipedia":  "Wikipedia (reference only)",
-        "tier_5_general_web":"Web Source",
-    }
-
-    if evidence and len(evidence) > 0:
-        for idx, ev in enumerate(evidence[:3], 1):
-            src_domain = ev.get("source_domain") or ev.get("title") or "Verified Source"
-            snippet = ev.get("snippet", "")[:120]
-            url = ev.get("url", "")
-            tier_raw = ev.get("tier", "tier_5_general_web")
-            tier_label = TIER_LABELS.get(str(tier_raw).lower(), "Web Source")
-
-            page.draw_rect(fitz.Rect(40, y, 555, y + 38), color=(0.9, 0.9, 0.9), fill=(0.98, 0.99, 1.0))
-            page.insert_text((50, y + 14), f"[{idx}] {src_domain.upper()} — {tier_label}", fontsize=9, color=(0.1, 0.2, 0.4), fontname="helv")
-            page.insert_text((50, y + 26), f"Snippet: {snippet}...", fontsize=8, color=(0.35, 0.35, 0.35), fontname="helv")
-            if url:
-                page.insert_text((50, y + 36), f"URL: {url[:75]}", fontsize=7.5, color=(0.0, 0.4, 0.8), fontname="helv")
-            y += 42
-    else:
-        page.draw_rect(fitz.Rect(40, y, 555, y + 42), color=(0.9, 0.9, 0.9), fill=(0.98, 0.98, 0.98))
-        page.insert_text((50, y + 18), "• International Fact-Checking Network (IFCN) signatories (AltNews, BOOM Live, Factly)", fontsize=9, color=(0.2, 0.2, 0.2), fontname="helv")
-        page.insert_text((50, y + 32), "• Press Information Bureau (PIB) Fact Check & Official Government Portals", fontsize=9, color=(0.2, 0.2, 0.2), fontname="helv")
-        y += 50
-
-    # Footer Notice
-    y = 800
-    page.draw_line(fitz.Point(40, y), fitz.Point(555, y), color=(0.85, 0.85, 0.85), width=1)
-    page.insert_text((40, y + 16), "SatyaSetu is built for Hack on Track 2026. Automated fact verification and RAG evidence retrieval.", fontsize=8, color=(0.5, 0.5, 0.5), fontname="helv")
-    page.insert_text((440, y + 16), "https://satyasetu.org", fontsize=8, color=(0.04, 0.42, 0.33), fontname="helv")
-
-    pdf_bytes = doc.tobytes()
-    doc.close()
-    return pdf_bytes
-
-
-@router.post("/api/report/pdf", summary="Generate downloadable Fact-Check Report PDF")
-async def generate_report_pdf(req: PDFReportRequest):
-    """Generate and return a downloadable PDF report for a verified claim."""
-    from fastapi.responses import Response
-
-    pdf_content = create_fact_check_pdf(
-        claim=req.claim,
-        verdict=req.verdict,
-        explanation=req.explanation,
-        evidence_strength=req.evidence_strength or "High",
-        evidence=req.evidence or [],
-    )
-
-    filename = f"SatyaSetu_Report_{req.verdict.upper()}.pdf"
-    return Response(
-        content=pdf_content,
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"',
-            "Cache-Control": "no-cache",
-        },
-    )
 
 
 # ── Frontend Web Routes ─────────────────────────────────────────────────────────
