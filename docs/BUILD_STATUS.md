@@ -8,27 +8,27 @@ Last updated: Wave 10 completion.
 - **Track:** Hack on Track, FCRIT Vashi
 - **Role:** AI-powered WhatsApp Fact-Checking System for Multilingual India
 - **Repository:** `shreyaaspires-cloud/SatyaSetu`
-- **Active Branch:** `refactor/feature-layout`
+- **Active Branch:** `cleanup/whatsapp-demo` (tagged `pre-cleanup`)
 - **Target Deadlines:** PPT: 10 Oct 2026 | Round 2: 15-16 Oct 2026 | Round 3: Live prototype
 
 ## 2. Capability Matrix
 
 | Layer / Feature | Status | Proof / Test Suite | Notes |
 |---|---|---|---|
-| Phase 0: Safety Net and Environment | Completed | `tests/unit/test_characterisation.py` (8/8 pass) | Workspace aligned, requirements fixed, docs initialized |
-| Phase 1a: Contracts and Core Layer | Completed | `tests/unit/test_contracts.py` (12/12 pass) | Pydantic v2 models, config, constants, logging, redaction, timing |
-| Phase 1b: Security Layer and SSRF Guard | Completed | `tests/abuse/test_ssrf.py` (29/29 pass) | SSRF guard, safe_get, twilio_media_auth |
-| Phase 1c: Ingestion Feature Migration | Completed | `tests/unit/test_ingestion_detect.py` (7/7 pass) | OCR, ASR, PDF, URL extractors with safe_get and D3/D4/D6 fixes |
-| Phase 4: NLP Pipeline and Hinglish Detection | Completed | `tests/unit/test_language.py`, `tests/unit/test_claims.py`, `tests/unit/test_worthiness.py` (13/13 pass) | Script detection, KeyBERT, sentence splitter, check-worthiness, D7 fix |
-| Phase 5: Evidence Retrieval and Caching | Completed | `tests/unit/test_retrieval.py` (13/13 pass) | Google Fact Check, Web Search, Wikipedia with TTL cache |
-| Phase 6: NLI Verification and Stance Detection | Completed | `tests/unit/test_verification.py` (12/12 pass) | Cross-encoder stance, lexical fallback, rule-based aggregation |
-| Phase 7: Explanation and WhatsApp Reply | Completed | `tests/unit/test_explanation.py` (12/12 pass) | Structured JSON schema, multi-lingual replies, TwiML output |
-| Phase 8: End-to-End Orchestration | Completed | `tests/unit/test_pipeline.py` (9/9 pass) | Full pipeline test from IngestedMessage to CheckResponse |
-| Phase 9: Evaluation and Abuse Hardening | Completed | `tests/integration/test_smoke.py`, `tests/abuse/test_rate_limit.py` (11/11 pass) | IP + user rate limiting (graceful 429s), E2E smoke tests |
-| Phase 10: Presentation and Demo Hardening | Completed | `scripts/demo_cli.py`, `Procfile`, `Dockerfile` | Interactive CLI demo, cloud deployment configs |
+| Phase 0: Safety Net and Environment | Completed | `pre-cleanup` tag, 237 collected | Workspace aligned, baseline tests frozen |
+| Phase 1a: Contracts and Core Layer | Completed | `tests/unit/test_contracts.py` | Pydantic v2 models, config, constants, logging, redaction, timing |
+| Phase 1b: Security Layer and SSRF Guard | Completed | `tests/abuse/test_ssrf.py` (29 pass) | SSRF guard, safe_get, twilio_media_auth |
+| Phase 1c: Ingestion Feature Migration | Completed | `tests/unit/test_ingestion_detect.py` (7 pass) | OCR, ASR, PDF, URL extractors with safe_get and D3/D4/D6 fixes |
+| Phase 4: NLP Pipeline and Hinglish Detection | Completed | `tests/unit/test_language.py`, `tests/unit/test_claims.py`, `tests/unit/test_worthiness.py` | Script detection, KeyBERT, sentence splitter, check-worthiness |
+| Phase 5: Evidence Retrieval and Caching | Completed | `tests/unit/test_retrieval.py` | Google Fact Check, Web Search, Wikipedia with TTL cache |
+| Phase 6: NLI Verification and Stance Detection | Completed | `tests/unit/test_verification.py` | Cross-encoder stance, lexical fallback, rule-based aggregation |
+| Phase 7: Explanation and WhatsApp Reply | Completed | `tests/unit/test_explanation.py` | Structured JSON schema, multi-lingual replies, TwiML output |
+| Phase 8: End-to-End Orchestration | Completed | `tests/unit/test_pipeline.py` | Full pipeline test from IngestedMessage to CheckResponse |
+| Phase 9: Evaluation and Abuse Hardening | Completed | `tests/integration/test_smoke.py`, `tests/abuse/test_rate_limit.py` | IP + user rate limiting (graceful 429s), E2E smoke tests |
+| Phase 10: Presentation and Demo Hardening | In Progress | Refactor & Rebuild Plan v2 | Clean WhatsApp Web demo, native ES modules, fictional seed chats |
 
 ## 3. Verified Metrics (Measured Only, No Invented Statistics)
-- **Unit, Integration, and Abuse Test Suites:** **182 tests passing** (100% pass rate)
+- **Unit, Integration, and Abuse Test Suites:** **237 tests collected** (234 passing baseline)
   - 8 Characterisation (`test_characterisation.py`)
   - 12 Contracts & Core (`test_contracts.py`)
   - 29 SSRF Abuse Guard (`test_ssrf.py`)
