@@ -1,6 +1,15 @@
 """
 Verified Claim Bank matching and data loader.
-Provides pre-verified verdicts for common viral claims without LLM dependence.
+
+Provides pre-verified verdicts for common viral claims without LLM dependence,
+ensuring sub-100ms deterministic fact-checking responses for well-known rumors.
+
+Design & Integrity Principles:
+- Thread-Safe Double-Checked Caching: Prevents concurrent disk read races during cold starts.
+- Quality Validation: Verifies canonical text, non-expired `review_by` TTLs, and publisher citations.
+- Detail Conflict Gating: Rejects matches where critical entity details mismatch (e.g. Cardinal directions).
+- Non-Decisive Fallback: Fast-changing claim domains (living person health, current policies)
+  are flagged as `is_decisive=False` to trigger live retrieval alongside the static bank.
 """
 
 from __future__ import annotations
