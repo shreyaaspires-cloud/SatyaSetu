@@ -12,7 +12,9 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Patterns signaling viral forwarding pressure in WhatsApp forwards
+# Patterns signaling viral forwarding pressure in WhatsApp forwards.
+# Detects urgent calls-to-action in English, Devanagari Hindi, and Romanized Hinglish
+# often used to artificially amplify misinformative forwards before fact-checking.
 FORWARD_PRESSURE_PATTERNS = [
     # English patterns
     r"\bforward\s+(?:this|to|with)\b",
