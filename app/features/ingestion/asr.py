@@ -18,6 +18,9 @@ from app.core.security import get_twilio_media_auth, safe_get
 logger = logging.getLogger(__name__)
 
 _whisper_model: Any = None
+# Defensive Resource Bounds:
+# - File size limit: 2MB cap prevents memory exhaustion on large voice uploads.
+# - Duration bound: 120s limit bounds Whisper CPU/GPU compute allocation per request.
 MAX_FILE_BYTES = 2 * 1024 * 1024  # 2 MB
 MAX_AUDIO_DURATION_SEC = 120.0
 
