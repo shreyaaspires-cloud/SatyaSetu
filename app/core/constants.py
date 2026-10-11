@@ -1,16 +1,24 @@
 """
 System-wide enums and constants for SatyaSetu.
+
+Defines foundational vocabulary and typing contracts across the system:
+- InputType: Permitted inbound payload modalities for ingestion demuxing.
+- Tier: Source authority hierarchy for confidence weighting and conflict resolution.
+- Rating: Normalized fact-check verdict ratings reported by external investigative sources.
+- Verdict: Canonical system verdicts rendered by the synthesis and arbitration engines.
 """
 
 from enum import Enum
 
 
 class InputType(str, Enum):
+    """Supported multimodal input channels for inbound message processing."""
     TEXT = "text"
     SCREENSHOT = "screenshot"
     VOICE = "voice"
     PDF = "pdf"
     URL = "url"
+
 
 
 class Tier(str, Enum):
