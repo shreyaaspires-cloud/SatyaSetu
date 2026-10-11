@@ -4,6 +4,13 @@ Official government source search with topic routing and detail verification (T1
 Routes claims to official domain sets (RBI, NPCI, MOHFW, UIDAI, SEBI, PIB, etc.),
 executes domain-restricted queries, and validates that returned official snippets
 contain specific matching details rather than generic portal homepages.
+
+Architectural Highlights:
+- Topic Taxonomy & Routing: Detects domain categories (Banking, Health, Schemes, Securities)
+  to target queries via boolean `site:` expressions.
+- Salience & Generic Word Filtering: Guards against high-authority false positives by stripping
+  common institutional stopwords (e.g., 'portal', 'ministry', 'pib') and requiring salient detail matches.
+- Tier 2 Elevation: Successfully retrieved and matched official documents receive Tier.TIER_2_GOV_PIB authority.
 """
 
 from __future__ import annotations
