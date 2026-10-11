@@ -1,7 +1,13 @@
 """
 Ingestion orchestrator service.
-Routes incoming WhatsApp payloads across OCR, ASR, PDF, URL, and Text extractors
+
+Routes incoming WhatsApp and Web payloads across OCR, ASR, PDF, URL, and Text extractors
 and yields a validated IngestedMessage contract.
+
+Design Guarantees:
+- Uniform Contract: Downstream pipeline components consume `IngestedMessage` regardless of origin.
+- Zero-Exception SLA: Catches and gracefully degrades parser crashes to empty text payloads.
+- Anonymization by Default: Converts raw sender phone numbers to irreversible SHA256 hashes immediately.
 """
 
 from __future__ import annotations
@@ -33,8 +39,9 @@ def ingest(
 ) -> IngestedMessage:
     """
     Ingest an incoming message payload into a standardized IngestedMessage.
-    Synchronous function (D2 fixed) designed for clean execution in worker threads.
-    Never raises exceptions. On failure, returns empty raw_text.
+
+    Synchronous entry point designed for clean execution in worker threads.
+    Guarantees no unhandled exceptions bubble up; errors yield an IngestedMessage with empty raw_text.
     """
     hashed_from = hash_identifier(from_number) if from_number else "anonymous"
     input_type = detect_input_type(body, media_url, media_content_type)
