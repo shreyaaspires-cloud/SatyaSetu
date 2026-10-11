@@ -41,6 +41,11 @@ def is_public_http_url(url: str) -> bool:
     Validate that a URL uses http/https and does not resolve to private,
     loopback, or cloud-metadata network addresses.
     Prevents SSRF attacks on internal services.
+
+    Defensive Controls:
+    - Scheme verification: Rejects non-HTTP schemes (file://, gopher://, ftp://).
+    - DNS resolution checks: Resolves hostname to all underlying IPv4/IPv6 addresses.
+    - Cloud metadata blocking: Blocks 169.254.169.254, AWS IMDSv2, and loopback ranges.
     """
     if not url or not isinstance(url, str):
         return False
