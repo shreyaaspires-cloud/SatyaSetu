@@ -1,12 +1,19 @@
 """
-Stance scoring engine.
+Stance scoring and consensus aggregation engine.
 
-Uses a cross-encoder Natural Language Inference (NLI) model to determine
-whether each piece of retrieved evidence SUPPORTS, REFUTES, or is NEUTRAL
-toward a claim.
+Determines whether each piece of retrieved evidence SUPPORTS, REFUTES, or is NEUTRAL
+toward a claim, and aggregates evidence into a deterministic factual verdict.
 
-Model: roberta-large-mnli (configurable via settings.nli_model_name)
-Fallback: lexical overlap scoring when the model is unavailable.
+Tri-Tier Classification Cascade:
+1. Local RoBERTa-large MNLI Cross-Encoder: Fast, local zero-shot Natural Language Inference.
+2. Gemini Batch Stance Classifier: Contextual LLM stance classification with JSON structured output.
+3. Lexical & Polarity Heuristic Fallback: Token overlap and negation detection for offline execution.
+
+Consensus & Guardrails:
+- Detail Mismatch Pre-filtering: Items failing typed entity agreement (directions, numbers, currency)
+  are forced to NEUTRAL and prevented from skewing verdicts.
+- Tier-Weighted Scoring: IFCN (Tier 1) and Government (Tier 2) sources carry highest decisive weights.
+- Recency Decay: Stale evidence (> 365 days) is discounted when evaluating fast-moving claims.
 """
 
 from __future__ import annotations
@@ -16,9 +23,9 @@ import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from app.contracts.models import EvidenceItem
+from app.core.config import settings
 from app.core.constants import Verdict
 from app.features.verification.details import check_detail_conflict, has_negation
-from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
