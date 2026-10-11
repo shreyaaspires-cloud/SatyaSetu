@@ -20,7 +20,13 @@ _lock = threading.Lock()
 
 
 def init_db() -> None:
-    """Initialize SQLite database and create claims table if not exists."""
+    """
+    Initialize SQLite database and create claims table if not exists.
+    Design Constraints:
+    - Thread-safety: Module-level threading.Lock synchronizes SQLite access across threads.
+    - Zero plain PII: Stores salted HMAC sender hash and bounded redacted snippet only.
+    - Automated retention: Log purging controlled by configurable claims_retention_days.
+    """
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     with _lock:
         try:
