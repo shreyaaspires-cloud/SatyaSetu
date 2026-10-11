@@ -19,6 +19,10 @@ logger = logging.getLogger(__name__)
 
 _ocr_reader: Any = None
 
+# Defensive Preprocessing & Bounds:
+# - Image downsampling: MAX_IMAGE_WIDTH = 800px accelerates EasyOCR inference without accuracy loss.
+# - File size limit: 2MB cap prevents decompression bomb attacks and excessive memory usage.
+# - Confidence threshold: 0.6 minimum suppresses noisy OCR artifacts from camera blur.
 MAX_IMAGE_WIDTH = 800  # px: resize before OCR
 MAX_FILE_BYTES = 2 * 1024 * 1024  # 2 MB
 CONFIDENCE_THRESHOLD = 0.6
