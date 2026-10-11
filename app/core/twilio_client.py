@@ -18,6 +18,10 @@ def send_twilio_message(to_number: str, body: str) -> bool:
     Send an outbound message via Twilio REST API.
     Returns True on success, False if credentials are missing or call fails.
     Never raises uncaught exceptions to caller.
+
+    Resilience Guarantees:
+    - WhatsApp payload length bounding (enforces <= 4096 characters per Meta specs).
+    - Exception isolation: Logs network/auth failures without crashing worker threads.
     """
     if not (settings.account_sid and settings.auth_token):
         logger.debug("Twilio credentials not configured; skipping outbound REST message.")
