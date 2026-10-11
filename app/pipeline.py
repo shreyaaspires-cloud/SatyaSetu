@@ -30,13 +30,18 @@ from app.features.verification.service import batch_verify_claims
 logger = logging.getLogger(__name__)
 
 
+# ── Verdict Resolution Hierarchy ──────────────────────────────────────────
+# Determines system-level verdict from an ensemble of decomposed claim results.
+# Precedence follows safety-first principle: Refutations and outdated claims
+# supersede partial validations to prevent deceptive narrative propagation.
+
 def _derive_overall_verdict(claim_results: list[ClaimResult]) -> Verdict:
     """
     Combine per-claim verdicts into a single overall verdict.
 
     Rules (applied in priority order):
-      - Any REFUTED claim             → overall REFUTED
-      - Any OUTDATED claim            → overall OUTDATED
+      - Any REFUTED claim             → overall REFUTED (high safety priority)
+      - Any OUTDATED claim            → overall OUTDATED (temporal invalidation)
       - Any PARTIALLY_SUPPORTED claim → overall PARTIALLY_SUPPORTED
       - All SUPPORTED                 → overall SUPPORTED
       - Otherwise                     → UNVERIFIABLE
