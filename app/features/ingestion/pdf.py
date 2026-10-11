@@ -19,6 +19,10 @@ from app.features.ingestion.ocr import CONFIDENCE_THRESHOLD, get_ocr_reader
 
 logger = logging.getLogger(__name__)
 
+# Document Ingestion Safeguards:
+# - File size limit: 2MB cap prevents denial-of-service from massive documents.
+# - Output bound: 10,000 characters limit bounds downstream NLP processing time.
+# - Hybrid extraction: Attempts native PDF text first, falls back to OCR if page has <20 chars.
 MAX_FILE_BYTES = 2 * 1024 * 1024  # 2 MB
 MAX_TEXT_CHARS = 10_000
 MIN_TEXT_PER_PAGE = 20
