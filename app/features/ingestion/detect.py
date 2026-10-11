@@ -16,8 +16,8 @@ def detect_input_type(
     Determine which extraction pipeline to route the message to.
 
     Priority order:
-      1. media_content_type for image, audio, or pdf attachments
-      2. body starting with http/https indicates a URL to scrape
+      1. media_content_type for image, audio (including WhatsApp Opus), or pdf attachments
+      2. body starting with http/https indicates a URL to scrape via SSRF guard
       3. Fallback to plain text from body
     """
     if media_content_type:
