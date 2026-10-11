@@ -1,6 +1,7 @@
 """
 API Check endpoint & Web demo interface.
-Provides POST /api/check, POST /api/ocr, and serves the WhatsApp Web Desktop Demo.
+Provides POST /api/check, POST /api/ocr, POST /api/pdf, GET /api/demo/config,
+and serves the WhatsApp Web Desktop Demo.
 """
 
 from __future__ import annotations
@@ -10,12 +11,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.contracts.api import CheckAPIResponse, CheckRequest
 from app.contracts.models import IngestedMessage
 from app.core.constants import InputType
+from app.core.messages import DEMO_CONFIG
 from app.features.explanation.formatter import (
     VERDICT_EMOJI,
     compute_evidence_strength,
@@ -29,6 +31,7 @@ router = APIRouter(tags=["check"])
 
 # Locate static folder at workspace root
 STATIC_DIR = Path(__file__).resolve().parent.parent.parent / "static"
+
 
 
 def _read_html_page(filename: str, fallback_title: str) -> str:
@@ -228,3 +231,12 @@ def whatsapp_portal_page() -> str:
     """Realistic WhatsApp Web Desktop Screen with SatyaSetu AI Bot."""
     return _read_html_page("whatsapp.html", "SatyaSetu — WhatsApp Web AI Fact-Checking Bot")
 
+
+@router.get("/api/demo/config", summary="Demo configuration & bot message strings")
+def demo_config() -> JSONResponse:
+    """
+    Return bot message strings, supported languages, and verdict labels for the
+    web demo UI. Used by the frontend to keep copy in sync with the backend.
+    No secret values are exposed.
+    """
+    return JSONResponse(content=DEMO_CONFIG)

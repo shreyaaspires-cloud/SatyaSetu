@@ -1,14 +1,14 @@
 """
 Health check router.
 
-GET /health — lightweight liveness probe suitable for Render / Railway / Cloud Run.
-Returns service metadata and environment info without exposing secrets.
+GET /health          — lightweight liveness probe.
+GET /health/detailed — model status, feature flags (no secrets exposed).
 """
 
 from __future__ import annotations
 
 import time
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
 from app.core.config import settings
@@ -29,6 +29,7 @@ class HealthResponse(BaseModel):
 class DetailedHealthResponse(HealthResponse):
     environment: dict[str, str] = Field(default_factory=dict)
     features_enabled: dict[str, bool] = Field(default_factory=dict)
+    model_status: dict[str, str] = Field(default_factory=dict)
 
 
 @router.get("/health", response_model=HealthResponse, summary="Liveness probe")
@@ -44,8 +45,9 @@ async def health_check() -> HealthResponse:
 
 
 @router.get("/health/detailed", response_model=DetailedHealthResponse, summary="Diagnostics probe")
-async def health_check_detailed() -> DetailedHealthResponse:
-    """Return 200 OK with diagnostics without exposing secrets."""
+async def health_check_detailed(request: Request) -> DetailedHealthResponse:
+    """Return 200 OK with model readiness status, feature flags (no secrets exposed)."""
+    model_status: dict[str, str] = getattr(request.app.state, "model_status", {})
     return DetailedHealthResponse(
         status="ok",
         app_name=settings.app_name,
@@ -62,5 +64,6 @@ async def health_check_detailed() -> DetailedHealthResponse:
             "web_search": bool(settings.search_api_key),
             "twilio_signature_required": settings.require_twilio_signature,
         },
+        model_status=model_status,
     )
 

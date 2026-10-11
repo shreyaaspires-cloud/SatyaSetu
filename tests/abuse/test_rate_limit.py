@@ -95,23 +95,28 @@ class TestWebhookRateLimitIntegration:
             assert "too many messages" in res3.text.lower()
 
     def test_ip_rate_limiting_middleware(self, monkeypatch):
-        import app_main
+        import app.main as app_main
         monkeypatch.setattr(app_main, "IP_RATE_LIMIT_PER_MINUTE", 2)
+        monkeypatch.setattr(app_main, "IP_RATE_LIMIT_PER_WINDOW", 2)
         client = TestClient(app)
 
         with app_main._ip_rate_lock:
             app_main._ip_rate_store.clear()
 
-        # Request 1 & 2 pass
-        r1 = client.get("/health")
+        # Request 1 & 2 pass on non-exempt API endpoint
+        r1 = client.get("/api/demo/config")
         assert r1.status_code == 200
-        r2 = client.get("/health")
+        r2 = client.get("/api/demo/config")
         assert r2.status_code == 200
 
-        # Request 3 hits IP limit
-        r3 = client.get("/health")
+        # Request 3 hits IP limit on API endpoint
+        r3 = client.get("/api/demo/config")
         assert r3.status_code == 429
         assert r3.headers.get("retry-after") == "60"
         data = r3.json()
         assert data["code"] == "RATE_LIMIT_EXCEEDED"
+
+        # Exempt paths like /health are never rate-limited
+        r_health = client.get("/health")
+        assert r_health.status_code == 200
 

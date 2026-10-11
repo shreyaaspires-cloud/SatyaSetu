@@ -1,28 +1,20 @@
 """
-main.py
-───────
-SatyaSetu Unified Production Entry Point.
+main.py — compatibility shim.
 
-This module exposes the modern FastAPI application (`app_main:app`) as the root
-application entry point, ensuring seamless compatibility for:
-  - `uvicorn main:app --reload`
-  - `uvicorn app_main:app --reload`
-  - Container runtimes and WSGI/ASGI runners
+The canonical application factory lives in app/main.py.
+This file re-exports `app` so that `uvicorn main:app` keeps working.
 """
 
-from __future__ import annotations
-
-import uvicorn
-from app_main import app
+from app.main import app  # noqa: F401
 
 __all__ = ["app"]
 
-
 if __name__ == "__main__":
+    import uvicorn
     from app.core.config import settings
 
     uvicorn.run(
-        "main:app",
+        "app.main:app",
         host="0.0.0.0",
         port=settings.port,
         reload=settings.env == "development",
