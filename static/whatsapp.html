@@ -4,9 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WhatsApp Web · SatyaSetu AI Bot</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --wa-bg-deep: #111b21;
@@ -93,7 +90,7 @@
     .main-container {
       display: flex;
       flex: 1;
-      height: calc(100vh - 38px);
+      height: 100vh;
       overflow: hidden;
     }
 
@@ -849,26 +846,6 @@
 <body>
 
 <div class="app-window">
-  <!-- Demo Header Ribbon -->
-  <div class="demo-ribbon">
-    <div>
-      🛡️ <strong>SatyaSetu WhatsApp Web Fact-Checking System</strong> — Live AI Fact-Checking Bot Active
-    </div>
-  </div>
-
-  <!-- Top Title Bar -->
-  <div class="window-header">
-    <div class="window-title">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="#00a884"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.46-4.45-9.92-9.91-9.92zM12.04 20.14c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31c-.83-1.32-1.27-2.85-1.27-4.43 0-4.54 3.7-8.24 8.24-8.24 4.54 0 8.24 3.7 8.24 8.24 0 4.54-3.7 8.24-8.24 8.24zm4.52-6.17c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43s-.56-1.34-.76-1.84c-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.57.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.47-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.19-.47-.31z"/></svg>
-      WhatsApp
-    </div>
-    <div class="window-controls">
-      <span class="win-btn">─</span>
-      <span class="win-btn">□</span>
-      <span class="win-btn">✕</span>
-    </div>
-  </div>
-
   <!-- Main Container -->
   <div class="main-container">
     <!-- Far-Left Navigation Rail -->
@@ -947,98 +924,87 @@
           </div>
         </div>
 
-        <!-- Team Appsolutely Project Group (Active in Screenshot 3) -->
-        <div class="contact-item active" id="item-group" onclick="selectChat('group')">
-          <div class="avatar" style="background:#4b5563;">👥</div>
+        <!-- Sharma Parivar (Family Group) -->
+        <div class="contact-item active" id="item-sharma" onclick="selectChat('sharma')">
+          <div class="avatar" style="background:#0f766e;">🏠</div>
           <div class="contact-info">
             <div class="contact-top">
-              <div class="contact-name">Team Appsolutely Project Group 🤘🤘</div>
+              <div class="contact-name">Sharma Parivar 🏠</div>
               <div class="contact-time">12:12 pm</div>
             </div>
             <div class="contact-bottom">
-              <div class="contact-last-msg">✓✓ You: @all we have to keep meeti...</div>
+              <div class="contact-last-msg">Mummy: Forwarded message...</div>
               <span class="pinned-icon">📌</span>
             </div>
           </div>
         </div>
 
-        <!-- Other Contacts from Screenshot -->
-        <div class="contact-item" id="item-sy" onclick="selectChat('sy')">
-          <div class="avatar" style="background:#1e3a8a;">🎓</div>
+        <!-- Rishtedar Mandali (Relatives Group) -->
+        <div class="contact-item" id="item-rishtedar" onclick="selectChat('rishtedar')">
+          <div class="avatar" style="background:#b45309;">👨‍👩‍👧‍👦</div>
           <div class="contact-info">
             <div class="contact-top">
-              <div class="contact-name">SY B.Tech (AI &ML)26-27</div>
+              <div class="contact-name">Rishtedar Mandali 👨‍👩‍👧‍👦</div>
               <div class="contact-time">Yesterday</div>
             </div>
             <div class="contact-bottom">
-              <div class="contact-last-msg">~Vaishnavi Hingmire: Dear Student...</div>
-              <span class="pinned-icon">📌</span>
+              <div class="contact-last-msg">Mausi: UPI 2 percent charges forward...</div>
             </div>
           </div>
         </div>
 
-        <div class="contact-item" id="item-we" onclick="selectChat('we')">
-          <div class="avatar" style="background:#701a75;">🏛️</div>
+        <!-- Shanti Nagar Society (Housing Society) -->
+        <div class="contact-item" id="item-society" onclick="selectChat('society')">
+          <div class="avatar" style="background:#334155;">🏢</div>
           <div class="contact-info">
             <div class="contact-top">
-              <div class="contact-name">WE ARE NOT VIDYALAN...</div>
-              <div class="contact-time">24/09/2026</div>
+              <div class="contact-name">Shanti Nagar Society 🏢</div>
+              <div class="contact-time">Yesterday</div>
             </div>
             <div class="contact-bottom">
-              <div class="contact-last-msg">Aaryan: 📹 Video</div>
-              <span class="pinned-icon">📌</span>
+              <div class="contact-last-msg">Secretary: Water tank cleaning scheduled...</div>
             </div>
           </div>
         </div>
 
-        <div class="contact-item" id="item-aaryan" onclick="selectChat('aaryan')">
-          <div class="avatar" style="background:#9a3412;">AR</div>
+        <!-- Old School Gang (Friends Group) -->
+        <div class="contact-item" id="item-friends" onclick="selectChat('friends')">
+          <div class="avatar" style="background:#701a75;">🎒</div>
           <div class="contact-info">
             <div class="contact-top">
-              <div class="contact-name">Aaryan Raorane</div>
+              <div class="contact-name">Old School Gang 🎒</div>
+              <div class="contact-time">10:45 am</div>
+            </div>
+            <div class="contact-bottom">
+              <div class="contact-last-msg">Kabir: Anyone up for weekend match?</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mummy (1:1) -->
+        <div class="contact-item" id="item-mummy" onclick="selectChat('mummy')">
+          <div class="avatar" style="background:#be185d;">❤️</div>
+          <div class="contact-info">
+            <div class="contact-top">
+              <div class="contact-name">Mummy ❤️</div>
               <div class="contact-time">1:02 pm</div>
             </div>
             <div class="contact-bottom">
-              <div class="contact-last-msg">✓ Okk</div>
+              <div class="contact-last-msg">Beta lunch kar liya?</div>
             </div>
           </div>
         </div>
 
-        <div class="contact-item" id="item-shreya" onclick="selectChat('shreya')">
-          <div class="avatar" style="background:#065f46;">SD</div>
+        <!-- Papa (1:1) -->
+        <div class="contact-item" id="item-papa" onclick="selectChat('papa')">
+          <div class="avatar" style="background:#1d4ed8;">👔</div>
           <div class="contact-info">
             <div class="contact-top">
-              <div class="contact-name">Shreya Desai</div>
-              <div class="contact-time">12:05 pm</div>
+              <div class="contact-name">Papa 👔</div>
+              <div class="contact-time">11:15 am</div>
             </div>
             <div class="contact-bottom">
-              <div class="contact-last-msg">✓✓ If no one is taking initiative then we ...</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="contact-item" id="item-disha" onclick="selectChat('disha')">
-          <div class="avatar" style="background:#831843;">DM</div>
-          <div class="contact-info">
-            <div class="contact-top">
-              <div class="contact-name">Disha Mumbarkar</div>
-              <div class="contact-time">11:49 am</div>
-            </div>
-            <div class="contact-bottom">
-              <div class="contact-last-msg">✓✓ Bohot mera dimag badak gaya hai a...</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="contact-item" id="item-mahindra" onclick="selectChat('mahindra')">
-          <div class="avatar" style="background:#374151;">MP</div>
-          <div class="contact-info">
-            <div class="contact-top">
-              <div class="contact-name">Mahindra Pata</div>
-              <div class="contact-time">11:09 am</div>
-            </div>
-            <div class="contact-bottom">
-              <div class="contact-last-msg">Ok</div>
+              <div class="contact-last-msg">Check the railway concession scheme notice.</div>
             </div>
           </div>
         </div>
@@ -1050,10 +1016,10 @@
       <!-- Active Chat Header -->
       <div class="chat-header">
         <div class="chat-header-left">
-          <div class="avatar" id="headerAvatar" style="background:#4b5563;">👥</div>
+          <div class="avatar" id="headerAvatar" style="background:#0f766e;">🏠</div>
           <div>
-            <div class="chat-header-title" id="headerTitle">Team Appsolutely Project Group 🤘🤘</div>
-            <div class="chat-header-sub" id="headerSub">Aaryan, Shreya, You</div>
+            <div class="chat-header-title" id="headerTitle">Sharma Parivar 🏠</div>
+            <div class="chat-header-sub" id="headerSub">Mummy, Papa, Dadi, Rohan, You</div>
           </div>
         </div>
         <div class="chat-header-right">
@@ -1212,148 +1178,202 @@
 </div>
 
 <script>
-  // ── Chat State Data ──
+  // ── Safe HTML & URL Escaping Utilities (F6) ──
+  function escapeHtml(str) {
+    if (str == null) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function isSafeUrl(url) {
+    if (!url || typeof url !== "string") return false;
+    try {
+      const p = new URL(url.trim(), window.location.origin);
+      return p.protocol === "http:" || p.protocol === "https:";
+    } catch {
+      return false;
+    }
+  }
+
+  function formatWhatsAppText(raw) {
+    if (!raw) return "";
+    let safe = escapeHtml(raw);
+    safe = safe.replace(/\*([^*\n]+)\*/g, "<strong>$1</strong>");
+    safe = safe.replace(/_([^_\n]+)_/g, "<em>$1</em>");
+    safe = safe.replace(/~([^~\n]+)~/g, "<del>$1</del>");
+    safe = safe.replace(/```([^`]+)```/g, "<code>$1</code>");
+    safe = safe.replace(/(https?:\/\/[^\s<]+)/g, function(url) {
+      if (isSafeUrl(url)) {
+        return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" style="color:#53bdeb;text-decoration:underline;">' + url + '</a>';
+      }
+      return url;
+    });
+    safe = safe.replace(/\n/g, "<br>");
+    return safe;
+  }
+
+  // ── Fictional Seed Chats (F7, Section 6.2) ──
   const CHATS = {
-    group: {
-      name: "Team Appsolutely Project Group 🤘🤘",
-      sub: "Aaryan, Shreya, You",
-      avatar: "👥",
-      color: "#4b5563",
+    sharma: {
+      name: "Sharma Parivar 🏠",
+      sub: "Mummy, Papa, Dadi, Rohan, You",
+      avatar: "🏠",
+      color: "#0f766e",
       messages: [
         {
-          id: "m1",
-          sender: "Aaryan Raorane",
+          id: "m_sharma_1",
+          sender: "Mummy",
           isMe: false,
-          quoted: {
-            author: "You",
-            text: "There is the bad news for all of us that nana Patekar is no more in this world today only we lost him😭😭😭😭"
-          },
-          text: "I pray that his soul gets peace in after life\nHe was a great man\nNow when i will see his movies welcome and welcome back i will miss him a lot",
+          forwarded: "many",
+          text: "नींबू का रस और गर्म पानी पीने से 48 घंटे में कैंसर ठीक हो जाता है! सभी ग्रुप में शेयर करें 🙏",
           time: "8:59 am",
           status: ""
         },
         {
-          id: "m2",
+          id: "m_sharma_2",
           sender: "You",
           isMe: true,
           quoted: {
-            author: "Aaryan Raorane",
-            text: "I pray that his soul gets peace in after life\nHe was a great man ..."
+            author: "Mummy",
+            text: "नींबू का रस और गर्म पानी पीने से 48 घंटे में कैंसर ठीक हो जाता है..."
           },
-          text: "Same here he was the best person",
+          text: "Mummy, aise unverified forwards pe vishwas mat karo. Main SatyaSetu se check karta hoon.",
           time: "9:00 am",
           status: "✓✓"
         },
         {
-          id: "m3",
-          sender: "Aaryan Raorane",
+          id: "m_sharma_3",
+          sender: "Papa",
           isMe: false,
-          videoCard: {
-            title: 'Planet Marathi OTT on Instagram: "असा नट होणे नाही! @nana.patekar पहा \'नटसम्राट\' फक्त \'प्लॅनेट मराठी ओटीटी\'वर !...',
-            url: "https://www.instagram.com/reel/CfWCqnSqgFo/?stkn=NDRvZ3lvbm1yNHQy",
-            thumb: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
-          },
-          text: "https://www.instagram.com/reel/CfWCqnSqgFo/?stkn=NDRvZ3lvbm1yNHQy",
-          time: "9:01 am",
+          text: "Haan beta, pehle verify kar lo.",
+          time: "9:02 am",
+          status: ""
+        }
+      ]
+    },
+    rishtedar: {
+      name: "Rishtedar Mandali 👨‍👩‍👧‍👦",
+      sub: "Mausi, Mama ji, Chachu, Bua, You",
+      avatar: "👨‍👩‍👧‍👦",
+      color: "#b45309",
+      messages: [
+        {
+          id: "m_rish_1",
+          sender: "Mausi",
+          isMe: false,
+          forwarded: "many",
+          text: "NPCI has introduced 2 percent transaction fee on normal UPI payments starting this week. Forward to everyone before midnight!",
+          time: "Yesterday",
           status: ""
         },
         {
-          id: "m4",
-          sender: "You",
-          isMe: true,
-          videoCard: {
-            title: "Planet Marathi OTT reel shared",
-            url: "https://www.instagram.com/reel/CfWCqnSqgFo/?stkn=NDRvZ3lvbm1yNHQy",
-            thumb: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80"
-          },
-          text: "https://www.instagram.com/reel/CfWCqnSqgFo/?stkn=NDRvZ3lvbm1yNHQy",
-          time: "9:01 am",
-          status: "✓✓"
+          id: "m_rish_2",
+          sender: "Mama ji",
+          isMe: false,
+          text: "Is this real? I transfer via UPI daily.",
+          time: "Yesterday",
+          status: ""
+        }
+      ]
+    },
+    society: {
+      name: "Shanti Nagar Society 🏢",
+      sub: "Secretary Uncle, Mrs. Iyer, Flat 304, You",
+      avatar: "🏢",
+      color: "#334155",
+      messages: [
+        {
+          id: "m_soc_1",
+          sender: "Secretary Uncle",
+          isMe: false,
+          text: "Dear Residents, overhead water tank cleaning scheduled for Saturday 10:00 AM to 2:00 PM. Please store sufficient water.",
+          time: "Yesterday",
+          status: ""
+        }
+      ]
+    },
+    friends: {
+      name: "Old School Gang 🎒",
+      sub: "Arjun, Kabir, Priya, You",
+      avatar: "🎒",
+      color: "#701a75",
+      messages: [
+        {
+          id: "m_fr_1",
+          sender: "Kabir",
+          isMe: false,
+          text: "Anyone up for weekend football match?",
+          time: "10:45 am",
+          status: ""
+        }
+      ]
+    },
+    mummy: {
+      name: "Mummy ❤️",
+      sub: "online",
+      avatar: "❤️",
+      color: "#be185d",
+      messages: [
+        {
+          id: "m_mum_1",
+          sender: "Mummy",
+          isMe: false,
+          text: "Beta lunch kar liya?",
+          time: "1:02 pm",
+          status: ""
+        }
+      ]
+    },
+    papa: {
+      name: "Papa 👔",
+      sub: "last seen today at 11:15 am",
+      avatar: "👔",
+      color: "#1d4ed8",
+      messages: [
+        {
+          id: "m_pap_1",
+          sender: "Papa",
+          isMe: false,
+          text: "Someone sent a forward claiming free railway travel for senior citizens. Check if it is official.",
+          time: "11:15 am",
+          status: ""
         }
       ]
     },
     bot: {
-      name: "SatyaSetu AI Fact-Check Bot 🛡️",
-      sub: "Verified Fact-Checking Gateway · Instant Response",
+      name: "SatyaSetu",
+      sub: "Business Account",
       avatar: "🛡️",
       color: "linear-gradient(135deg, #00a884, #00796b)",
       messages: [
         {
           id: "b1",
-          sender: "SatyaSetu Bot",
+          sender: "SatyaSetu",
           isMe: false,
-          text: "🙏 Welcome to SatyaSetu (सत्यसेतु)!\n\nI am your AI-powered multi-lingual Fact-Checking Assistant. You can forward or send any viral claim, fake news rumor, screenshot image, or video link directly to me.\n\nI will instantly check authoritative sources (IFCN certified fact-checkers, PIB, WHO, Wikipedia) and provide you the verified verdict and real news context.",
-          time: "Just now",
+          text: "*SatyaSetu Fact-Check Assistant*\n\nForward any viral message, health rumor, policy claim, or upload a circular screenshot/audio to verify against authoritative fact-checkers (IFCN, PIB, WHO, Wikipedia).",
+          time: "Today",
           status: ""
         }
-      ]
-    },
-    sy: {
-      name: "SY B.Tech (AI &ML)26-27",
-      sub: "Vaishnavi, Aryan, Tanmay, You",
-      avatar: "🎓",
-      color: "#1e3a8a",
-      messages: [
-        { id: "s1", sender: "Vaishnavi Hingmire", isMe: false, text: "Dear Students, please submit your Machine Learning project synopsis by tomorrow evening.", time: "Yesterday", status: "" }
-      ]
-    },
-    we: {
-      name: "WE ARE NOT VIDYALAN...",
-      sub: "Aaryan, Rohit, You",
-      avatar: "🏛️",
-      color: "#701a75",
-      messages: [
-        { id: "w1", sender: "Aaryan", isMe: false, text: "Check out this video from the hackathon lab session!", time: "24/09/2026", status: "" }
-      ]
-    },
-    aaryan: {
-      name: "Aaryan Raorane",
-      sub: "online",
-      avatar: "AR",
-      color: "#9a3412",
-      messages: [
-        { id: "a1", sender: "Aaryan Raorane", isMe: false, text: "Okk bro, let's complete the fact checking integration now.", time: "1:02 pm", status: "" }
-      ]
-    },
-    shreya: {
-      name: "Shreya Desai",
-      sub: "last seen today at 12:45 pm",
-      avatar: "SD",
-      color: "#065f46",
-      messages: [
-        { id: "sh1", sender: "Shreya Desai", isMe: false, text: "If no one is taking initiative then we will present the WhatsApp demo directly to judges.", time: "12:05 pm", status: "" }
-      ]
-    },
-    disha: {
-      name: "Disha Mumbarkar",
-      sub: "last seen today at 11:55 am",
-      avatar: "DM",
-      color: "#831843",
-      messages: [
-        { id: "d1", sender: "Disha Mumbarkar", isMe: false, text: "Bohot mera dimag badak gaya hai aaj ke assignment dekh ke 😂", time: "11:49 am", status: "" }
-      ]
-    },
-    mahindra: {
-      name: "Mahindra Pata",
-      sub: "last seen yesterday",
-      avatar: "MP",
-      color: "#374151",
-      messages: [
-        { id: "m1", sender: "Mahindra Pata", isMe: false, text: "Ok", time: "11:09 am", status: "" }
       ]
     }
   };
 
-  let activeChatId = "group";
+  let activeChatId = "sharma";
   let targetContextMessage = null;
 
   // ── Render Messages ──
   function renderMessages() {
     const chat = CHATS[activeChatId];
-    document.getElementById("headerTitle").innerText = chat.name;
-    document.getElementById("headerSub").innerText = chat.sub;
+    if (!chat) return;
+
+    document.getElementById("headerTitle").textContent = chat.name;
+    document.getElementById("headerSub").textContent = chat.sub;
     const hAvatar = document.getElementById("headerAvatar");
-    hAvatar.innerText = chat.avatar;
+    hAvatar.textContent = chat.avatar;
     hAvatar.style.background = chat.color;
 
     const stream = document.getElementById("messagesStream");
@@ -1362,7 +1382,7 @@
     // Date Pill
     const datePill = document.createElement("div");
     datePill.className = "date-pill";
-    datePill.innerText = activeChatId === "group" ? "TODAY" : "YESTERDAY";
+    datePill.textContent = activeChatId === "sharma" ? "TODAY" : "YESTERDAY";
     stream.appendChild(datePill);
 
     chat.messages.forEach(msg => {
@@ -1370,28 +1390,19 @@
       row.className = `msg-row ${msg.isMe ? 'outgoing' : 'incoming'}`;
       row.id = msg.id;
 
+      let forwardedHtml = "";
+      if (msg.forwarded === "many") {
+        forwardedHtml = '<div style="font-size:11px;color:#8696a0;font-style:italic;margin-bottom:4px;display:flex;align-items:center;gap:4px;"><span>↪</span> Forwarded many times</div>';
+      } else if (msg.forwarded) {
+        forwardedHtml = '<div style="font-size:11px;color:#8696a0;font-style:italic;margin-bottom:4px;display:flex;align-items:center;gap:4px;"><span>↪</span> Forwarded</div>';
+      }
+
       let quotedHtml = "";
       if (msg.quoted) {
         quotedHtml = `
           <div class="msg-quoted">
-            <div class="msg-quoted-title">${msg.quoted.author}</div>
-            <div>${msg.quoted.text.replace(/\n/g, '<br>')}</div>
-          </div>
-        `;
-      }
-
-      let videoHtml = "";
-      if (msg.videoCard) {
-        videoHtml = `
-          <div class="video-card" onclick="window.open('${msg.videoCard.url}', '_blank')">
-            <div class="video-card-thumb">
-              <img src="${msg.videoCard.thumb}" alt="thumbnail">
-              <div class="play-badge">▶</div>
-            </div>
-            <div class="video-card-body">
-              <div class="video-card-title">${msg.videoCard.title}</div>
-              <div class="video-card-url">${msg.videoCard.url}</div>
-            </div>
+            <div class="msg-quoted-title">${escapeHtml(msg.quoted.author)}</div>
+            <div>${formatWhatsAppText(msg.quoted.text)}</div>
           </div>
         `;
       }
@@ -1400,79 +1411,58 @@
       if (msg.image) {
         imageHtml = `
           <div style="margin-bottom:6px;border-radius:8px;overflow:hidden;max-height:240px;">
-            <img src="${msg.image}" style="width:100%;height:auto;display:block;">
+            <img src="${escapeHtml(msg.image)}" style="width:100%;height:auto;display:block;" alt="attachment">
           </div>
         `;
       }
 
-      let factCardHtml = "";
-      if (msg.factCheck) {
-        const fc = msg.factCheck;
-        const fcEncoded = encodeURIComponent(JSON.stringify(fc));
-
-        // Human-friendly clear verdict badge
-        let verdictBadgeText = fc.verdict;
-        if (fc.verdict === "REFUTED") {
-          verdictBadgeText = "❌ FAKE / FALSE CLAIM";
-        } else if (fc.verdict === "SUPPORTED") {
-          verdictBadgeText = "✅ VERIFIED TRUE";
-        } else if (fc.verdict === "PARTIALLY_SUPPORTED" || fc.verdict === "MISLEADING") {
-          verdictBadgeText = "⚠️ MISLEADING CLAIM";
-        } else if (fc.verdict === "OUTDATED") {
-          verdictBadgeText = "⏳ OUTDATED CLAIM";
-        } else if (fc.verdict === "UNVERIFIABLE") {
-          verdictBadgeText = "❓ UNVERIFIABLE";
-        }
-
-        factCardHtml = `
-          <div class="factcheck-card ${fc.verdict}">
-            <div class="fc-header">
-              <div class="fc-logo">🛡️ SatyaSetu Fact-Check</div>
-              <span class="verdict-tag ${fc.verdict}">${verdictBadgeText}</span>
-            </div>
-            <div class="fc-claim"><strong>Forwarded Claim:</strong> "${fc.claim || ''}"</div>
-            <div class="fc-real-news" style="background: rgba(0, 168, 132, 0.12); border-left: 3px solid #00a884; padding: 10px; border-radius: 6px; margin: 8px 0;">
-              <strong style="color: #25d366; font-size: 13px;">✅ The Verified Truth / Real News:</strong><br>
-              <span style="color: #e9edef; font-size: 13.5px; line-height: 1.45;">${fc.real_news || fc.explanation || ''}</span>
-            </div>
-            <div class="fc-sources">
-              <span><strong>Sources & Evidence:</strong> ${fc.evidence_strength || 'Verified'}</span>
-              ${(fc.evidence && fc.evidence.length > 0) ? fc.evidence.slice(0, 2).map(e => `<span>• <a href="${e.url}" target="_blank" class="fc-source-link">${e.source_domain || e.title}</a>: ${e.snippet ? e.snippet.substring(0, 100) + '...' : ''}</span>`).join('') : '<span>• Certified Fact-Checkers (AltNews, BOOM Live, PIB)</span>'}
-            </div>
-            <div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:flex-end;">
-              <button onclick="downloadReportPdfById('${msg.id}')" style="background:#0b3d33;border:1px solid #00a884;color:#00a884;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all 0.2s;">
-                <span>📄</span> Download Verification Report (PDF)
-              </button>
-            </div>
+      let retryHtml = "";
+      if (msg.isError && msg.retryClaim) {
+        retryHtml = `
+          <div style="margin-top:6px;display:flex;justify-content:flex-end;">
+            <button onclick="triggerBotVerification('${escapeHtml(msg.retryClaim)}')" style="background:#2a3942;border:1px solid #8696a0;color:#e9edef;border-radius:4px;padding:4px 10px;font-size:11.5px;cursor:pointer;">
+              ↻ Retry
+            </button>
           </div>
         `;
       }
+
+      const senderHeader = (!msg.isMe && (activeChatId === "sharma" || activeChatId === "rishtedar" || activeChatId === "society" || activeChatId === "friends"))
+        ? `<div class="msg-sender">${escapeHtml(msg.sender)}</div>` : '';
+
+      const contentHtml = formatWhatsAppText(msg.text);
 
       row.innerHTML = `
-        <div class="msg-bubble" oncontextmenu="openMessageContextMenu(event, '${msg.id}')">
+        <div class="msg-bubble" oncontextmenu="openMessageContextMenu(event, '${escapeHtml(msg.id)}')">
           <div class="msg-hover-actions">
-            <span class="msg-action-icon" title="Forward to SatyaSetu / Contacts" onclick="event.stopPropagation(); quickForwardMsg('${msg.id}')">
+            <span class="msg-action-icon" title="Forward to SatyaSetu / Contacts" onclick="event.stopPropagation(); quickForwardMsg('${escapeHtml(msg.id)}')">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>
             </span>
-            <span class="msg-action-icon" title="Options" onclick="event.stopPropagation(); openMessageContextMenu(event, '${msg.id}')">
+            <span class="msg-action-icon" title="Options" onclick="event.stopPropagation(); openMessageContextMenu(event, '${escapeHtml(msg.id)}')">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
             </span>
           </div>
-          ${!msg.isMe && activeChatId === 'group' ? `<div class="msg-sender">${msg.sender}</div>` : ''}
+          ${senderHeader}
+          ${forwardedHtml}
           ${quotedHtml}
           ${imageHtml}
-          ${videoHtml}
-          ${msg.factCheck ? `<div style="font-weight:600;font-size:13px;color:#aebac1;margin-bottom:6px;">🔍 SatyaSetu Fact-Check Report:</div>` : (msg.text ? `<div>${msg.text.replace(/\n/g, '<br>')}</div>` : '')}
-          ${factCardHtml}
+          <div>${contentHtml}</div>
+          ${retryHtml}
           <div class="msg-meta">
-            <span>${msg.time}</span>
-            ${msg.status ? `<span>${msg.status}</span>` : ''}
+            <span>${escapeHtml(msg.time)}</span>
+            ${msg.status ? `<span>${escapeHtml(msg.status)}</span>` : ''}
           </div>
         </div>
       `;
 
       stream.appendChild(row);
     });
+
+    // Simulated interface disclaimer footer
+    const disclaimer = document.createElement("div");
+    disclaimer.style.cssText = "text-align:center;font-size:11px;color:#8696a0;padding:12px 16px;user-select:none;margin-top:8px;";
+    disclaimer.textContent = "Simulated interface for demonstration. Not affiliated with WhatsApp or Meta.";
+    stream.appendChild(disclaimer);
 
     stream.scrollTop = stream.scrollHeight;
   }
@@ -1499,7 +1489,6 @@
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase();
 
-    // Append outgoing message
     const newMsg = {
       id: "usr-" + Date.now(),
       sender: "You",
@@ -1513,13 +1502,13 @@
     CHATS[activeChatId].messages.push(newMsg);
     renderMessages();
 
-    // If active chat is SatyaSetu Bot, trigger verification backend!
+    // If in SatyaSetu chat, trigger verification
     if (activeChatId === "bot") {
       triggerBotVerification(text, extraData);
     }
   }
 
-  // ── Trigger Live SatyaSetu Fact-Check Backend ──
+  // ── Trigger Live SatyaSetu Fact-Check Backend (F1, F2, F3) ──
   async function triggerBotVerification(claimText, extraData = {}) {
     const typing = document.getElementById("typingIndicatorContainer");
     typing.style.display = "block";
@@ -1527,60 +1516,49 @@
     stream.scrollTop = stream.scrollHeight;
 
     try {
-      let queryText = claimText || "";
-      // Strip conversational forward prefixes so retrieval & claim bank get exact claim tokens
+      let queryText = (claimText || "").trim();
       queryText = queryText.replace(/^\[Forwarded\s+from[^\]]+\]:\s*/i, "").replace(/^Forwarded:\s*/i, "").trim();
 
-      // If user uploaded an image (or forwarded an image), run OCR if text is generic
-      const isGenericPrompt = !queryText || /^Sent screenshot image for fact-checking:?$/i.test(queryText) || /^Screenshot verification$/i.test(queryText);
-      if (extraData.rawFile && isGenericPrompt) {
+      if (extraData.rawFile && (!queryText || queryText.length < 5)) {
         try {
           const formData = new FormData();
           formData.append("file", extraData.rawFile);
           const ocrRes = await fetch("/api/ocr", { method: "POST", body: formData });
-          const ocrData = await ocrRes.json();
-          if (ocrData.text && ocrData.text.trim()) {
-            queryText = ocrData.text.trim();
-          } else {
-            queryText = "Screenshot verification";
+          if (ocrRes.ok) {
+            const ocrData = await ocrRes.json();
+            if (ocrData.text && ocrData.text.trim()) {
+              queryText = ocrData.text.trim();
+            }
           }
         } catch (ocrErr) {
-          console.warn("OCR failed:", ocrErr);
-          queryText = "Screenshot verification";
+          console.warn("OCR fallback note:", ocrErr);
         }
       }
 
-      // Check claim via live FastAPI backend
       const res = await fetch("/api/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: queryText || "Verify this claim" })
       });
 
-      const data = await res.json();
       typing.style.display = "none";
 
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase();
 
-      // Clean real news text for user display
-      const cleanRealNews = data.real_news || (data.explanation ? data.explanation.split('\n')[0] : "Verified Fact Check");
+      // Parity with Twilio webhook: render formatted_reply text bubble directly (F18)
+      const replyContent = data.formatted_reply || data.explanation || "No verdict returned by backend.";
 
-      // Bot reply message with Fact-Check Card
       const botMsg = {
         id: "bot-" + Date.now(),
-        sender: "SatyaSetu Bot",
+        sender: "SatyaSetu",
         isMe: false,
-        text: `🔍 Here is the verified fact check for your inquiry:\n\n*Verdict:* ${data.verdict_label || data.verdict}\n\n📰 *Real News:* ${cleanRealNews}\n\n${data.formatted_reply || ''}`,
-        factCheck: {
-          verdict: data.verdict || "REFUTED",
-          verdict_emoji: data.verdict_emoji || "❌",
-          claim: queryText,
-          real_news: cleanRealNews,
-          explanation: cleanRealNews,
-          evidence_strength: data.evidence_strength || "High",
-          evidence: data.evidence || []
-        },
+        text: replyContent,
         time: timeStr,
         status: ""
       };
@@ -1592,24 +1570,17 @@
       console.error("Fact check request failed:", err);
       typing.style.display = "none";
 
-      // Graceful fallback with offline truth verification
+      // Truthful system failure notice — never invent verdicts or sources (F1, F2)
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase();
       const botMsg = {
         id: "bot-err-" + Date.now(),
-        sender: "SatyaSetu Bot",
+        sender: "SatyaSetu",
         isMe: false,
-        text: `🔍 *Fact Check Completed:*\n\n❌ *REFUTED / FAKE NEWS*\n\nInvestigation reveals this claim is an unverified viral rumor. Major fact-checking organizations and official bureaus report no credible evidence supporting it.`,
-        factCheck: {
-          verdict: "REFUTED",
-          verdict_emoji: "❌",
-          claim: claimText,
-          explanation: "The viral claim has been thoroughly debunked. Real news reports confirm this statement is inaccurate.",
-          evidence_strength: "High",
-          evidence: [
-            { source_domain: "boomlive.in", title: "Fact-Check Report", url: "https://boomlive.in" },
-            { source_domain: "pib.gov.in", title: "PIB Fact Check", url: "https://pib.gov.in" }
-          ]
-        },
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase(),
+        text: "Couldn't check this right now. Please try again.",
+        isError: true,
+        retryClaim: claimText,
+        time: timeStr,
         status: ""
       };
 
@@ -2005,78 +1976,6 @@
     sendMessage(claimText);
   }
 
-  // ── Download Fact-Check PDF Report ──
-  async function downloadReportPdfById(msgId) {
-    try {
-      let fc = null;
-      if (activeChatId && CHATS[activeChatId]) {
-        const msg = CHATS[activeChatId].messages.find(m => m.id === msgId);
-        if (msg && msg.factCheck) {
-          fc = msg.factCheck;
-        }
-      }
-      if (!fc) {
-        // Fallback: look across all chats
-        for (const cKey in CHATS) {
-          const m = CHATS[cKey].messages.find(msg => msg.id === msgId);
-          if (m && m.factCheck) {
-            fc = m.factCheck;
-            break;
-          }
-        }
-      }
-      if (!fc) {
-        showToast("Report data not found for this message.");
-        return;
-      }
-      await triggerPdfDownload(fc);
-    } catch (err) {
-      console.error("PDF download error:", err);
-      showToast("Failed to download PDF report. Please try again.");
-    }
-  }
-
-  async function downloadReportPdf(encodedData) {
-    try {
-      const fc = typeof encodedData === "object" ? encodedData : JSON.parse(decodeURIComponent(encodedData));
-      await triggerPdfDownload(fc);
-    } catch (err) {
-      console.error("PDF download error:", err);
-      showToast("Failed to download PDF report. Please try again.");
-    }
-  }
-
-  async function triggerPdfDownload(fc) {
-    showToast("Generating official Fact-Check PDF report... 📄");
-
-    const res = await fetch("/api/report/pdf", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        claim: fc.claim || "Investigated Viral Claim",
-        verdict: fc.verdict || "REFUTED",
-        verdict_emoji: fc.verdict_emoji || "",
-        explanation: fc.explanation || fc.real_news || "",
-        evidence_strength: fc.evidence_strength || "High",
-        evidence: fc.evidence || []
-      })
-    });
-
-    if (!res.ok) throw new Error("Server failed to generate report PDF");
-
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.style.display = "none";
-    a.href = url;
-    a.download = `SatyaSetu_Report_${fc.verdict || 'VERDICT'}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    a.remove();
-    showToast("PDF Report downloaded successfully! ✓");
-  }
-
   // ── Contact Search & Filter Chips ──
   document.getElementById("chatSearch")?.addEventListener("input", function(e) {
     const q = e.target.value.toLowerCase().trim();
@@ -2101,11 +2000,11 @@
         if (label === "all") {
           item.style.display = "flex";
         } else if (label === "unread") {
-          item.style.display = (id === "item-sy" || id === "item-group") ? "flex" : "none";
+          item.style.display = (id === "item-sharma" || id === "item-rishtedar") ? "flex" : "none";
         } else if (label === "favourites") {
-          item.style.display = (id === "item-bot" || id === "item-group") ? "flex" : "none";
+          item.style.display = (id === "item-bot" || id === "item-sharma") ? "flex" : "none";
         } else if (label === "groups") {
-          item.style.display = (id === "item-group" || id === "item-sy" || id === "item-we") ? "flex" : "none";
+          item.style.display = (id === "item-sharma" || id === "item-rishtedar" || id === "item-society" || id === "item-friends") ? "flex" : "none";
         }
       });
     });
@@ -2133,42 +2032,50 @@
       <div onclick="forwardToTarget('bot')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;background:#0d3930;border-left:4px solid #00a884;transition:background 0.15s;">
         <div style="width:42px;height:42px;border-radius:50%;background:#00a884;display:flex;align-items:center;justify-content:center;font-size:18px;">🛡️</div>
         <div style="flex:1;">
-          <div style="font-size:14.5px;font-weight:700;color:#e9edef;">SatyaSetu AI Fact-Check Bot 🛡️</div>
-          <div style="font-size:12px;color:#34d399;">Instant Fact-Check & Real News Extraction</div>
+          <div style="font-size:14.5px;font-weight:700;color:#e9edef;">SatyaSetu</div>
+          <div style="font-size:12px;color:#34d399;">Business Account · Fact-Check Bot</div>
         </div>
-        <span style="background:#00a884;color:#111b21;padding:4px 10px;border-radius:12px;font-size:11.5px;font-weight:700;">Check</span>
+        <span style="background:#00a884;color:#111b21;padding:4px 10px;border-radius:12px;font-size:11.5px;font-weight:700;">Forward</span>
       </div>
 
-      <!-- Other Contacts -->
-      <div onclick="forwardToTarget('group')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
-        <div style="width:40px;height:40px;border-radius:50%;background:#4b5563;display:flex;align-items:center;justify-content:center;">👥</div>
+      <!-- Fictional Chats -->
+      <div onclick="forwardToTarget('sharma')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#0f766e;display:flex;align-items:center;justify-content:center;">🏠</div>
         <div>
-          <div style="font-size:14px;font-weight:600;color:#e9edef;">Team Appsolutely Project Group</div>
-          <div style="font-size:12px;color:#8696a0;">Group · 3 participants</div>
+          <div style="font-size:14px;font-weight:600;color:#e9edef;">Sharma Parivar 🏠</div>
+          <div style="font-size:12px;color:#8696a0;">Family Group</div>
         </div>
       </div>
 
-      <div onclick="forwardToTarget('aaryan')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
-        <div style="width:40px;height:40px;border-radius:50%;background:#9a3412;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;">AR</div>
+      <div onclick="forwardToTarget('rishtedar')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#b45309;display:flex;align-items:center;justify-content:center;">👨‍👩‍👧‍👦</div>
         <div>
-          <div style="font-size:14px;font-weight:600;color:#e9edef;">Aaryan Raorane</div>
+          <div style="font-size:14px;font-weight:600;color:#e9edef;">Rishtedar Mandali 👨‍👩‍👧‍👦</div>
+          <div style="font-size:12px;color:#8696a0;">Relatives Group</div>
+        </div>
+      </div>
+
+      <div onclick="forwardToTarget('society')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#334155;display:flex;align-items:center;justify-content:center;">🏢</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#e9edef;">Shanti Nagar Society 🏢</div>
+          <div style="font-size:12px;color:#8696a0;">Housing Society</div>
+        </div>
+      </div>
+
+      <div onclick="forwardToTarget('mummy')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#be185d;display:flex;align-items:center;justify-content:center;">❤️</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#e9edef;">Mummy ❤️</div>
           <div style="font-size:12px;color:#8696a0;">Contact</div>
         </div>
       </div>
 
-      <div onclick="forwardToTarget('shreya')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
-        <div style="width:40px;height:40px;border-radius:50%;background:#065f46;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;">SD</div>
+      <div onclick="forwardToTarget('papa')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#1d4ed8;display:flex;align-items:center;justify-content:center;">👔</div>
         <div>
-          <div style="font-size:14px;font-weight:600;color:#e9edef;">Shreya Desai</div>
+          <div style="font-size:14px;font-weight:600;color:#e9edef;">Papa 👔</div>
           <div style="font-size:12px;color:#8696a0;">Contact</div>
-        </div>
-      </div>
-
-      <div onclick="forwardToTarget('sy')" style="display:flex;align-items:center;gap:14px;padding:10px 20px;cursor:pointer;transition:background 0.15s;">
-        <div style="width:40px;height:40px;border-radius:50%;background:#1e3a8a;display:flex;align-items:center;justify-content:center;">🎓</div>
-        <div>
-          <div style="font-size:14px;font-weight:600;color:#e9edef;">SY B.Tech (AI &ML)26-27</div>
-          <div style="font-size:12px;color:#8696a0;">Class Group</div>
         </div>
       </div>
     </div>
