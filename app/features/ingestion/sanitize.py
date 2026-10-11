@@ -32,7 +32,11 @@ def sanitize_text(text: str, max_chars: int = 10_000) -> str:
     Sanitize text by:
     1. Removing null bytes and non-printable control characters (preserving \\n and \\t).
     2. Stripping common prompt-injection markers (LOOPHOLE-02).
-    3. Truncating to max_chars.
+    3. Truncating to max_chars to prevent memory/regex DOS attacks.
+
+    Defense-in-depth:
+    - Pre-filter: Cleanses text before NLP and retrieval queries.
+    - Structural delimitation: Subsequent LLM prompts quote untrusted input in delimiters.
     """
     if not text:
         return ""
