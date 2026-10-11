@@ -11,7 +11,8 @@ from __future__ import annotations
 def twiml_message(body: str) -> str:
     """
     Wrap a text body in minimal TwiML Response/Message XML.
-    Escapes XML special characters: & < >
+    Escapes XML special characters (&, <, >) to prevent malformed XML
+    and Twilio parser rejection (Error 11200).
     """
     escaped = (
         body.replace("&", "&amp;")
