@@ -4,13 +4,16 @@ Admin dashboard API endpoints (BUG-18 / PRD §6 FR-13).
 Protected by X-API-Key header matching settings.admin_api_key.
 Provides claim history, stats, and manual verdict override endpoints.
 
-Note: Claim persistence (SQLAlchemy / SQLite) is scaffolded here.
-      Wire up MISSING-05 (ClaimLog model) when the DB layer is added.
+Security & Architectural Notes:
+- Constant-time secret comparison via secrets.compare_digest prevents timing side-channels.
+- Ephemeral in-memory statistics combined with persistent sqlite ClaimLog records.
+- Human-in-the-loop audit trail overrides for disputed or evolving factual assertions.
 """
 
 from __future__ import annotations
 
 import logging
+import secrets
 from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException, Query, status
@@ -22,13 +25,16 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
-import secrets
-
-
 # ── Auth dependency ───────────────────────────────────────────────────────────
 
 def _require_api_key(x_api_key: str = Header(..., alias="X-API-Key")) -> None:
-    """Require X-API-Key header matching ADMIN_API_KEY env var (constant-time check)."""
+    """
+    Validate the incoming request against administrative credentials.
+
+    Uses `secrets.compare_digest` to mitigate string comparison timing attacks.
+    If `ADMIN_API_KEY` is unset or blank in configuration, rejects all access with
+    HTTP 503 to ensure default-deny security.
+    """
     if not settings.admin_api_key:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
