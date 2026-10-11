@@ -25,10 +25,10 @@ Last updated: Phase 2 cleanup (11 October 2026). Tests: 227 passing.
 | Phase 7: Explanation and WhatsApp Reply | Completed | `tests/unit/test_explanation.py` | Structured JSON schema, multi-lingual replies, TwiML output |
 | Phase 8: End-to-End Orchestration | Completed | `tests/unit/test_pipeline.py` | Full pipeline test from IngestedMessage to CheckResponse |
 | Phase 9: Evaluation and Abuse Hardening | Completed | `tests/integration/test_smoke.py`, `tests/abuse/test_rate_limit.py` | IP + user rate limiting (graceful 429s), E2E smoke tests |
-| Phase 10: Presentation and Demo Hardening | In Progress | Refactor & Rebuild Plan v2 | Clean WhatsApp Web demo, native ES modules, fictional seed chats |
+| Phase 10: Presentation and Demo Hardening | Completed | Refactor & Rebuild Plan v2 | Clean WhatsApp Web demo in `web/whatsapp/` (native ES modules, CSS tokenization, fictional seed chats, presenter panel `Ctrl+Shift+D`, safe DOM escaping, zero external CDNs) |
 
 ## 3. Verified Metrics (Measured Only, No Invented Statistics)
-- **Unit, Integration, and Abuse Test Suites:** **227 tests passing** (measured after Phase 2 cleanup, 11 Oct 2026)
+- **Unit, Integration, and Abuse Test Suites:** **227 tests passing** (measured after Phase 2 cleanup and Phase 4-7 rebuild, 11 Oct 2026)
   - 11 Contracts & Core (`test_contracts.py`)
   - 29 SSRF Abuse Guard (`test_ssrf.py`)
   - 8 Ingestion (`test_ingestion_detect.py`)
@@ -43,11 +43,11 @@ Last updated: Phase 2 cleanup (11 October 2026). Tests: 227 passing.
   - 5 Screens/API Integration (`test_screens_integration.py`)
 - **End-to-End Latency:** ~1.2s for cached/offline/Wikipedia retrieval (1219ms backend pipeline)
 - **Security Audit:**
-  - ✅ **Rate Limiting:** Dual-layer: IP-based sliding window (60 req/min, graceful 429s with `Retry-After: 60`) + Per-hashed-sender rate limiter for WhatsApp inbound webhook.
+  - ✅ **Rate Limiting:** Dual-layer: IP-based sliding window (60 req/min, graceful 429s with `Retry-After: 60`, exempt static/health/docs) + Per-hashed-sender rate limiter for WhatsApp inbound webhook (`webhook_rate_limit_per_window`).
   - ✅ **Input Sanitization:** Schema-enforced Pydantic v2, HTML tag stripping, zero-width space removal, length bounding.
-  - ✅ **PII Protection:** Phone numbers SHA-256 hashed before logging; regex-based `RedactionFilter` on all logging streams.
+  - ✅ **PII Protection:** Phone numbers hashed via HMAC-SHA256 with `settings.sender_hash_secret` before logging; raw text never stored in SQLite `claims_db.py` (redacted snippet only); configurable retention (`claims_retention_days`).
   - ✅ **SSRF Protection:** Strict private IP / link-local / DNS rebinding / redirect guard via `safe_get`.
-  - ✅ **Secret Management:** 100% environment-driven via `pydantic-settings`; no hardcoded API keys; secrets excluded from diagnostic endpoints.
+  - ✅ **Secret Management:** 100% environment-driven via `pydantic-settings`; no hardcoded API keys; constant-time comparison (`secrets.compare_digest`) for admin authentication.
   - ✅ **Twilio Webhook Response Timeout & Architecture:**
     - Twilio officially enforces a **15-second** HTTP response timeout on standard webhooks (Twilio Error 11200 - HTTP retrieval failure). Specific services (e.g. Conversations) enforce 5 seconds.
     - SatyaSetu implements an asynchronous non-blocking two-step architecture:
