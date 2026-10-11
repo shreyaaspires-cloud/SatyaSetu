@@ -1,7 +1,13 @@
 """
 NLP feature package for SatyaSetu.
-Provides language detection, translation, keyphrase extraction,
-claim extraction, forward pressure detection, and check-worthiness scoring.
+
+Provides a composable pipeline of language processing capabilities:
+- Language Detection: Script + ISO-639 code identification with Hinglish awareness.
+- Translation: M2M100 local model with Gemini fallback for 12+ Indic languages.
+- Claim Extraction: Sentence segmentation + spaCy/Gemini-backed factual claim detection.
+- Keyword Extraction: KeyBERT / TF-IDF keyphrases for retrieval query formulation.
+- Check-Worthiness Scoring: Routing gate that rejects conversational and non-verifiable inputs.
+- Forward Pressure Detection: Identifies viral forwarding signals (e.g., "share this").
 """
 
 from app.features.nlp.claims import extract_claims, has_forward_pressure, split_sentences
