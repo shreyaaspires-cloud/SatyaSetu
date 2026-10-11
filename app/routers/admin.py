@@ -22,16 +22,19 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
+import secrets
+
+
 # ── Auth dependency ───────────────────────────────────────────────────────────
 
 def _require_api_key(x_api_key: str = Header(..., alias="X-API-Key")) -> None:
-    """Require X-API-Key header matching ADMIN_API_KEY env var."""
+    """Require X-API-Key header matching ADMIN_API_KEY env var (constant-time check)."""
     if not settings.admin_api_key:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Admin API is not configured on this server.",
         )
-    if x_api_key != settings.admin_api_key:
+    if not secrets.compare_digest(x_api_key, settings.admin_api_key):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid API key.",
@@ -105,7 +108,7 @@ def override_claim_verdict(
     """
     _require_api_key(x_api_key)
 
-    valid_verdicts = {"REFUTED", "SUPPORTED", "PARTIALLY_SUPPORTED", "UNVERIFIABLE", "OUTDATED"}
+    valid_verdicts = {"REFUTED", "SUPPORTED", "MISLEADING", "PARTIALLY_SUPPORTED", "UNVERIFIABLE", "OUTDATED"}
     if new_verdict.upper() not in valid_verdicts:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

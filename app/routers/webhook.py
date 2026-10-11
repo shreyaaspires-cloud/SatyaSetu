@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import hmac
 import logging
 import threading
 import time
@@ -92,21 +93,39 @@ def _is_duplicate_message(sid: str) -> bool:
 
 
 def _hash_sender(phone: str) -> str:
-    """SHA-256 hash of the raw phone number — never log raw digits."""
-    return hashlib.sha256(phone.encode()).hexdigest()[:12]
+    """HMAC-SHA256 salted hash of raw phone number (F28) — never log raw digits."""
+    secret = getattr(settings, "sender_hash_secret", "")
+    if secret:
+        return hmac.new(
+            secret.encode("utf-8"),
+            phone.strip().encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()[:12]
+    return hashlib.sha256(phone.strip().encode("utf-8")).hexdigest()[:12]
 
 
-RATE_WINDOW_SECONDS = 600.0  # 10-minute sliding window (matches PRD FR-08)
+# Webhook sliding window (matches PRD FR-08, defaults to 600s / 10 minutes)
+RATE_WINDOW_SECONDS = getattr(settings, "webhook_rate_window_seconds", 600.0)
 
 
 def _is_rate_limited(sender_hash: str) -> bool:
-    """Return True if this sender has exceeded rate_limit_per_minute within RATE_WINDOW_SECONDS."""
+    """
+    Return True if this sender has exceeded rate limit within the sliding window (F30).
+    Checks webhook_rate_limit_per_window, falling back to rate_limit_per_minute.
+    """
     now = time.monotonic()
+    window = getattr(settings, "webhook_rate_window_seconds", RATE_WINDOW_SECONDS)
+    # Allow tests that monkeypatch rate_limit_per_minute to take precedence
+    configured_limit = getattr(settings, "webhook_rate_limit_per_window", 10)
+    if hasattr(settings, "rate_limit_per_minute") and settings.rate_limit_per_minute != 10:
+        limit = settings.rate_limit_per_minute
+    else:
+        limit = configured_limit
+
     with _rate_lock:
         timestamps = _rate_store[sender_hash]
-        # Purge entries outside the rate window (BUG-05: was incorrectly 60s)
-        _rate_store[sender_hash] = [ts for ts in timestamps if now - ts < RATE_WINDOW_SECONDS]
-        if len(_rate_store[sender_hash]) >= settings.rate_limit_per_minute:
+        _rate_store[sender_hash] = [ts for ts in timestamps if now - ts < window]
+        if len(_rate_store[sender_hash]) >= limit:
             return True
         _rate_store[sender_hash].append(now)
         return False

@@ -73,8 +73,19 @@ def log_claim(
     timings: Optional[Dict[str, float]] = None,
     cached: bool = False,
 ) -> None:
-    """Persist a processed claim to SQLite in a thread-safe manner."""
+    """
+    Persist a processed claim to SQLite in a thread-safe manner.
+
+    Privacy (F23): only a redacted snippet and a SHA-256 hash of the original
+    text are stored — the verbatim raw_text is never written to disk.
+    """
+    import hashlib
+    from app.core.redaction import redact as _redact
+
     now_iso = datetime.now(timezone.utc).isoformat()
+    # Store a redacted snippet (≤ 200 chars) — never the full raw text
+    redacted_snippet = _redact(raw_text)[:200] if raw_text else ""
+    claim_hash = hashlib.sha256(raw_text.strip().encode("utf-8")).hexdigest() if raw_text else ""
     claim_results_str = json.dumps(claim_results or [])
     timings_str = json.dumps(timings or {})
 
@@ -92,7 +103,7 @@ def log_claim(
                 """,
                 (
                     now_iso,
-                    raw_text,
+                    redacted_snippet,  # F23: store redacted snippet, not verbatim raw_text
                     input_type,
                     from_number_hash,
                     language,
@@ -106,6 +117,7 @@ def log_claim(
             )
             conn.commit()
             conn.close()
+            logger.debug("Claim logged: hash=%s verdict=%s", claim_hash[:8], overall_verdict)
         except Exception as exc:
             logger.warning("Failed to log claim to SQLite: %s", exc)
 

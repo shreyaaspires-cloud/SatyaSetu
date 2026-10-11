@@ -60,13 +60,14 @@ def test_voice_and_pdf_detection():
 
 
 def test_phone_hashing():
+    """hash_identifier returns 64-char hex; raw number never appears in the output."""
+    import hmac
     raw = "whatsapp:+919999999999"
     hashed = hash_identifier(raw)
-    expected = hashlib.sha256(raw.encode("utf-8")).hexdigest()
-
-    assert hashed == expected
     assert len(hashed) == 64
     assert raw not in hashed
+    # Deterministic — same input always gives same output in one test process
+    assert hash_identifier(raw) == hashed
 
 
 def test_sanitize_text_behavior():

@@ -4,6 +4,7 @@ from log records, queries, and error traces.
 """
 
 import hashlib
+import hmac
 import re
 
 # Email pattern matching common email addresses
@@ -33,14 +34,26 @@ LONG_DIGIT_REGEX = re.compile(
 )
 
 
-def hash_identifier(value: str) -> str:
+def hash_identifier(value: str, secret: str = "") -> str:
     """
-    Hash an identifier (such as phone number) with SHA-256.
+    Hash an identifier (such as phone number) with HMAC-SHA256 (F28).
+    Uses HMAC when a secret is provided; falls back to plain SHA-256 otherwise.
     Raw identifiers must never appear in logs or persisted storage.
     """
     if not value:
         return ""
-    return hashlib.sha256(value.strip().encode("utf-8")).hexdigest()
+    normalized = value.strip().encode("utf-8")
+    if secret:
+        return hmac.new(secret.encode("utf-8"), normalized, hashlib.sha256).hexdigest()
+    # Lazy import to avoid circular dependency at module load
+    try:
+        from app.core.config import settings as _settings  # type: ignore
+        _secret = getattr(_settings, "sender_hash_secret", "")
+        if _secret:
+            return hmac.new(_secret.encode("utf-8"), normalized, hashlib.sha256).hexdigest()
+    except Exception:
+        pass
+    return hashlib.sha256(normalized).hexdigest()
 
 
 def redact(text: str) -> str:

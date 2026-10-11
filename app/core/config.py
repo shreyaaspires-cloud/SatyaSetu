@@ -118,9 +118,17 @@ class Settings(BaseSettings):
         default="memory",
         description="Cache backend: 'memory' or 'redis'",
     )
+    webhook_rate_limit_per_window: int = Field(
+        default=10,
+        description="Allowed requests per webhook rate window per sender",
+    )
+    webhook_rate_window_seconds: float = Field(
+        default=600.0,
+        description="Sliding window duration in seconds for webhook rate limiter (matches PRD FR-08)",
+    )
     rate_limit_per_minute: int = Field(
         default=10,
-        description="Allowed requests per 10-minute window per phone number (matches PRD FR-08)",
+        description="Allowed requests per 10-minute window per phone number (alias for webhook_rate_limit_per_window)",
     )
     max_claims_per_message: int = Field(
         default=3,
@@ -129,6 +137,16 @@ class Settings(BaseSettings):
     retrieval_budget_ms: int = Field(
         default=12000,
         description="Total time budget in milliseconds for retrieval and verification",
+    )
+
+    # Privacy & Salted Hashing (F28)
+    sender_hash_secret: str = Field(
+        default="satyasetu-prod-salt-secret-2026",
+        description="HMAC secret key used for salted hashing of sender phone numbers",
+    )
+    claims_retention_days: int = Field(
+        default=30,
+        description="Maximum days to retain claims in SQLite storage before automated purge",
     )
 
     # Redis (Optional)
