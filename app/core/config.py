@@ -8,7 +8,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """All application settings for SatyaSetu."""
+    """
+    Unified application settings loaded from environment variables and optional .env.
+    Key Architectural Safeguards:
+    - Secret segregation: Sensitive API credentials loaded exclusively via environment.
+    - Salted sender identity: sender_hash_secret prevents rainbow-table sender phone recovery.
+    - Rate window isolation: Differentiates public web UI limits from webhook limits.
+    """
 
     model_config = SettingsConfigDict(
         env_file=".env",
