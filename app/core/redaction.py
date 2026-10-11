@@ -39,6 +39,10 @@ def hash_identifier(value: str, secret: str = "") -> str:
     Hash an identifier (such as phone number) with HMAC-SHA256 (F28).
     Uses HMAC when a secret is provided; falls back to plain SHA-256 otherwise.
     Raw identifiers must never appear in logs or persisted storage.
+
+    Security Notes:
+    - HMAC prevents dictionary/rainbow-table recovery of Indian mobile numbers.
+    - Normalized UTF-8 encoding ensures cross-platform cryptographic determinism.
     """
     if not value:
         return ""
