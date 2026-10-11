@@ -1,6 +1,36 @@
 """
+app/features/retrieval/sources.py
+──────────────────────────────────
 Source domain classification and tier assignment.
 Loads domain tiers from config/sources.yaml to categorize evidence reliability.
+
+Tier system
+────────────
+Evidence credibility in SatyaSetu is expressed as a five-level tier:
+
+  Tier 1 (IFCN)        — International Fact Checking Network certified outlets
+                          (AltNews, BoomLive, Factly, PolitiFact, Snopes, Reuters…).
+  Tier 2 (Gov / PIB)   — Official government and public-health bodies
+                          (pib.gov.in, who.int, rbi.org.in, uidai.gov.in…).
+  Tier 3 (Mainstream)  — Established news organizations with editorial oversight
+                          (The Hindu, Indian Express, BBC, NDTV…).
+  Tier 4 (Wikipedia)   — Collaboratively edited encyclopedia; useful for background
+                          but lacks primary-source authority.
+  Tier 5 (General Web) — All other domains; treated with lowest confidence.
+
+Configuration
+──────────────
+Tiers are loaded from config/sources.yaml at first call and then cached in
+_sources_cache for the process lifetime.  Updating the YAML file requires an
+application restart to take effect.  The embedded fallback list ensures the
+service remains functional if the config file is missing (e.g., Docker image
+built without config volume mount).
+
+Domain matching
+────────────────
+`www.` prefixes are stripped before comparison.  Subdomain matching is suffix-
+based (`netloc.endswith("." + d)`) so `health.who.int` correctly maps to the
+`who.int` Tier 2 entry.
 """
 
 from __future__ import annotations
@@ -16,7 +46,8 @@ from app.core.constants import Tier
 
 logger = logging.getLogger(__name__)
 
-# In-memory cached source definitions
+# In-memory cached source definitions.
+# Populated on first call to load_sources_config(); never evicted (stable list).
 _sources_cache: Optional[Dict[str, List[str]]] = None
 
 
@@ -32,6 +63,9 @@ def load_sources_config() -> Dict[str, List[str]]:
     """
     Load tiered domain lists from config/sources.yaml.
     Falls back to embedded defaults if file is unavailable.
+
+    Caching: the parsed YAML dict is stored in _sources_cache so repeated calls
+    within the same process pay no I/O cost after the first invocation.
     """
     global _sources_cache
     if _sources_cache is not None:
@@ -47,7 +81,7 @@ def load_sources_config() -> Dict[str, List[str]]:
         except Exception as exc:
             logger.warning("Failed to load %s: %s. Using default sources.", config_path, exc)
 
-    # Embedded fallback
+    # Embedded fallback — mirrors config/sources.yaml; kept in sync manually.
     _sources_cache = {
         "tier_1_ifcn": [
             "altnews.in", "boomlive.in", "factly.in", "thequint.com",
@@ -75,6 +109,16 @@ def classify_domain(url: str) -> Tier:
     """
     Extract hostname from URL and classify into its corresponding Tier.
     Defaults to Tier.TIER_5_GENERAL_WEB for unlisted domains.
+
+    Steps
+    ──────
+    1. Parse URL with urlparse() to extract netloc.
+    2. Strip leading 'www.' prefix.
+    3. Walk tiers 1-4 in descending trust order; return on first match.
+    4. Fall through to TIER_5_GENERAL_WEB.
+
+    All exceptions are silently caught to ensure this function never raises:
+    evidence scoring must degrade gracefully, not abort the pipeline.
     """
     if not url:
         return Tier.TIER_5_GENERAL_WEB
@@ -93,6 +137,7 @@ def classify_domain(url: str) -> Tier:
         def _matches(domain_list: List[str]) -> bool:
             for d in domain_list:
                 d = d.lower().strip()
+                # Exact match OR subdomain: health.who.int matches who.int
                 if netloc == d or netloc.endswith("." + d):
                     return True
             return False
