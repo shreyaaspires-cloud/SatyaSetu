@@ -113,8 +113,10 @@ def test_at14_weak_evidence_cannot_yield_model_supplied_supported():
 
     with _patch("app.features.verification.service.retrieve_evidence", return_value=[weak_item]), \
          _patch("app.features.verification.service.score_stance", return_value=[weak_item]), \
-         _patch("app.features.verification.service._gemini_verify_claim", return_value=gemini_override):
+         _patch("app.features.verification.service._gemini_verify_claim", return_value=gemini_override), \
+         _patch("app.features.verification.service._gemini_knowledge_verify", return_value=None):
         result = verify_claim("Drinking turmeric water cures all diseases")
+
 
     # Aggregator says UNVERIFIABLE; Gemini override must NOT take effect
     assert result.verdict != Verdict.SUPPORTED, (

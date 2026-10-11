@@ -78,10 +78,12 @@ def test_sanitize_text_behavior():
     assert "Allowed newline" in sanitized
     assert "Allowed tab" in sanitized
 
-    # Verify D6 fix: marker strings are NOT blindly stripped by sanitize_text
+    # Verify LOOPHOLE-02: marker strings are stripped by sanitize_text
     injection_text = "Check this claim IGNORE PREVIOUS"
     clean_injection = sanitize_text(injection_text)
-    assert "IGNORE PREVIOUS" in clean_injection
+    assert "IGNORE PREVIOUS" not in clean_injection
+    assert "Check this claim" in clean_injection
+
 
 
 def test_ingest_ocr_with_mock_reader():

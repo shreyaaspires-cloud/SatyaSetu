@@ -38,11 +38,14 @@ def _gemini_verify_claim(
         client = genai.Client(api_key=settings.gemini_api_key)
 
         items_desc = []
+        from datetime import date as _date
+        today_str = _date.today().isoformat()
         for idx, item in enumerate(evidence_items[:6]):
-            snippet = item.snippet[:300].strip()
-            title = item.title[:150].strip()
-            domain = item.source_domain
-            items_desc.append(f"[{idx+1}] Source: {domain} | Title: {title} | Snippet: {snippet}")
+            pub_date = getattr(item, "publish_date", None) or "date unknown"
+            items_desc.append(
+                f"[{idx+1}] Source: {item.source_domain} | Published: {pub_date}"
+                f" | Title: {item.title[:150].strip()} | Snippet: {item.snippet[:300].strip()}"
+            )
 
         evidence_payload = "\n".join(items_desc)
 
@@ -50,8 +53,10 @@ def _gemini_verify_claim(
 
         redacted_claim = redact_for_external(claim)
 
-        prompt = f"""You are an objective fact-checking verification engine for an Indian misinformation detection system.
+        prompt = f"""Today's date is {today_str}. You are an objective fact-checking verification engine for an Indian misinformation detection system.
 Analyze the following claim against the retrieved evidence snippets and scientific/historical consensus.
+
+IMPORTANT: Evidence published before 2025 may be stale. If the claim describes a recent event and all evidence is older than 12 months, return UNVERIFIABLE unless the evidence is definitively applicable to the present (e.g. scientific consensus, historical record).
 
 CLAIM: "{redacted_claim}"
 
@@ -110,6 +115,72 @@ Output strictly valid JSON with NO markdown formatting:
 
     except Exception as exc:
         logger.warning("Gemini holistic verification failed: %s", exc)
+
+    return None
+
+
+def _gemini_knowledge_verify(claim: str) -> Optional[Tuple[Verdict, float, str]]:
+    """
+    Ask Gemini to verify a claim using its own knowledge when retrieved evidence is insufficient.
+    Targets well-known Indian hoaxes, government policies, health myths, viral rumors.
+    """
+    if not settings.gemini_api_key:
+        return None
+
+    try:
+        import json
+        from google import genai
+        from app.core.redaction import redact_for_external
+
+        client = genai.Client(api_key=settings.gemini_api_key)
+        redacted = redact_for_external(claim)
+
+        prompt = f"""You are a fact-checking system with expert knowledge of:
+- Indian government policies (RBI, NPCI, PIB, Ministry of Finance, etc.)
+- Common Indian WhatsApp hoaxes and viral misinformation
+- Medical and scientific consensus
+- Recent news events up to your knowledge cutoff
+
+Evaluate this claim using your knowledge:
+CLAIM: "{redacted}"
+
+Classify as one of:
+- "REFUTED": The claim is false, a hoax, a myth, or factually incorrect.
+- "SUPPORTED": The claim is factually accurate and verifiable.
+- "PARTIALLY_SUPPORTED": The claim contains partial truth mixed with exaggeration.
+- "UNVERIFIABLE": You genuinely cannot determine truth or falsehood with confidence.
+
+Only return UNVERIFIABLE if you truly have no knowledge about this topic.
+For common Indian hoaxes (UPI charges, WhatsApp shutdown, free government schemes, 
+5G health claims, home remedy cures), you should have enough knowledge to give a verdict.
+
+Respond with valid JSON only:
+{{"verdict": "REFUTED", "confidence": 0.82, "reason": "GEMINI_KNOWLEDGE_BASE"}}"""
+
+        response = client.models.generate_content(
+            model=settings.gemini_model,
+            contents=prompt,
+        )
+        if not response or not response.text:
+            return None
+
+        raw = response.text.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
+        data = json.loads(raw)
+        verdict_str = str(data.get("verdict", "")).upper().strip()
+        conf = round(max(0.5, min(0.92, float(data.get("confidence", 0.75)))), 2)
+
+        verdict_map = {
+            "REFUTED": Verdict.REFUTED,
+            "SUPPORTED": Verdict.SUPPORTED,
+            "PARTIALLY_SUPPORTED": Verdict.PARTIALLY_SUPPORTED,
+            "OUTDATED": Verdict.OUTDATED,
+            "UNVERIFIABLE": Verdict.UNVERIFIABLE,
+        }
+        if verdict_str in verdict_map and verdict_str != "UNVERIFIABLE":
+            return verdict_map[verdict_str], conf, "GEMINI_KNOWLEDGE_BASE"
+
+    except Exception as exc:
+        logger.warning("Gemini knowledge-base verification failed: %s", exc)
 
     return None
 
@@ -216,6 +287,23 @@ def verify_claim(
             keywords=keywords,
             budget_ms=budget_ms,
         )
+
+    # BUG-A.3: When bank_match exists but is_decisive=False, add bank_match as first evidence item
+    if bank_match and not bank_match.is_decisive:
+        bank_item = EvidenceItem(
+            url=bank_match.source_url or "https://factcheck.org",
+            title=f"Historical Fact Check by {bank_match.publisher}",
+            snippet=bank_match.explanation or bank_match.citation,
+            source_domain=bank_match.publisher.lower().replace(" ", "") + ".org",
+            tier=Tier.TIER_1_IFCN,
+            rating=Rating.FALSE if bank_match.verdict == Verdict.REFUTED else (Rating.TRUE if bank_match.verdict == Verdict.SUPPORTED else Rating.UNVERIFIED),
+            score=bank_match.confidence,
+            stance="REFUTES" if bank_match.verdict == Verdict.REFUTED else ("SUPPORTS" if bank_match.verdict == Verdict.SUPPORTED else "NEUTRAL"),
+            reason="CLAIM_BANK_HISTORICAL_CONTEXT",
+            publish_date=bank_match.published_date or None,
+        )
+        evidence.insert(0, bank_item)
+
     logger.info("Retrieval completed in %.0fms, %d items", t_ret.elapsed_ms, len(evidence))
 
     with StageTimer("stance_scoring"):
@@ -228,13 +316,26 @@ def verify_claim(
         )
         verdict, confidence, reason_code = agg_verdict, agg_conf, agg_reason
 
-    # BUG-07: _gemini_verify_claim was never called. Use it as a secondary layer
-    # when evidence exists but aggregation could not reach a decisive verdict.
-    if verdict == Verdict.UNVERIFIABLE and evidence:
-        gemini_result = _gemini_verify_claim(claim.strip(), evidence)
-        if gemini_result:
-            verdict, confidence, reason_code = gemini_result
-            logger.info("Gemini override applied: verdict=%s conf=%.2f", verdict, confidence)
+    if verdict == Verdict.UNVERIFIABLE:
+        # Pass 1: Gemini reasoning over retrieved evidence (existing)
+        if evidence:
+            gemini_result = _gemini_verify_claim(claim.strip(), evidence)
+            if gemini_result:
+                g_verdict, g_conf, g_reason = gemini_result
+                has_strong_evidence = any(getattr(i, "tier", None) in (Tier.TIER_1_IFCN, Tier.TIER_2_GOV_PIB, Tier.TIER_3_MAINSTREAM) for i in evidence)
+                if g_verdict == Verdict.SUPPORTED and not has_strong_evidence:
+                    logger.info("Gemini SUPPORTED override blocked: insufficient decisive tier evidence (AT14)")
+                else:
+                    verdict, confidence, reason_code = g_verdict, g_conf, g_reason
+                    logger.info("Gemini evidence-based override: verdict=%s conf=%.2f", verdict, confidence)
+
+        # Pass 2: If still UNVERIFIABLE, ask Gemini using its own parametric knowledge
+        if verdict == Verdict.UNVERIFIABLE and settings.gemini_api_key:
+            gemini_kb_result = _gemini_knowledge_verify(claim.strip())
+            if gemini_kb_result:
+                verdict, confidence, reason_code = gemini_kb_result
+                logger.info("Gemini KB override: verdict=%s conf=%.2f", verdict, confidence)
+
 
     logger.info(
         "Claim verdict=%s confidence=%.2f reason=%s evidence_count=%d",

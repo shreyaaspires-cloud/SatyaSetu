@@ -118,6 +118,16 @@ class TestTemplateExplanation:
             assert isinstance(explanation, str)
             assert len(explanation) > 10
 
+    def test_health_claim_unverifiable_has_advisory(self):
+        result = _make_claim_result(
+            claim="Drinking fluorine gas cures disease",
+            verdict=Verdict.UNVERIFIABLE,
+            evidence=[]
+        )
+        explanation = _template_explanation(result)
+        assert "Health advisory" in explanation
+        assert "WHO.int" in explanation
+
 
 class TestGenerateExplanation:
     def test_returns_string(self):
@@ -332,4 +342,32 @@ class TestT11Acceptance:
         # Claim echo line must also be present
         mr_echo_label = data["mr"]["ui"]["claim_echo"]
         assert mr_echo_label in reply
+
+
+def test_pdf_no_cryptographic_verified_label():
+    import fitz
+    from app.routers.check import create_fact_check_pdf
+    pdf_bytes = create_fact_check_pdf(
+        claim="Test claim", verdict="REFUTED", explanation="Test explanation"
+    )
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    all_text = "".join(page.get_text() for page in doc)
+    assert "Cryptographically Verified" not in all_text
+
+
+def test_pdf_wikipedia_source_not_labeled_ifcn():
+    import fitz
+    from app.routers.check import create_fact_check_pdf
+    ev = [{
+        "source_domain": "en.wikipedia.org",
+        "url": "https://en.wikipedia.org/wiki/UPI",
+        "snippet": "UPI background",
+        "tier": "tier_4_wikipedia",
+        "rating": "UNVERIFIED",
+    }]
+    pdf_bytes = create_fact_check_pdf("UPI claim", "UNVERIFIABLE", "explanation", evidence=ev)
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    all_text = "".join(page.get_text() for page in doc)
+    assert "IFCN" not in all_text, "Wikipedia source must not be labeled IFCN Certified"
+
 

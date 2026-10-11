@@ -24,7 +24,9 @@ def _make_item(
     rating: Rating = Rating.UNVERIFIED,
     score: float = 0.5,
     stance: str | None = None,
+    publish_date: str | None = None,
 ) -> EvidenceItem:
+    from datetime import date
     return EvidenceItem(
         url=url,
         title=title,
@@ -34,6 +36,7 @@ def _make_item(
         rating=rating,
         score=score,
         stance=stance,
+        publish_date=publish_date or date.today().isoformat(),
     )
 
 
@@ -205,4 +208,65 @@ class TestT4Acceptance:
         )
         verdict, conf, code = aggregate_verdict("Mandatory exam requirement notice", [item])
         assert verdict == Verdict.OUTDATED
+
+
+def test_no_evidence_unverifiable():
+    from app.features.verification.service import verify_claim
+    from app.core.constants import Verdict
+    from unittest.mock import patch
+    with patch("app.features.verification.service.retrieve_evidence", return_value=[]), \
+         patch("app.features.verification.service._gemini_verify_claim", return_value=None):
+        result = verify_claim("Unknown claim with no retrieval")
+    assert result.verdict == Verdict.UNVERIFIABLE
+
+
+def test_single_stale_source_not_refuted():
+    from app.contracts.models import EvidenceItem
+    from app.core.constants import Rating, Tier, Verdict
+    from app.features.verification.stance import aggregate_verdict
+    old_item = EvidenceItem(
+        url="https://boomlive.in/2022-hoax", title="2022 hoax debunked",
+        snippet="Person is alive and well.", source_domain="boomlive.in",
+        tier=Tier.TIER_1_IFCN, rating=Rating.FALSE, score=0.85,
+        stance="REFUTES", publish_date="2022-06-15",
+    )
+    verdict, conf, reason = aggregate_verdict("Person died recently", [old_item])
+    assert verdict != Verdict.REFUTED, f"Single stale source should not yield REFUTED (got {verdict})"
+
+
+def test_google_api_unavailable_yields_unverifiable():
+    from app.features.verification.service import verify_claim
+    from app.core.constants import Verdict
+    from unittest.mock import patch
+    with patch("app.features.retrieval.factcheck_google.settings") as ms, \
+         patch("app.features.retrieval.search_web.search_web", return_value=[]), \
+         patch("app.features.retrieval.wikipedia.search_wikipedia", return_value=[]):
+        ms.google_fact_check_api_key = ""
+        result = verify_claim("Some factual claim with no evidence available")
+    assert result.verdict == Verdict.UNVERIFIABLE
+
+
+def test_conflicting_policy_evidence_not_fully_refuted():
+    from app.contracts.models import EvidenceItem
+    from app.core.constants import Rating, Tier, Verdict
+    from app.features.verification.stance import aggregate_verdict
+    old_free = EvidenceItem(
+        url="https://pib.gov.in/2023/upi-free", title="UPI is free 2023",
+        snippet="All UPI transactions are free for consumers.",
+        source_domain="pib.gov.in", tier=Tier.TIER_2_GOV_PIB,
+        rating=Rating.UNVERIFIED, score=0.80, stance="REFUTES",
+        publish_date="2023-03-29",
+    )
+    new_mdr = EvidenceItem(
+        url="https://pib.gov.in/2026/upi-mdr", title="MDR on large merchant UPI 2026",
+        snippet="MDR applies to UPI merchant payments above Rs 2000 from September 2026.",
+        source_domain="pib.gov.in", tier=Tier.TIER_2_GOV_PIB,
+        rating=Rating.UNVERIFIED, score=0.75, stance="SUPPORTS",
+        publish_date="2026-09-01",
+    )
+    verdict, conf, reason = aggregate_verdict(
+        "Government planning to add additional tax on UPI payments", [old_free, new_mdr]
+    )
+    assert verdict != Verdict.REFUTED, f"Conflicting policy evidence must not be REFUTED (got {verdict})"
+
 

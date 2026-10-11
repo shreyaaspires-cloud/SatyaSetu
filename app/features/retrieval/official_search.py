@@ -32,6 +32,7 @@ TOPIC_KEYWORDS: Dict[str, List[str]] = {
         "rbi", "upi", "bank", "banking", "npci", "atm", "payment", "payments",
         "neft", "rtgs", "imps", "loan", "repo rate", "credit card", "debit card",
         "otp", "cyber fraud", "phishing", "bank account", "kyc", "reserve bank",
+        "mdr", "merchant discount rate", "merchant payment", "merchant upi", "qr code payment",
     ],
     "health": [
         "health", "vaccine", "vaccination", "covid", "corona", "virus", "disease",

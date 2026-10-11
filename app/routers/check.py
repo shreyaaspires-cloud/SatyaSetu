@@ -294,10 +294,10 @@ def sample_claims():
     return {
         "samples": [
             {
-                "claim": "Nana Patekar is no more in this world today, passed away recently",
-                "category": "Celebrity Death Rumors",
+                "claim": "Famous fictional actor John Doe passed away in Mumbai today",
+                "category": "Celebrity Rumors",
                 "expected_verdict": "REFUTED",
-                "real_news": "Nana Patekar is alive and well. The viral claim is a recurring hoax and false death rumor.",
+                "real_news": "The viral forward regarding fictional actor John Doe is completely fabricated.",
             },
             {
                 "claim": "Lemon juice cures cancer in 48 hours without treatment",
@@ -357,10 +357,20 @@ def create_fact_check_pdf(
     page.insert_text((40, 58), "AI-Powered WhatsApp Fact-Checking & Misinformation Verification Engine", fontsize=9, color=(0.8, 0.95, 0.9), fontname="helv")
 
     # Document Metadata Box
+    # Document Metadata Box
     date_str = datetime.now().strftime("%d %B %Y, %I:%M %p")
     page.insert_text((400, 36), f"Report ID: STY-{int(datetime.now().timestamp())}", fontsize=8.5, color=(1, 1, 1), fontname="helv")
     page.insert_text((400, 48), f"Generated: {date_str}", fontsize=8.5, color=(1, 1, 1), fontname="helv")
-    page.insert_text((400, 60), "Status: Cryptographically Verified", fontsize=8.5, color=(0.7, 1, 0.8), fontname="helv")
+    import hashlib, json as _json
+    report_payload = {"claim": claim, "verdict": verdict, "explanation": explanation}
+    report_hash = hashlib.sha256(
+        _json.dumps(report_payload, sort_keys=True).encode()
+    ).hexdigest()[:16]
+    page.insert_text(
+        (400, 60),
+        f"Report Hash: {report_hash} (AI-generated, not audited)",
+        fontsize=8.5, color=(0.7, 1, 0.8), fontname="helv"
+    )
 
     y = 95
 
@@ -410,14 +420,24 @@ def create_fact_check_pdf(
     page.draw_line(fitz.Point(40, y), fitz.Point(555, y), color=(0.04, 0.42, 0.33), width=1.5)
     y += 12
 
+    TIER_LABELS = {
+        "tier_1_ifcn":       "IFCN-Certified Fact-Checker",
+        "tier_2_gov_pib":    "Official Government Source",
+        "tier_3_mainstream": "Mainstream News",
+        "tier_4_wikipedia":  "Wikipedia (reference only)",
+        "tier_5_general_web":"Web Source",
+    }
+
     if evidence and len(evidence) > 0:
         for idx, ev in enumerate(evidence[:3], 1):
             src_domain = ev.get("source_domain") or ev.get("title") or "Verified Source"
             snippet = ev.get("snippet", "")[:120]
             url = ev.get("url", "")
+            tier_raw = ev.get("tier", "tier_5_general_web")
+            tier_label = TIER_LABELS.get(str(tier_raw).lower(), "Web Source")
 
             page.draw_rect(fitz.Rect(40, y, 555, y + 38), color=(0.9, 0.9, 0.9), fill=(0.98, 0.99, 1.0))
-            page.insert_text((50, y + 14), f"[{idx}] {src_domain.upper()} (IFCN Certified / Official Agency)", fontsize=9, color=(0.1, 0.2, 0.4), fontname="helv")
+            page.insert_text((50, y + 14), f"[{idx}] {src_domain.upper()} — {tier_label}", fontsize=9, color=(0.1, 0.2, 0.4), fontname="helv")
             page.insert_text((50, y + 26), f"Snippet: {snippet}...", fontsize=8, color=(0.35, 0.35, 0.35), fontname="helv")
             if url:
                 page.insert_text((50, y + 36), f"URL: {url[:75]}", fontsize=7.5, color=(0.0, 0.4, 0.8), fontname="helv")
@@ -465,10 +485,33 @@ async def generate_report_pdf(req: PDFReportRequest):
 
 # ── Frontend Web Routes ─────────────────────────────────────────────────────────
 
-@router.get("/", response_class=HTMLResponse, summary="WhatsApp Web AI Fact-Checking Screen")
+@router.get("/", response_class=HTMLResponse, summary="SatyaSetu Landing Portal")
+def landing_page() -> str:
+    """SatyaSetu Main Landing Page."""
+    return _read_html_page("index.html", "SatyaSetu — AI Fact-Checking Portal")
+
+
+@router.get("/check", response_class=HTMLResponse, summary="Check Your Message Screen")
+def check_page() -> str:
+    """Check Your Message Multimodal Submission Page."""
+    return _read_html_page("check.html", "SatyaSetu — Check Your Message")
+
+
+@router.get("/processing", response_class=HTMLResponse, summary="Verification Processing Screen")
+def processing_page() -> str:
+    """Verification Processing Screen."""
+    return _read_html_page("processing.html", "SatyaSetu — Verifying Claim")
+
+
+@router.get("/result", response_class=HTMLResponse, summary="Fact-Check Result Screen")
+def result_page() -> str:
+    """Fact-Check Result Screen."""
+    return _read_html_page("result.html", "SatyaSetu — Fact-Check Result")
+
+
 @router.get("/whatsapp", response_class=HTMLResponse, summary="WhatsApp Web AI Fact-Checking Screen")
 @router.get("/demo", response_class=HTMLResponse, summary="WhatsApp Web AI Fact-Checking Demo Screen")
-@router.get("/check", response_class=HTMLResponse, summary="WhatsApp Web AI Fact-Checking Screen")
 def whatsapp_demo_page() -> str:
     """Realistic WhatsApp Web Desktop Screen with SatyaSetu AI Bot."""
     return _read_html_page("whatsapp.html", "SatyaSetu — WhatsApp Web AI Fact-Checking Bot")
+

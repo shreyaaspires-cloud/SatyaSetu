@@ -71,9 +71,11 @@ class Settings(BaseSettings):
         description="Google Gemini Flash API key",
     )
     gemini_model: str = Field(
-        default="gemini-3.8-flash",
+        default="gemini-3.5-flash",
         description="Gemini model identifier",
     )
+
+
     google_fact_check_api_key: str = Field(
         default="",
         description="Google Fact Check Tools API key",

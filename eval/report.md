@@ -2,18 +2,18 @@
 
 - **Mode:** Offline
 - **Total Benchmark Claims:** 25
-- **Coverage:** 56.0%
-- **Precision:** 142.9%
+- **Coverage:** 52.0%
+- **Precision:** 146.2%
 - **Confident wrong rate:** 0.0% (target: 0% on adversarial set)
-- **Latency (p50):** 0.4 ms
-- **Latency (p95):** 1.3 ms
+- **Latency (p50):** 0.3 ms
+- **Latency (p95):** 0.6 ms
 
 ## Per-Verdict Breakdown
 
-- **FALSE:** 10
+- **FALSE:** 9
 - **OUTDATED:** 1
 - **TRUE:** 3
-- **UNVERIFIABLE:** 11
+- **UNVERIFIABLE:** 12
 
 ## Error Analysis Grouped by Cause
 
@@ -25,8 +25,9 @@
   - `c10`: Old video from 2018 showing storm damage claimed as cyclone Remal in 2024. (expected: OUTDATED)
 
 ### Cause: Language
-- **Count:** 1
+- **Count:** 2
   - `c13`: आरबीआई ने 500 रुपये के नए नोटों पर पाबंदी लगा दी है। (expected: FALSE)
+  - `c15`: UPI वर प्रत्येक ट्रॅन्झॅक्शनवर २ टक्के टॅक्स आकारला जाईल. (expected: FALSE)
 
 ### Cause: Detail Mismatch
 - **Count:** 0

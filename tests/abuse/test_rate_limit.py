@@ -21,11 +21,17 @@ from app.routers.webhook import _hash_sender, _is_rate_limited, _rate_store, _ra
 
 @pytest.fixture(autouse=True)
 def clean_rate_store():
+    import app_main
     with _rate_lock:
         _rate_store.clear()
+    with app_main._ip_rate_lock:
+        app_main._ip_rate_store.clear()
     yield
     with _rate_lock:
         _rate_store.clear()
+    with app_main._ip_rate_lock:
+        app_main._ip_rate_store.clear()
+
 
 
 class TestRateLimiterCore:
@@ -83,9 +89,9 @@ class TestWebhookRateLimitIntegration:
             res2 = client.post("/webhook/twilio", data={"Body": "Claim 2", "From": f"whatsapp:{phone}"})
             assert res2.status_code == 200
 
-            # Request 3: Exceeds rate limit -> Graceful 429
+            # Request 3: Exceeds rate limit -> Polite notification (HTTP 200 to satisfy Twilio webhook retries)
             res3 = client.post("/webhook/twilio", data={"Body": "Claim 3", "From": f"whatsapp:{phone}"})
-            assert res3.status_code == 429
+            assert res3.status_code == 200
             assert "too many messages" in res3.text.lower()
 
     def test_ip_rate_limiting_middleware(self, monkeypatch):

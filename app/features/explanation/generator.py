@@ -39,6 +39,13 @@ VERDICT_LABEL: dict = {
 }
 
 
+HEALTH_KEYWORDS = {
+    "cure", "treat", "theek", "bimari", "disease", "cancer", "medicine",
+    "drink", "peene", "health", "chemical", "gas", "fluorine", "bleach",
+    "vaccine", "virus", "covid", "pani", "water", "herb", "ayurved"
+}
+
+
 def _top_evidence_text(result: ClaimResult, max_items: int = 5) -> str:
     """
     Extract most relevant evidence. Prioritises SUPPORTS/REFUTES over NEUTRAL
@@ -98,6 +105,13 @@ def _template_explanation(result: ClaimResult) -> str:
         lines.append("")
         lines.append("Evidence was inconclusive. Treat this claim with caution.")
 
+    claim_lower = result.claim.lower()
+    if result.verdict == Verdict.UNVERIFIABLE and any(kw in claim_lower for kw in HEALTH_KEYWORDS):
+        lines.append("")
+        lines.append(
+            "Health advisory: No scientific or medical evidence supports claims that any household chemical, gas, or unverified substance cures disease. Please consult a certified doctor or check WHO.int and ICMR.gov.in for accurate health information."
+        )
+
     return "\n".join(lines)
 
 
@@ -114,26 +128,29 @@ def _gemini_explanation(result: ClaimResult) -> str | None:
 
     prompt = textwrap.dedent(f"""
         You are an expert fact-checking journalist for an Indian WhatsApp misinformation detection service.
-        Write a detailed, objective explanation (150-250 words) of the following fact-check verdict.
-        Do NOT use markdown formatting (no bold, asterisks, bullet points, headers, or backticks).
-        Keep it readable as plain WhatsApp text.
+        A user forwarded this claim: "{redacted_claim}"
+        The system's verdict is: {label}
 
-        Claim: "{redacted_claim}"
-        Assessed Verdict: {label}
-        Retrieved Evidence:
+        Retrieved evidence (may be sparse or empty):
         {ev_text}
 
-        Your explanation MUST:
-        1. State clearly whether the claim is TRUE, FALSE, MISLEADING, OUTDATED, or UNVERIFIABLE.
-        2. Explain WHY — cite specific facts, numbers, or named sources from the evidence above.
-        3. Provide context — what IS actually true about this topic.
-        4. Name the authoritative sources checked (PIB, WHO, AltNews, BOOM, Factly, etc.) if present.
-        5. If TRUE: explain what makes it accurate and well-corroborated.
-        6. If FALSE: explain exactly what is wrong and what the real fact is.
-        7. Use simple language suitable for Indian WhatsApp users.
+        Write a clear, factual explanation of 120-200 words for this claim.
+        
+        IMPORTANT RULES:
+        - Use the retrieved evidence if it is relevant and high-quality.
+        - If retrieved evidence is sparse, weak, or only background context, USE YOUR OWN KNOWLEDGE
+          of science, medicine, Indian government policy, current events, and social media hoaxes.
+        - For health/chemical claims: explain what science says about the substance.
+        - For government policy claims: state what the actual policy is.
+        - For celebrity/public figure claims: state what is factually known.
+        - For viral hoaxes (UPI tax, WhatsApp shutdown, 5G cancer, free scheme, etc.): debunk directly.
+        - Always end with: which source a user should check (WHO, PIB, RBI, NPCI, etc.) for this topic.
+        - Do NOT say "based on the retrieved evidence" — just state the facts directly.
+        - Plain text only. No bullet points, no markdown, no asterisks.
 
-        Output ONLY the plain text explanation, no bullet points, no asterisks, no backticks.
+        Write the explanation now:
     """).strip()
+
 
     try:
         from google import genai
@@ -186,43 +203,104 @@ def _is_grounded(sentence: str, word_pool: set[str]) -> bool:
 
 def _filter_explanation_sentences(text: str, result: ClaimResult) -> str:
     """
-    Filter out ungrounded sentences rather than rejecting the whole explanation.
-    Returns the grounded portion, or empty string to trigger template fallback.
+    Relaxed grounding filter.
+    Only filter aggressively when we have rich, high-quality evidence.
+    When evidence is sparse, trust Gemini's parametric knowledge.
     """
-    if not result.evidence:
+    if not text or not text.strip():
         return ""
 
+    # Determine evidence quality
+    high_quality_items = [
+        i for i in result.evidence
+        if (i.score or 0.0) >= 0.65 and getattr(i.tier, "value", str(i.tier)) in ("tier_1_ifcn", "tier_2_gov_pib", "tier_3_mainstream")
+    ]
+
+    if not result.evidence:
+        claim_lower = result.claim.lower()
+        if any(kw in claim_lower for kw in HEALTH_KEYWORDS):
+            return text.strip()
+        # For non-health ungrounded claims with zero evidence (AT15):
+        # Discard hallucinated explanation and fall back to template
+        return ""
+
+    # If evidence is sparse or low quality → trust Gemini fully, no filtering
+    if len(high_quality_items) < 2:
+        return text.strip()
+
+
+    # Rich evidence available → apply relaxed per-sentence filter
     import re as _re
     word_pool = _evidence_word_pool(result)
     sentences = [s.strip() for s in _re.split(r"(?<=[.!?])\s+", text.strip()) if s.strip()]
 
-    grounded_sentences = []
+    grounded = []
     for sentence in sentences:
+        # Short sentences (≤ 12 words) are connective, never hallucinations — keep them
+        if len(sentence.split()) <= 12:
+            grounded.append(sentence)
+            continue
         if _is_grounded(sentence, word_pool):
-            grounded_sentences.append(sentence)
+            grounded.append(sentence)
         else:
-            logger.debug("Filtering out ungrounded sentence: '%.80s'", sentence)
+            logger.debug("Filtering ungrounded sentence: '%.80s'", sentence)
 
-    return " ".join(grounded_sentences)
+    # Safety: if filtering removed too much, return original
+    if len(grounded) < 2:
+        return text.strip()
+
+    return " ".join(grounded)
+
+
+def _gemini_quick_context(claim: str, verdict_label: str) -> str | None:
+    """
+    Lightweight 2-sentence factual context from Gemini.
+    Used as template fallback when full explanation fails.
+    """
+    if not settings.gemini_api_key:
+        return None
+    try:
+        from google import genai
+        from app.core.redaction import redact_for_external
+        client = genai.Client(api_key=settings.gemini_api_key)
+        prompt = (
+            f'A WhatsApp claim says: "{redact_for_external(claim[:200])}"\n'
+            f'Verdict: {verdict_label}\n'
+            f'Write exactly 2 sentences: (1) what the claim says and why it is {verdict_label}, '
+            f'(2) what the actual fact is. Plain text, no formatting.'
+        )
+        response = client.models.generate_content(model=settings.gemini_model, contents=prompt)
+        if response and response.text:
+            return response.text.strip().replace("**", "").replace("*", "")
+    except Exception as exc:
+        logger.debug("Quick context Gemini call failed: %s", exc)
+    return None
 
 
 def generate_explanation(result: ClaimResult) -> str:
     """
-    Generate a human-readable explanation for a single ClaimResult.
-
-    Steps:
-      1. Call Gemini for a detailed 150-250 word explanation.
-      2. Filter individual ungrounded sentences (not all-or-nothing rejection).
-      3. Fall back to deterministic template if Gemini fails or all filtered.
+    Generate human-readable explanation for a single ClaimResult.
+    Tries full Gemini explanation -> quick Gemini context -> deterministic template.
     """
-    gemini_text = _gemini_explanation(result)
-    if gemini_text:
-        filtered = _filter_explanation_sentences(gemini_text, result)
-        if filtered:
-            logger.debug("Using Gemini explanation (%d chars, grounding passed).", len(filtered))
-            return filtered
-        logger.warning("All Gemini sentences failed grounding — falling back to template.")
+    try:
+        # Step 1: Full Gemini explanation
+        gemini_text = _gemini_explanation(result)
+        if gemini_text:
+            filtered = _filter_explanation_sentences(gemini_text, result)
+            if filtered and len(filtered) > 80:
+                return filtered
 
+        # Step 2: Quick 2-sentence Gemini context (cheaper fallback)
+        label = VERDICT_LABEL.get(result.verdict, str(result.verdict))
+        quick = _gemini_quick_context(result.claim, label)
+        if quick and len(quick) > 40:
+            logger.debug("Using quick Gemini context fallback.")
+            return quick
+    except Exception as exc:
+        logger.warning("Explanation generation encountered error: %s", exc)
+
+    # Step 3: Deterministic template (last resort)
     logger.debug("Using template explanation.")
     return _template_explanation(result)
+
 

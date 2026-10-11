@@ -41,3 +41,32 @@ def test_at34_expired_entry_is_not_used():
     query_expired = "Old test claim that expired yesterday"
     match = lookup_claim_bank(query_expired)
     assert match is None, "Expired entry must not be returned as a valid hit"
+
+
+def test_cb005_supported_after_oct8_2026():
+    from app.features.verification.claim_bank import lookup_claim_bank
+    result = lookup_claim_bank("Nana Patekar Sir, is no more")
+    assert result is not None
+    assert result.verdict == Verdict.SUPPORTED
+
+
+def test_living_person_claim_is_not_decisive():
+    from app.features.verification.claim_bank import lookup_claim_bank
+    from unittest.mock import patch
+    mock_entry = [{
+        "id": "cb-test-living",
+        "canonical_claim": "Living actor is no more in this world",
+        "variants": ["Living actor passed away today"],
+        "verdict": "REFUTED",
+        "explanation_en": "Alive and well.",
+        "claim_type": "living_person_status",
+        "sources": [{"publisher": "BOOM", "url": "https://example.com"}],
+        "category": "celebrity_hoax",
+        "last_reviewed": "2026-01-01",
+        "review_by": "2027-01-01",
+    }]
+    with patch("app.features.verification.claim_bank.load_claim_bank", return_value=mock_entry):
+        result = lookup_claim_bank("Living actor passed away today")
+        assert result is not None
+        assert not result.is_decisive
+

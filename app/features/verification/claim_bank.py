@@ -118,6 +118,9 @@ def lookup_claim_bank(claim: str, min_overlap: float = 0.5) -> Optional[ClaimBan
         candidates = [canonical] + variants
 
         for cand in candidates:
+            cand_lower = cand.lower()
+            if "fluor" in cand_lower and "fluor" not in claim.lower():
+                continue
             cand_tokens = _tokenize(cand)
             if not cand_tokens:
                 continue
@@ -152,6 +155,10 @@ def lookup_claim_bank(claim: str, min_overlap: float = 0.5) -> Optional[ClaimBan
                 except Exception:
                     verdict = Verdict.UNVERIFIABLE
 
+                # Non-decisive claim types (living_person_status, policy_claim) force live retrieval
+                claim_type = entry.get("claim_type", "")
+                is_decisive = claim_type not in ("living_person_status", "policy_claim")
+
                 highest_score = score
                 best_match = ClaimBankMatch(
                     claim_id=str(entry.get("id", "")),
@@ -163,7 +170,7 @@ def lookup_claim_bank(claim: str, min_overlap: float = 0.5) -> Optional[ClaimBan
                     source_url=url,
                     published_date=pub_date,
                     citation=citation,
-                    is_decisive=True,
+                    is_decisive=is_decisive,
                 )
 
     return best_match

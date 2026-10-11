@@ -257,6 +257,20 @@ def score_stance(
     if not _to_score:
         return evidence_items
 
+    def _apply_recency_weight(item: EvidenceItem) -> None:
+        from datetime import date, datetime
+        today = date.today()
+        if getattr(item, "publish_date", None):
+            try:
+                pub = datetime.strptime(str(item.publish_date)[:10], "%Y-%m-%d").date()
+                age_months = (today - pub).days / 30.44
+                if age_months > 36:
+                    item.score = round(item.score * 0.60, 3)
+                elif age_months > 18:
+                    item.score = round(item.score * 0.80, 3)
+            except Exception:
+                pass
+
     # 1. Try local NLI model
     model_tuple = _load_nli_model(settings.nli_model_name)
     if model_tuple is not None:
@@ -271,10 +285,13 @@ def score_stance(
             else:
                 item.stance = "NEUTRAL"
             item.score = round(confidence, 3)
+            _apply_recency_weight(item)
         return evidence_items
 
     # 2. Try Gemini batch stance (only on non-mismatched items)
     if _gemini_stance_batch(claim, _to_score):
+        for item in _to_score:
+            _apply_recency_weight(item)
         return evidence_items
 
     # 3. Negation-aware lexical fallback
@@ -294,6 +311,7 @@ def score_stance(
         else:
             item.stance = "NEUTRAL"
             item.score = overlap
+        _apply_recency_weight(item)
 
     return evidence_items
 
@@ -379,7 +397,11 @@ def aggregate_verdict(
 
     # -----------------------------------------------------------------------
     # Rule 2: REFUTED — authoritative FALSE rating that passed gate
+    # BUG-B.2: Require corroboration OR publish_date no older than 18 months
     # -----------------------------------------------------------------------
+    from datetime import date, datetime
+    today = date.today()
+
     tier12_false = [
         i for i in decisive
         if i.tier in (Tier.TIER_1_IFCN, Tier.TIER_2_GOV_PIB)
@@ -389,6 +411,20 @@ def aggregate_verdict(
     ]
     if tier12_false:
         best = max(tier12_false, key=lambda i: i.score)
+        # Check corroboration (at least 2 items supporting REFUTES)
+        has_corroboration = len([i for i in decisive if i.stance == "REFUTES" and i.tier in _DECISIVE_TIERS]) >= 2
+        is_fresh = False
+        if best.publish_date:
+            try:
+                pub_d = datetime.strptime(str(best.publish_date)[:10], "%Y-%m-%d").date()
+                if (today - pub_d).days / 30.44 <= 18:
+                    is_fresh = True
+            except Exception:
+                is_fresh = False
+
+        if not has_corroboration and not is_fresh:
+            return Verdict.UNVERIFIABLE, round(min(best.score, 1.0), 3), "SINGLE_STALE_SOURCE"
+
         return Verdict.REFUTED, round(min(best.score, 1.0), 3), "AUTHORITATIVE_FACT_CHECK"
 
     # -----------------------------------------------------------------------
@@ -419,15 +455,44 @@ def aggregate_verdict(
         return Verdict.PARTIALLY_SUPPORTED, round(min(best.score, 1.0), 3), "AUTHORITATIVE_FACT_CHECK"
 
     # -----------------------------------------------------------------------
-    # From here on: only stance-based evaluation of decisive Tier-1/2/3 items
+    # Rule 2d: Conflicting policy evidence → PARTIALLY_SUPPORTED (BUG-B.3)
+    # If decisive items have BOTH REFUTES and SUPPORTS stances from the same
+    # domain or government sources with > 18 months age difference
     # -----------------------------------------------------------------------
     decisive_t123 = [i for i in decisive if i.tier in _DECISIVE_TIERS and _is_tier2_detail_valid(i)]
-
-
-
     supports_t123 = [i for i in decisive_t123 if i.stance == "SUPPORTS"]
     refutes_t123 = [i for i in decisive_t123 if i.stance == "REFUTES"]
 
+    if supports_t123 and refutes_t123:
+        # Check if SUPPORTS and REFUTES come from same domain or government domains with date difference > 18 months
+        conflicting_policy = False
+        max_conf = max(max(s.score for s in supports_t123), max(r.score for r in refutes_t123))
+
+        for s in supports_t123:
+            for r in refutes_t123:
+                same_or_gov = (
+                    (s.source_domain and s.source_domain == r.source_domain)
+                    or (s.tier == Tier.TIER_2_GOV_PIB and r.tier == Tier.TIER_2_GOV_PIB)
+                )
+                if same_or_gov and s.publish_date and r.publish_date:
+                    try:
+                        s_dt = datetime.strptime(str(s.publish_date)[:10], "%Y-%m-%d").date()
+                        r_dt = datetime.strptime(str(r.publish_date)[:10], "%Y-%m-%d").date()
+                        diff_months = abs((s_dt - r_dt).days) / 30.44
+                        if diff_months > 18:
+                            conflicting_policy = True
+                            break
+                    except Exception:
+                        pass
+            if conflicting_policy:
+                break
+
+        if conflicting_policy:
+            return Verdict.PARTIALLY_SUPPORTED, round(min(max_conf, 1.0), 3), "CONFLICTING_POLICY_EVIDENCE"
+
+    # -----------------------------------------------------------------------
+    # From here on: only stance-based evaluation of decisive Tier-1/2/3 items
+    # -----------------------------------------------------------------------
     # Rule 4: conflicting decisive evidence → UNVERIFIABLE (CONFLICTING_EVIDENCE)
     if supports_t123 and refutes_t123:
         return Verdict.UNVERIFIABLE, 0.5, "CONFLICTING_EVIDENCE"

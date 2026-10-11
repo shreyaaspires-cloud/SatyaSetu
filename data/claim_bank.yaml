@@ -56,6 +56,7 @@
       published_date: "2023-03-29"
       tier: 2
   category: banking_scam
+  claim_type: "policy_claim"
   last_reviewed: "2026-03-01"
   review_by: "2027-03-01"
 
@@ -76,27 +77,24 @@
   review_by: "2024-01-01"
 
 - id: cb-005
-  canonical_claim: "Nana Patekar is no more in this world today, passed away recently"
+  canonical_claim: "Nana Patekar has passed away"
   variants:
-    - "Nana Patekar passed away"
-    - "There is bad news nana Patekar is no more in this world today"
+    - "Nana Patekar is no more"
+    - "nana patekar sir, is no more"
+    - "nana patekar passed away"
     - "नाना पाटेकर यांचे निधन झाले"
     - "नाना पाटेकर का निधन हो गया"
   key_details: []
-  verdict: REFUTED
-  explanation_en: "Nana Patekar is alive and in good health. The viral message claiming his demise is a recurring death hoax that has circulated multiple times on social media and has been officially debunked."
+  verdict: SUPPORTED
+  explanation_en: "Veteran actor Nana Patekar (age 75) passed away on 8 October 2026 at 5:20 AM after suffering a cardiac arrest at his residence in Goa. He was cremated with full state honours at his Donje farmhouse in Pune. Maharashtra government accorded him a state funeral. He is survived by his wife Neelkanthi Patekar and son Malhar Patekar."
   sources:
-    - url: "https://www.boomlive.in/fact-check/nana-patekar-death-hoax-fact-check"
-      publisher: "BOOM Live"
-      published_date: "2024-06-15"
-      tier: 1
-    - url: "https://www.thequint.com/news/webqoof/nana-patekar-death-hoax-debunked"
-      publisher: "The Quint - WebQoof"
-      published_date: "2024-06-16"
-      tier: 1
-  category: celebrity_hoax
-  last_reviewed: "2026-06-01"
-  review_by: "2027-06-01"
+    - url: "https://bernama.com/en/world/news.php?id=2617145"
+      publisher: "Bernama / ANI"
+      published_date: "2026-10-08"
+      tier: 3
+  category: news_event
+  last_reviewed: "2026-10-11"
+  review_by: "2027-10-11"
 
 - id: cb-006
   canonical_claim: "Lemon juice cures cancer in 48 hours without treatment"
@@ -121,6 +119,112 @@
   review_by: "2027-01-01"
 
 - id: cb-007
+  canonical_claim: "Drinking fluorine or fluoride cures diseases"
+  variants:
+    - "fluorine peene se bimari hogi theek"
+    - "fluoride water cures all diseases"
+    - "fluoride se bimari theek hoti hai"
+    - "drinking fluoride treats illness"
+  key_details: []
+  verdict: REFUTED
+  explanation_en: "Fluorine is a highly toxic, reactive gas that is dangerous to human health. Fluoride compounds, even at low concentrations, do not cure diseases. High fluoride exposure causes fluorosis and organ damage. There is no scientific or medical evidence that drinking fluorine or fluoride-based substances treats any disease. WHO and ICMR guidelines strictly limit fluoride in drinking water for safety reasons."
+  sources:
+    - url: "https://www.who.int/teams/environment-climate-change-and-health/chemical-safety-and-health/health-topics/fluoride"
+      publisher: "World Health Organization"
+      published_date: "2023-06-01"
+      tier: 2
+    - url: "https://www.icmr.gov.in"
+      publisher: "ICMR"
+      published_date: "2022-01-01"
+      tier: 2
+  category: health_cure
+  last_reviewed: "2026-01-10"
+  review_by: "2027-01-10"
+
+- id: cb-008
+  canonical_claim: "Government of India has imposed tax on UPI payments"
+  variants:
+    - "Government has imposed tax on UPI"
+    - "UPI payments will now be taxed"
+    - "UPI pe tax lagega"
+    - "NPCI has introduced charges on UPI transactions"
+    - "RBI imposed 2 percent tax on UPI"
+    - "सरकार ने UPI पर टैक्स लगाया"
+  key_details: []
+  verdict: REFUTED
+  explanation_en: "The Government of India has not imposed any tax on UPI payments. NPCI and RBI have both confirmed that standard person-to-person and person-to-merchant UPI transactions remain completely free for regular users. This is a recurring viral hoax that has been debunked multiple times by PIB Fact Check."
+  sources:
+    - url: "https://pib.gov.in/PressReleasePage.aspx?PRID=1911855"
+      publisher: "PIB Fact Check"
+      published_date: "2023-03-29"
+      tier: 2
+    - url: "https://npci.org.in"
+      publisher: "NPCI"
+      published_date: "2023-01-01"
+      tier: 2
+  category: banking_scam
+  last_reviewed: "2026-01-10"
+  review_by: "2027-01-10"
+
+- id: cb-009
+  canonical_claim: "5G towers cause cancer and health problems"
+  variants:
+    - "5G se cancer hota hai"
+    - "5G towers are harmful to human health"
+    - "5G radiation causes disease"
+    - "5G towers spread coronavirus"
+  key_details: []
+  verdict: REFUTED
+  explanation_en: "There is no scientific evidence that 5G towers cause cancer or any disease. 5G uses non-ionizing radio frequency radiation, which does not damage DNA or cause cancer. WHO and ICNIRP have reviewed the evidence and found 5G safe within established guidelines. The claim that 5G spread COVID-19 is also false."
+  sources:
+    - url: "https://www.who.int/news-room/questions-and-answers/item/radiation-5g-mobile-networks-and-health"
+      publisher: "World Health Organization"
+      published_date: "2020-10-01"
+      tier: 2
+  category: health_tech
+  last_reviewed: "2026-01-10"
+  review_by: "2027-01-10"
+
+- id: cb-010
+  canonical_claim: "WhatsApp is shutting down or will start charging users"
+  variants:
+    - "WhatsApp band ho raha hai"
+    - "WhatsApp is shutting down tonight"
+    - "WhatsApp will charge Rs 1 per message"
+    - "WhatsApp is going to be paid"
+    - "forward to 10 people or your account will be deleted"
+  key_details: []
+  verdict: REFUTED
+  explanation_en: "WhatsApp is not shutting down and has not announced any charges for regular users. WhatsApp is free to use for personal messaging. Chain messages saying WhatsApp will shut down or become paid are a recurring hoax. Forward-or-lose-account messages are manipulation tactics, not real warnings from WhatsApp."
+  sources:
+    - url: "https://www.boomlive.in/fact-check/whatsapp-shutdown-hoax"
+      publisher: "BOOM Live"
+      published_date: "2022-01-01"
+      tier: 1
+  category: app_hoax
+  last_reviewed: "2026-01-10"
+  review_by: "2027-01-10"
+
+- id: cb-011
+  canonical_claim: "PM Modi announced free smartphones for all students under Digital India"
+  variants:
+    - "Modi ji ne free smartphone dene ka ailan kiya"
+    - "government is giving free smartphones to students"
+    - "Digital Bharat yojana mein free mobile milega"
+    - "सरकार सभी छात्रों को मुफ्त स्मार्टफोन दे रही है"
+  key_details: []
+  verdict: REFUTED
+  explanation_en: "The central government has not announced any scheme providing free smartphones to all students under Digital India. Such viral messages are fabricated and often link to phishing websites that steal personal data. PIB Fact Check has repeatedly debunked free smartphone scheme messages. Always verify government schemes at india.gov.in or mygov.in."
+  sources:
+    - url: "https://pib.gov.in/factcheck.aspx"
+      publisher: "PIB Fact Check"
+      published_date: "2023-06-01"
+      tier: 2
+  category: government_scheme_scam
+  last_reviewed: "2026-01-10"
+  review_by: "2027-01-10"
+
+- id: cb-012
   canonical_claim: "Railway Free Ticket Scheme announced for all senior citizens across India"
   variants:
     - "Indian Railways announced free train tickets for all senior citizens"
@@ -138,7 +242,7 @@
   last_reviewed: "2026-01-01"
   review_by: "2027-01-01"
 
-- id: cb-008
+- id: cb-013
   canonical_claim: "ISRO launched Aditya-L1 solar observation mission to L1 Lagrange point"
   variants:
     - "ISRO successfully launched Aditya L1 mission to study the sun"
@@ -155,4 +259,5 @@
   category: science_space
   last_reviewed: "2026-01-01"
   review_by: "2027-01-01"
+
 

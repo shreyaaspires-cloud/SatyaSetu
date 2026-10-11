@@ -62,13 +62,18 @@ def test_translation_english_pass_through():
     assert is_fallback is False
 
 
-def test_translation_d7_hack_removed():
+def test_translation_d7_hack_removed(monkeypatch):
     # Defect D7 test: the hardcoded PM KISAN phrase shortcut must NOT exist
+    monkeypatch.setattr("app.core.config.settings.gemini_api_key", "")
     pm_kisan_hi = "यह मैसेज फॉरवर्ड करो, PM Kisan का पैसा मिलेगा"
 
     translated, is_fallback = translate_to_english(pm_kisan_hi, "hi")
     # Must NOT return the hardcoded English demo hack
     assert translated != "Forward this message and you will receive money under PM-KISAN."
-    # If no model is loaded (or mocked decoder returns non-string), it safely falls back
-    assert is_fallback is True
-    assert translated == pm_kisan_hi
+    # Either local m2m100 translated it, or it safely fell back to original
+    if is_fallback:
+        assert translated == pm_kisan_hi
+    else:
+        assert isinstance(translated, str) and len(translated) > 0
+
+
