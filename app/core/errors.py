@@ -4,7 +4,11 @@ Custom domain exceptions for SatyaSetu.
 
 
 class SatyaSetuError(Exception):
-    """Base exception for all SatyaSetu domain errors."""
+    """
+    Base exception for all SatyaSetu domain errors.
+    Enables centralized catch-and-recover error boundaries in webhook & REST layers
+    to guarantee graceful responses (neutral fallback text) instead of unhandled 500 crashes.
+    """
     pass
 
 
