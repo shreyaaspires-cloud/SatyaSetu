@@ -45,7 +45,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     1. Probes lightweight embedding and stance models.
     2. Initializes SQLite connection pool for local claim verification logs.
     3. Exposes model readiness status dictionary via app.state for health checks.
-    """
+
     STARTUP: Pre-load heavy ML models once to eliminate per-request cold starts.
     Model load failures are non-fatal; status is stored in app.state for /health.
     SHUTDOWN: Python GC handles cleanup; no explicit teardown needed.
