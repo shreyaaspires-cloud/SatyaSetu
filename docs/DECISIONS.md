@@ -47,3 +47,9 @@
 - **Context:** Google has migrated the Python Gemini SDK from legacy `google-generativeai` to the unified `google-genai` SDK.
 - **Decision:** Use `google-genai>=1.0.0` for all Gemini interactions, verified via Context7 and PyPI dry-run.
 - **Consequences:** Uses the modern Google GenAI client structure and official typing support.
+
+## ADR-009: Verified Claim Bank Curation, Sourcing, and Safeguards
+- **Status:** Accepted
+- **Context:** Storing unvetted claims or claims regarding living/deceased individuals poses severe harm, defamation, and hallucination risks. Serving unverified death or arrest claims as authoritative truths can trigger panic or violate privacy laws.
+- **Decision:** The verified claim bank holds only claims reviewed by a team member. Every active entry must have an unexpired `review_by` date and at least one Tier 1 (IFCN fact-checkers) or Tier 2 (official government/health agencies) source. No claims concerning a named living or recently deceased person's death, arrest, or private health status may be committed to the production bank. Expired or unsourced entries are automatically rejected at load time by `validate_claim_bank_entry`.
+- **Consequences:** Eliminates defamation and harm hazards, guarantees traceability to certified fact-checkers, and enforces automated expiration gates.

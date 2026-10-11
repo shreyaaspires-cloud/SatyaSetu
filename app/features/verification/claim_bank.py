@@ -45,6 +45,50 @@ def get_claim_bank_path() -> str:
     return os.path.join(base_dir, "data", "claim_bank.yaml")
 
 
+def validate_claim_bank_entry(entry: Dict[str, Any], today: Optional[date] = None) -> bool:
+    """
+    Validate that a claim bank entry satisfies quality and truthfulness policies:
+    1. Must have a canonical_claim.
+    2. review_by must be present, valid date, and not in the past.
+    3. sources must be non-empty with at least one source having url and publisher.
+    """
+    if not isinstance(entry, dict):
+        return False
+    if not entry.get("canonical_claim", "").strip():
+        logger.warning("Claim bank entry rejected: missing canonical_claim (%s)", entry.get("id"))
+        return False
+
+    review_by_str = entry.get("review_by")
+    if not review_by_str:
+        logger.warning("Claim bank entry %s rejected: missing review_by date", entry.get("id"))
+        return False
+    try:
+        review_by_date = datetime.strptime(str(review_by_str), "%Y-%m-%d").date()
+        current_date = today or date.today()
+        if review_by_date < current_date:
+            logger.warning("Claim bank entry %s rejected: expired on %s", entry.get("id"), review_by_date)
+            return False
+    except Exception:
+        logger.warning("Claim bank entry %s rejected: invalid review_by format", entry.get("id"))
+        return False
+
+    sources = entry.get("sources")
+    if not sources or not isinstance(sources, list):
+        logger.warning("Claim bank entry %s rejected: missing sources list", entry.get("id"))
+        return False
+
+    has_valid_source = False
+    for s in sources:
+        if isinstance(s, dict) and s.get("url") and s.get("publisher"):
+            has_valid_source = True
+            break
+    if not has_valid_source:
+        logger.warning("Claim bank entry %s rejected: no source has valid url and publisher", entry.get("id"))
+        return False
+
+    return True
+
+
 def load_claim_bank(force_reload: bool = False) -> List[Dict[str, Any]]:
     """Load entries from data/claim_bank.yaml. Thread-safe via _claim_bank_lock."""
     global _CLAIM_BANK_CACHE
@@ -60,8 +104,11 @@ def load_claim_bank(force_reload: bool = False) -> List[Dict[str, Any]]:
 
         try:
             with open(bank_path, "r", encoding="utf-8") as f:
-                data = yaml.safe_load(f) or []
-                _CLAIM_BANK_CACHE = data
+                raw_data = yaml.safe_load(f) or []
+                _CLAIM_BANK_CACHE = [
+                    entry for entry in raw_data
+                    if validate_claim_bank_entry(entry)
+                ]
                 return _CLAIM_BANK_CACHE
         except Exception as exc:
             logger.error("Failed to load claim bank from %s: %s", bank_path, exc)

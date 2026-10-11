@@ -36,18 +36,63 @@ def test_at33_key_detail_changed_does_not_return_bank_verdict():
 def test_at34_expired_entry_is_not_used():
     """
     AT34: An expired (review_by passed) entry is not used.
+    Uses fixture from tests/fixtures/claim_bank_fixtures.yaml.
     """
-    # Query corresponding to an expired test entry
-    query_expired = "Old test claim that expired yesterday"
-    match = lookup_claim_bank(query_expired)
-    assert match is None, "Expired entry must not be returned as a valid hit"
+    import yaml
+    from pathlib import Path
+    from unittest.mock import patch
+
+    fixture_path = Path(__file__).resolve().parent.parent / "fixtures" / "claim_bank_fixtures.yaml"
+    with open(fixture_path, "r", encoding="utf-8") as f:
+        fixtures = yaml.safe_load(f)
+
+    # Fixture contains cb-004 which expired in 2024
+    with patch("app.features.verification.claim_bank.load_claim_bank", return_value=fixtures):
+        match = lookup_claim_bank("Old test claim that expired yesterday")
+        assert match is None, "Expired entry must not be returned as a valid hit"
 
 
-def test_cb005_supported_after_oct8_2026():
-    from app.features.verification.claim_bank import lookup_claim_bank
-    result = lookup_claim_bank("Nana Patekar Sir, is no more")
-    assert result is not None
-    assert result.verdict == Verdict.SUPPORTED
+def test_validate_claim_bank_entry_rejection():
+    """
+    Verify validate_claim_bank_entry rejects expired or unsourced entries.
+    """
+    from app.features.verification.claim_bank import validate_claim_bank_entry
+
+    # Valid entry
+    valid_entry = {
+        "id": "cb-valid",
+        "canonical_claim": "A valid claim",
+        "review_by": "2030-01-01",
+        "sources": [{"url": "https://example.com", "publisher": "FactCheck"}],
+    }
+    assert validate_claim_bank_entry(valid_entry) is True
+
+    # Expired entry
+    expired_entry = {
+        "id": "cb-expired",
+        "canonical_claim": "An expired claim",
+        "review_by": "2020-01-01",
+        "sources": [{"url": "https://example.com", "publisher": "FactCheck"}],
+    }
+    assert validate_claim_bank_entry(expired_entry) is False
+
+    # Missing sources
+    unsourced_entry = {
+        "id": "cb-unsourced",
+        "canonical_claim": "An unsourced claim",
+        "review_by": "2030-01-01",
+        "sources": [],
+    }
+    assert validate_claim_bank_entry(unsourced_entry) is False
+
+    # Source without url or publisher
+    invalid_source_entry = {
+        "id": "cb-invalid-source",
+        "canonical_claim": "Claim with bad source",
+        "review_by": "2030-01-01",
+        "sources": [{"url": "", "publisher": ""}],
+    }
+    assert validate_claim_bank_entry(invalid_source_entry) is False
 
 
 def test_living_person_claim_is_not_decisive():

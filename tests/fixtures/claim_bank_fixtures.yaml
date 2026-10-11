@@ -1,0 +1,16 @@
+# Test fixtures for claim bank tests (expired entries, mock entries)
+- id: cb-004
+  canonical_claim: "Old test claim that expired yesterday"
+  variants:
+    - "पुराना टेस्ट दावा जो कल समाप्त हो गया"
+  key_details: []
+  verdict: REFUTED
+  explanation_en: "This test claim is marked as expired."
+  sources:
+    - url: "https://factcheck.org/expired-claim"
+      publisher: "FactCheck.org"
+      published_date: "2023-01-01"
+      tier: 1
+  category: test_expired
+  last_reviewed: "2023-01-01"
+  review_by: "2024-01-01"

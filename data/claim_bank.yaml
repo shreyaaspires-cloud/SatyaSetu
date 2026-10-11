@@ -60,41 +60,6 @@
   last_reviewed: "2026-03-01"
   review_by: "2027-03-01"
 
-- id: cb-004
-  canonical_claim: "Old test claim that expired yesterday"
-  variants:
-    - "पुराना टेस्ट दावा जो कल समाप्त हो गया"
-  key_details: []
-  verdict: REFUTED
-  explanation_en: "This test claim is marked as expired."
-  sources:
-    - url: "https://factcheck.org/expired-claim"
-      publisher: "FactCheck.org"
-      published_date: "2023-01-01"
-      tier: 1
-  category: test_expired
-  last_reviewed: "2023-01-01"
-  review_by: "2024-01-01"
-
-- id: cb-005
-  canonical_claim: "Nana Patekar has passed away"
-  variants:
-    - "Nana Patekar is no more"
-    - "nana patekar sir, is no more"
-    - "nana patekar passed away"
-    - "नाना पाटेकर यांचे निधन झाले"
-    - "नाना पाटेकर का निधन हो गया"
-  key_details: []
-  verdict: SUPPORTED
-  explanation_en: "Veteran actor Nana Patekar (age 75) passed away on 8 October 2026 at 5:20 AM after suffering a cardiac arrest at his residence in Goa. He was cremated with full state honours at his Donje farmhouse in Pune. Maharashtra government accorded him a state funeral. He is survived by his wife Neelkanthi Patekar and son Malhar Patekar."
-  sources:
-    - url: "https://bernama.com/en/world/news.php?id=2617145"
-      publisher: "Bernama / ANI"
-      published_date: "2026-10-08"
-      tier: 3
-  category: news_event
-  last_reviewed: "2026-10-11"
-  review_by: "2027-10-11"
 
 - id: cb-006
   canonical_claim: "Lemon juice cures cancer in 48 hours without treatment"
