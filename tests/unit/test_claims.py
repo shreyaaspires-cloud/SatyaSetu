@@ -58,3 +58,5 @@ def test_extract_keywords_with_mock():
 
     # Empty text returns empty list without calling model
     assert extract_keywords("", model=mock_kw) == []
+    assert extract_keywords("   ", model=mock_kw) == []
+

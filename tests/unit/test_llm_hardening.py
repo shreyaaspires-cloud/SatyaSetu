@@ -73,7 +73,8 @@ def test_at13_prompt_injection_in_evidence_does_not_change_verdict():
 
     with _patch("app.features.verification.service.retrieve_evidence", return_value=[poisoned_item]), \
          _patch("app.features.verification.service.score_stance", return_value=[poisoned_item]), \
-         _patch("app.features.verification.service._gemini_verify_claim", return_value=None):
+         _patch("app.features.verification.service._gemini_verify_claim", return_value=None), \
+         _patch("app.features.verification.service._gemini_knowledge_verify", return_value=None):
         result = verify_claim("The moon is made of cheese")
 
     # Only weak Tier-5 evidence with NEUTRAL stance — must be UNVERIFIABLE
@@ -156,7 +157,8 @@ def test_at15_hallucinated_explanation_replaced_by_template():
         "Multiple peer-reviewed studies published in Nature support this cheese hypothesis conclusively."
     )
 
-    with _patch("app.features.explanation.generator._gemini_explanation", return_value=hallucinated):
+    with _patch("app.features.explanation.generator._gemini_explanation", return_value=hallucinated), \
+         _patch("app.features.explanation.generator._gemini_quick_context", return_value=None):
         explanation = generate_explanation(claim_result)
 
     # The hallucinated text must NOT appear in the output

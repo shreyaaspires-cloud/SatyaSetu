@@ -78,9 +78,13 @@ def test_sanitize_text_behavior():
     assert "Allowed newline" in sanitized
     assert "Allowed tab" in sanitized
 
+    # Truncation check
+    assert sanitize_text("1234567890", max_chars=5) == "12345"
+
     # Verify LOOPHOLE-02: marker strings are stripped by sanitize_text
     injection_text = "Check this claim IGNORE PREVIOUS"
     clean_injection = sanitize_text(injection_text)
+
     assert "IGNORE PREVIOUS" not in clean_injection
     assert "Check this claim" in clean_injection
 

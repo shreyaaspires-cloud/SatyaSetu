@@ -36,8 +36,8 @@ DEMO_CLAIMS = [
     "Government announced free railway tickets for senior citizens across India",
     # Lemon cancer
     "Lemon juice cures cancer in 48 hours without chemotherapy",
-    # Celebrity death hoax
-    "Nana Patekar passed away recently — is no more in this world",
+    # Viral scam hoax
+    "Viral audio message claiming national highway toll booths are closed permanently",
     # ISRO true claim
     "ISRO launched Aditya-L1 solar observation mission to L1 Lagrange point",
     # CBSE fake
