@@ -32,8 +32,11 @@ class EvidenceItemAPI(BaseModel):
 class CheckAPIResponse(BaseModel):
     """
     Public response model for POST /api/check.
-    Does not invent fake confidence scores or synthetic fallbacks.
-    Truthful evidence strength derived from verified source tiers.
+    Decoupled Contract Rules:
+    - Truthfulness: Does not invent fake confidence scores or synthetic fallbacks.
+    - ADR-007 Enforced: Verdict adheres strictly to SUPPORTED/REFUTED/MISLEADING/UNVERIFIABLE.
+    - Evidence Strength: Derived from verified source tiers (Strong, Moderate, Limited, Insufficient).
+    - Parity: formatted_reply strictly mirrors WhatsApp webhook message layout.
     """
     model_config = ConfigDict(extra="ignore")
     verdict: str
