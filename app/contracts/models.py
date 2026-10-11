@@ -12,6 +12,10 @@ from app.core.constants import InputType, Rating, Tier, Verdict
 class IngestedMessage(BaseModel):
     """
     Standardized payload produced by the Ingestion layer.
+    Architectural Guarantees:
+    - Zero plain PII: from_number must be cryptographically hashed prior to ingestion.
+    - Sanitized input: raw_text contains unicode-normalized, zero-width-stripped content.
+    - Polymorphic input_type (TEXT, IMAGE, AUDIO, PDF, URL) with dedicated extraction metrics.
     """
     model_config = ConfigDict(extra="ignore")
 
