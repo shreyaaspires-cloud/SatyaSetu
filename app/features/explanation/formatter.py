@@ -38,7 +38,11 @@ def _load_labels() -> Dict[str, Any]:
 
 
 def get_verdict_label(verdict: Verdict, lang: str = "en") -> str:
-    """Return hardcoded localized verdict label from labels.yaml."""
+    """
+    Return hardcoded localized verdict label from labels.yaml.
+    Guarantees ADR-007 verdict compliance across English, Hindi, and regional Indic languages
+    without hallucinating intermediate confidence grades.
+    """
     labels = _load_labels()
     lang_code = lang.split("-")[0].lower() if lang else "en"
     lang_dict = labels.get(lang_code, labels.get("en", {}))
