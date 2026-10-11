@@ -1,6 +1,12 @@
 """
 Article URL text extraction using newspaper3k with Open Graph meta fallback.
-Guarantees SSRF validation on the target URL before any HTTP access.
+
+Guarantees:
+- Strict SSRF Prevention: Rejects non-public IPs, localhost, RFC 1918 subnets, and metadata endpoints
+  via `is_public_http_url` and `safe_get` before attempting socket connection.
+- Resilient Fallback: If `newspaper3k` fails (due to dynamic hydration or paywalls), falls back
+  to direct HTML parsing of Open Graph (`og:description`) and standard meta description tags.
+- Bounded Memory: Truncates parsed text to `MAX_TEXT_CHARS` to protect downstream tokenizers.
 """
 
 from __future__ import annotations
