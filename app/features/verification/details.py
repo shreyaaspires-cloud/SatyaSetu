@@ -12,6 +12,11 @@ percentages, years) from claim and evidence text, then detects conflicts:
 
 Negation handling is separate: when only one side carries a negation word,
 the item is treated as opposite-polarity evidence (REFUTES), not a mismatch.
+
+Engineering Invariants:
+- High-Precision Entity Parsing: Prevents superficial semantic similarity from causing false verifications.
+- Unit-Aware Number Matching: Pairs quantities with dimensions (currency, time, geography).
+- Multi-lingual direction vocabulary support (English + Hindi transliterations).
 """
 
 from __future__ import annotations
