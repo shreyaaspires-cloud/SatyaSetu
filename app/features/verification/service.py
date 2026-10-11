@@ -1,8 +1,18 @@
 """
-Claim verification service (Wave 6).
+Claim verification service (Wave 6 / PRD §6 FR-04, FR-05, FR-06).
 
-Orchestrates retrieval + stance scoring + verdict aggregation for a single claim,
-returning a fully populated ClaimResult contract object.
+Orchestrates multi-stage factual verification for incoming assertions:
+1. Dynamic LRU Claim Cache: Sub-millisecond hit for identical claims verified recently.
+2. Fast-Path Pre-Verified Claim Bank: Zero-latency resolution of viral hoaxes.
+3. Multi-Source Evidence Retrieval: Fan-out retrieval across IFCN, Government, and Web sources.
+4. Deterministic Stance Scoring: Rule-based polarity, entity alignment, and tier-weighted consensus.
+5. Multi-Pass LLM Arbitration:
+   - Pass 1: Gemini holistic reasoning over retrieved snippets (guarded by tier-strength checks).
+   - Pass 2: Parametric knowledge-base verification when live web evidence is inconclusive.
+
+Latency & Safety SLA:
+- Enforces time budgets per claim to stay well within WhatsApp response constraints.
+- Sanitizes PII before sending claims to external foundation models.
 """
 
 from __future__ import annotations
