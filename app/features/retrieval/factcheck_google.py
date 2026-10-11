@@ -1,12 +1,22 @@
 """
 Google Fact Check Tools API retriever.
+
 Queries published fact checks from IFCN signatories and reputable journalists.
-Enforces timeout, HTTP status checks, tenacity retry, and D10 fixes.
+Enforces timeout, HTTP status checks, tenacity retry, and token similarity relevance filtering.
+
+Design & Algorithmic Notes:
+- Lexical Similarity Gating: Computes Dice coefficient and overlap coefficient over
+  stemmed content tokens (excluding stopwords).
+- Relevance Thresholding: Claims scoring below `settings.factcheck_min_match` are demoted
+  to Tier 5 (capped at score 0.3 with NEUTRAL stance) to prevent false-positive claim binding.
+- Redaction & SSRF Defense: Strips PII prior to query dispatch and validates returned URLs
+  via `is_public_http_url`.
 """
 
 from __future__ import annotations
 
 import logging
+import re
 from typing import List
 from urllib.parse import urlparse
 
@@ -20,8 +30,6 @@ from app.core.redaction import redact_for_external
 from app.core.security import is_public_http_url
 from app.features.retrieval.ratings import normalize_rating
 from app.features.retrieval.sources import classify_domain
-
-import re
 
 logger = logging.getLogger(__name__)
 
