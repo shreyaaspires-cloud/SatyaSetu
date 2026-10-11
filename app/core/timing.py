@@ -9,6 +9,8 @@ from typing import Optional
 class StageTimer:
     """
     Context manager for measuring stage latency in milliseconds.
+    Uses time.perf_counter() for high-resolution monotonic clock precision,
+    unaffected by system clock adjustments.
 
     Usage:
         with StageTimer("retrieval") as timer:
