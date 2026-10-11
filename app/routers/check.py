@@ -1,7 +1,18 @@
 """
 API Check endpoint & Web demo interface.
-Provides POST /api/check, POST /api/ocr, POST /api/pdf, GET /api/demo/config,
-and serves the WhatsApp Web Desktop Demo.
+
+Provides:
+- POST /api/check: Synchronous claim verification through the complete multi-stage pipeline.
+- POST /api/ocr: Tesseract/EasyOCR fallback image text extraction.
+- POST /api/voice: Whisper ASR with in-memory WAV decoding and tempfile fallbacks.
+- POST /api/pdf: Hybrid text extraction (pdfplumber + OCR).
+- GET /api/demo/config: Localized copy, verdict configurations, and supported languages.
+- Web routes serving the interactive WhatsApp Web emulator.
+
+Architecture & Security:
+- Serves as the primary HTTP ingestion gateway for non-Twilio clients (web, extensions).
+- Memory-safe buffering of uploaded files with immediate cleanup of temp files.
+- Decouples raw ingestion models from downstream structured API responses.
 """
 
 from __future__ import annotations
@@ -33,6 +44,7 @@ router = APIRouter(tags=["check"])
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent.parent
 STATIC_DIR = WORKSPACE_ROOT / "static"
 WEB_DIR = WORKSPACE_ROOT / "web" / "whatsapp"
+
 
 
 def _read_html_page(filename: str, fallback_title: str) -> str:
