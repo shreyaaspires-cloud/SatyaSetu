@@ -1,13 +1,19 @@
 """
-WhatsApp webhook router (Wave 8).
+WhatsApp webhook router (Wave 8 / PRD §6 FR-08, FR-09).
 
 Handles POST /webhook/twilio — the Twilio WhatsApp inbound message endpoint.
 
-Security:
-  - Optional Twilio signature validation (settings.require_twilio_signature)
-  - Per-sender rate limiting (in-memory, configurable)
-  - PII redacted from all log lines (from_number hashed before logging)
-  - Request IDs attached to all log statements for traceability
+Architectural Rationale & Failure Mode Defenses:
+- Immediate TwiML ACK: Responds within 2 seconds with an acknowledgement TwiML
+  to prevent Twilio timeout retries (Twilio times out at 15s).
+- Background Pipeline Execution: Heavy NLP/Retrieval/LLM pipeline runs asynchronously
+  in a dedicated worker thread, dispatching the final verdict via the Twilio REST API.
+- Message Deduplication: In-memory sliding window keyed on `MessageSid` drops duplicate
+  deliveries caused by carrier network retries or transient cellular reconnections.
+- Sliding Window Rate Limiting: Keyed on HMAC-SHA256 hashed sender numbers, preserving
+  user privacy while throttling high-frequency flooding (FR-08).
+- HTTP 200 Safety Guarantee: Rate-limited and error responses return HTTP 200 with user-facing
+  warning copy, preventing aggressive webhook retry storms by Twilio.
 """
 
 from __future__ import annotations
