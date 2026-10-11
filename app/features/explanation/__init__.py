@@ -1,6 +1,10 @@
 """
 Explanation feature package.
-Exports the main public API: generate_explanation and format_whatsapp_reply.
+
+Generates human-readable WhatsApp replies from structured ClaimResult objects:
+- `generate_explanation`: Constructs natural-language summaries using Gemini/templates.
+- `format_whatsapp_reply`: Applies emoji badges, verdict labels, evidence citations,
+  and language-specific formatting to produce the final user-facing message.
 """
 
 from app.features.explanation.generator import generate_explanation
