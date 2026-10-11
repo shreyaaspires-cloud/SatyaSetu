@@ -485,33 +485,10 @@ async def generate_report_pdf(req: PDFReportRequest):
 
 # ── Frontend Web Routes ─────────────────────────────────────────────────────────
 
-@router.get("/", response_class=HTMLResponse, summary="SatyaSetu Landing Portal")
-def landing_page() -> str:
-    """SatyaSetu Main Landing Page."""
-    return _read_html_page("index.html", "SatyaSetu — AI Fact-Checking Portal")
-
-
-@router.get("/check", response_class=HTMLResponse, summary="Check Your Message Screen")
-def check_page() -> str:
-    """Check Your Message Multimodal Submission Page."""
-    return _read_html_page("check.html", "SatyaSetu — Check Your Message")
-
-
-@router.get("/processing", response_class=HTMLResponse, summary="Verification Processing Screen")
-def processing_page() -> str:
-    """Verification Processing Screen."""
-    return _read_html_page("processing.html", "SatyaSetu — Verifying Claim")
-
-
-@router.get("/result", response_class=HTMLResponse, summary="Fact-Check Result Screen")
-def result_page() -> str:
-    """Fact-Check Result Screen."""
-    return _read_html_page("result.html", "SatyaSetu — Fact-Check Result")
-
-
+@router.get("/", response_class=HTMLResponse, summary="WhatsApp Web AI Fact-Checking Screen")
 @router.get("/whatsapp", response_class=HTMLResponse, summary="WhatsApp Web AI Fact-Checking Screen")
 @router.get("/demo", response_class=HTMLResponse, summary="WhatsApp Web AI Fact-Checking Demo Screen")
-def whatsapp_demo_page() -> str:
+def whatsapp_portal_page() -> str:
     """Realistic WhatsApp Web Desktop Screen with SatyaSetu AI Bot."""
     return _read_html_page("whatsapp.html", "SatyaSetu — WhatsApp Web AI Fact-Checking Bot")
 

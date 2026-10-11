@@ -25,37 +25,13 @@ def client():
     return TestClient(app)
 
 
-def test_landing_screen_served(client):
-    """GET / should serve the main portal landing screen."""
+def test_root_screen_serves_whatsapp_portal(client):
+    """GET / should directly serve the WhatsApp Web AI portal."""
     resp = client.get("/")
     assert resp.status_code == 200
     assert "text/html" in resp.headers["content-type"]
-    assert "SatyaSetu" in resp.text
-    assert "hero-input" in resp.text
-
-
-def test_check_screen_served(client):
-    """GET /check should serve the message submission screen."""
-    resp = client.get("/check")
-    assert resp.status_code == 200
-    assert "text/html" in resp.headers["content-type"]
-    assert "message-input" in resp.text
-
-
-def test_processing_screen_served(client):
-    """GET /processing should serve the verification progress screen."""
-    resp = client.get("/processing")
-    assert resp.status_code == 200
-    assert "text/html" in resp.headers["content-type"]
-    assert "Verifying" in resp.text or "SatyaSetu" in resp.text
-
-
-def test_result_screen_served(client):
-    """GET /result should serve the comprehensive fact-check report screen."""
-    resp = client.get("/result")
-    assert resp.status_code == 200
-    assert "text/html" in resp.headers["content-type"]
-    assert "verdict-heading" in resp.text
+    assert "chat-input" in resp.text
+    assert "SatyaSetu Bot" in resp.text
 
 
 def test_whatsapp_screen_served(client):
