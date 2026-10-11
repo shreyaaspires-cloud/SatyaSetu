@@ -18,6 +18,10 @@ class RedactionFilter(logging.Filter):
     """
     Logging filter that sanitizes log records by redacting phone numbers,
     emails, and sensitive digit runs from log messages.
+
+    Invariants:
+    - Contextvars Propagation: Associates async request_id with log record for distributed tracing.
+    - Argument Scrubbing: Sanitizes both msg templates and interpolated format args.
     """
 
     def filter(self, record: logging.LogRecord) -> bool:
