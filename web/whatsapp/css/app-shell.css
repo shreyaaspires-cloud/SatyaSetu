@@ -1,0 +1,131 @@
+/**
+ * app-shell.css - Main layout structure, desktop window bar, and navigation rail
+ */
+
+.app-window {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--wa-bg-deep);
+  overflow: hidden;
+}
+
+/* Desktop Window Bar */
+.window-header {
+  height: 38px;
+  background-color: var(--wa-bg-panel);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--wa-border);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.window-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--wa-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.window-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--wa-text-secondary);
+}
+
+.win-btn {
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 4px;
+  transition: color var(--transition-fast);
+}
+
+.win-btn:hover {
+  color: var(--wa-text-primary);
+}
+
+/* Main Split Container */
+.main-container {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 38px);
+  overflow: hidden;
+}
+
+/* Far-Left Vertical Icon Rail */
+.side-rail {
+  width: 58px;
+  background-color: var(--wa-bg-panel);
+  border-right: 1px solid var(--wa-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  flex-shrink: 0;
+}
+
+.rail-top, .rail-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.rail-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wa-text-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.rail-btn:hover {
+  background-color: var(--wa-hover);
+  color: var(--wa-text-primary);
+}
+
+.rail-btn.active {
+  background-color: var(--wa-active);
+  color: var(--wa-green);
+}
+
+.rail-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background-color: var(--wa-badge);
+  color: #111b21;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 5px;
+  line-height: 1.2;
+}
+
+/* Responsive Mobile Layout */
+@media (max-width: 768px) {
+  .window-header {
+    display: none;
+  }
+  .main-container {
+    height: 100vh;
+  }
+  .side-rail {
+    display: none;
+  }
+}

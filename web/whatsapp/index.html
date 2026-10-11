@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Web · SatyaSetu AI Bot</title>
+  <link rel="stylesheet" href="/web/whatsapp/css/tokens.css">
+  <link rel="stylesheet" href="/web/whatsapp/css/base.css">
+  <link rel="stylesheet" href="/web/whatsapp/css/app-shell.css">
+  <link rel="stylesheet" href="/web/whatsapp/css/sidebar.css">
+  <link rel="stylesheet" href="/web/whatsapp/css/chat-header.css">
+  <link rel="stylesheet" href="/web/whatsapp/css/messages.css">
+  <link rel="stylesheet" href="/web/whatsapp/css/composer.css">
+  <link rel="stylesheet" href="/web/whatsapp/css/menus.css">
+  <link rel="stylesheet" href="/web/whatsapp/css/modals.css">
+  <link rel="stylesheet" href="/web/whatsapp/css/presenter.css">
+</head>
+<body>
+
+  <div class="app-window">
+    <!-- Desktop Window Header -->
+    <header class="window-header">
+      <div class="window-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--wa-green)"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.46-4.45-9.92-9.91-9.92z"/></svg>
+        <span>WhatsApp Web · SatyaSetu Bot Edition</span>
+      </div>
+      <div class="window-controls">
+        <span class="win-btn" title="Presenter Mode (Ctrl+Shift+D)" id="presenterToolbarBtn">🔍 Presenter</span>
+        <span class="win-btn" title="Minimize">─</span>
+        <span class="win-btn" title="Maximize">□</span>
+        <span class="win-btn" title="Close">✕</span>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+      <!-- Left Navigation Rail -->
+      <nav class="side-rail" aria-label="WhatsApp Navigation">
+        <div class="rail-top">
+          <button class="rail-btn active" title="Chats" aria-label="Chats">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            <span class="rail-badge">3</span>
+          </button>
+          <button class="rail-btn" title="Status" aria-label="Status">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+          </button>
+          <button class="rail-btn" title="Channels" aria-label="Channels">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
+          </button>
+          <button class="rail-btn" title="Communities" aria-label="Communities">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 3s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          </button>
+        </div>
+        <div class="rail-bottom">
+          <button class="rail-btn" title="Toggle Theme" id="themeToggleBtn" aria-label="Toggle Theme">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+          </button>
+          <button class="rail-btn" title="Settings" aria-label="Settings">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Sidebar: Chats & Filter -->
+      <aside class="chats-sidebar">
+        <div class="sidebar-header">
+          <h1 class="sidebar-title">Chats</h1>
+          <div class="sidebar-actions">
+            <button class="icon-action-btn" title="New Chat" aria-label="New Chat">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
+            <button class="icon-action-btn" title="Menu" aria-label="Menu">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-section">
+          <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="chatSearch" class="search-input" placeholder="Search or start new chat" autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="filter-chips">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="unread">Unread</button>
+          <button class="chip" data-filter="favourites">Favourites</button>
+          <button class="chip" data-filter="groups">Groups</button>
+        </div>
+
+        <!-- Contacts / Conversations List -->
+        <div class="contacts-list" id="contactsList">
+          <!-- Populated dynamically by main.js -->
+        </div>
+      </aside>
+
+      <!-- Main Active Chat Area -->
+      <main class="chat-area">
+        <!-- Active Chat Header -->
+        <header class="chat-header">
+          <div class="chat-header-info">
+            <button class="mobile-back-btn" id="mobileBackBtn" aria-label="Back to chats">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="chat-header-avatar" id="headerAvatar">🛡️</div>
+            <div class="chat-header-meta">
+              <div class="chat-header-name" id="headerTitle">SatyaSetu</div>
+              <div class="chat-header-sub" id="headerSub">Official Business Account · AI Fact Checker</div>
+            </div>
+          </div>
+          <div class="chat-header-actions">
+            <button class="icon-action-btn" title="Search in chat" aria-label="Search chat">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+            <button class="icon-action-btn" title="More options" aria-label="Options">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Message Stream -->
+        <section class="messages-stream" id="messagesStream" aria-live="polite">
+          <!-- Populated dynamically by main.js -->
+        </section>
+
+        <!-- Typing Indicator Bubble Container -->
+        <div class="typing-container" id="typingIndicatorContainer">
+          <div class="typing-bubble">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+
+        <!-- Composer Input Area -->
+        <footer class="chat-composer">
+          <!-- Attachment Toggle -->
+          <button class="composer-btn" id="attachBtn" title="Attach file" aria-label="Attach file">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 0 1 5 0v10.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5V6H9v9.5a3 3 0 0 0 6 0V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
+          </button>
+
+          <!-- Input Field with contract & test support -->
+          <div class="composer-input-wrapper chat-input">
+            <input type="text" id="messageInput" class="composer-input chat-input" placeholder="Type a message or paste viral claim..." autocomplete="off">
+          </div>
+
+          <!-- Action Button: Mic or Send -->
+          <button class="composer-action-btn" id="composerActionBtn" title="Send or Voice Note" aria-label="Send message">
+            <svg class="mic-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg>
+            <svg class="send-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+
+          <!-- Hidden Upload Handlers -->
+          <input type="file" id="imageUploadInput" accept="image/*" style="display:none;">
+          <input type="file" id="docUploadInput" accept=".pdf,.doc,.docx" style="display:none;">
+        </footer>
+
+        <!-- Attachment Menu Popup -->
+        <div class="attachment-popup" id="attachmentPopup">
+          <div class="attachment-item" onclick="document.getElementById('imageUploadInput').click()">
+            <div class="attachment-icon" style="background:#bf59cf;">🖼️</div>
+            <span>Photos & Videos</span>
+          </div>
+          <div class="attachment-item" onclick="document.getElementById('docUploadInput').click()">
+            <div class="attachment-icon" style="background:#5157ae;">📄</div>
+            <span>Document / Circular PDF</span>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Message Context Menu -->
+  <div class="dropdown-menu" id="messageContextMenu">
+    <div class="menu-item context-action-item" data-action="forward">↪ Forward</div>
+    <div class="menu-item context-action-item" data-action="reply">💬 Reply</div>
+    <div class="menu-item context-action-item" data-action="copy">📋 Copy</div>
+    <div class="menu-item context-action-item" data-action="star">⭐ Star</div>
+    <div class="menu-item danger context-action-item" data-action="delete">🗑️ Delete</div>
+  </div>
+
+  <!-- Forward Modal Dialog -->
+  <div class="modal-backdrop" id="forwardModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title">Forward message to</span>
+        <button class="modal-close-btn" id="forwardCloseBtn" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="forward-preview">
+        <div class="forward-preview-label">SELECTED MESSAGE:</div>
+        <div class="forward-preview-text" id="forwardMsgPreview"></div>
+      </div>
+
+      <div class="forward-target-list">
+        <!-- SatyaSetu AI Bot (Featured Top Target) -->
+        <div class="forward-target-item bot-target" data-target="bot">
+          <div class="forward-target-avatar" style="background:#00a884;">🛡️</div>
+          <div>
+            <div class="forward-target-name">SatyaSetu</div>
+            <div class="forward-target-sub" style="color:#34d399;">Business Account · AI Fact-Check Bot</div>
+          </div>
+          <span class="forward-btn-pill">Forward & Check</span>
+        </div>
+
+        <!-- Fictional Chats -->
+        <div class="forward-target-item" data-target="sharma">
+          <div class="forward-target-avatar" style="background:#0f766e;">🏠</div>
+          <div>
+            <div class="forward-target-name">Sharma Parivar 🏠</div>
+            <div class="forward-target-sub">Family Group</div>
+          </div>
+        </div>
+
+        <div class="forward-target-item" data-target="rishtedar">
+          <div class="forward-target-avatar" style="background:#b45309;">👨‍👩‍👧‍👦</div>
+          <div>
+            <div class="forward-target-name">Rishtedar Mandali 👨‍👩‍👧‍👦</div>
+            <div class="forward-target-sub">Relatives Group</div>
+          </div>
+        </div>
+
+        <div class="forward-target-item" data-target="society">
+          <div class="forward-target-avatar" style="background:#334155;">🏢</div>
+          <div>
+            <div class="forward-target-name">Shanti Nagar Society 🏢</div>
+            <div class="forward-target-sub">Housing Society</div>
+          </div>
+        </div>
+
+        <div class="forward-target-item" data-target="friends">
+          <div class="forward-target-avatar" style="background:#701a75;">🎒</div>
+          <div>
+            <div class="forward-target-name">Old School Gang 🎒</div>
+            <div class="forward-target-sub">Friends Group</div>
+          </div>
+        </div>
+
+        <div class="forward-target-item" data-target="mummy">
+          <div class="forward-target-avatar" style="background:#be185d;">❤️</div>
+          <div>
+            <div class="forward-target-name">Mummy ❤️</div>
+            <div class="forward-target-sub">Personal Contact</div>
+          </div>
+        </div>
+
+        <div class="forward-target-item" data-target="papa">
+          <div class="forward-target-avatar" style="background:#1d4ed8;">👔</div>
+          <div>
+            <div class="forward-target-name">Papa 👔</div>
+            <div class="forward-target-sub">Personal Contact</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Presenter Inspection Panel (Ctrl+Shift+D) -->
+  <aside class="presenter-panel" id="presenterPanel" aria-label="Presenter Evaluation Panel">
+    <div class="presenter-header">
+      <div class="presenter-title">
+        <span>🛡️</span> SatyaSetu Telemetry & Inspector
+      </div>
+      <div>
+        <button class="win-btn" id="presenterCopyBtn" title="Copy JSON">📋 Copy</button>
+        <button class="win-btn" id="presenterCloseBtn" title="Close Panel">✕</button>
+      </div>
+    </div>
+    <div class="presenter-meta-bar">
+      <div class="presenter-meta-item">
+        <span class="presenter-meta-label">Verdict</span>
+        <span class="presenter-meta-value" id="presenterVerdict">IDLE</span>
+      </div>
+      <div class="presenter-meta-item">
+        <span class="presenter-meta-label">Strength</span>
+        <span class="presenter-meta-value" id="presenterStrength">N/A</span>
+      </div>
+      <div class="presenter-meta-item">
+        <span class="presenter-meta-label">Latency</span>
+        <span class="presenter-meta-value" id="presenterLatency">0 ms</span>
+      </div>
+    </div>
+    <div class="presenter-body">
+      <pre class="presenter-json-pre" id="presenterJson">// Press Ctrl+Shift+D to toggle anytime.</pre>
+    </div>
+    <div class="presenter-footer">
+      <span>ADR-007 Strict Enums</span>
+      <span class="presenter-shortcut-hint">Toggle: Ctrl+Shift+D</span>
+    </div>
+  </aside>
+
+  <!-- Presenter Toolbar Button Listener & Theme Toggle -->
+  <script>
+    document.getElementById("presenterToolbarBtn")?.addEventListener("click", () => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "D", ctrlKey: true, shiftKey: true }));
+    });
+    document.getElementById("themeToggleBtn")?.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme");
+      document.documentElement.setAttribute("data-theme", current === "light" ? "dark" : "light");
+    });
+  </script>
+
+  <!-- ES Module Application Main Entry -->
+  <script type="module" src="/web/whatsapp/js/main.js"></script>
+</body>
+</html>

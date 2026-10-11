@@ -136,6 +136,7 @@ _ip_rate_lock = Lock()
 # Exempt paths: never rate-limited (static assets, health checks, API docs)
 _RATE_LIMIT_EXEMPT_PREFIXES = (
     "/static",
+    "/web",
     "/health",
     "/docs",
     "/redoc",
@@ -246,10 +247,15 @@ def create_app() -> FastAPI:
             },
         )
 
-    # ── Static files ─────────────────────────────────────────────────────────
-    static_path = Path(__file__).resolve().parent.parent / "static"
+    # ── Static files & Web UI ────────────────────────────────────────────────
+    root_path = Path(__file__).resolve().parent.parent
+    static_path = root_path / "static"
     if static_path.exists():
         _app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+
+    web_path = root_path / "web"
+    if web_path.exists():
+        _app.mount("/web", StaticFiles(directory=str(web_path)), name="web")
 
     # ── Router registration ──────────────────────────────────────────────────
     from app.routers.check import router as check_router      # noqa: E402

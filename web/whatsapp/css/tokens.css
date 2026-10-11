@@ -1,0 +1,72 @@
+/**
+ * tokens.css - Design Tokens for SatyaSetu WhatsApp Web
+ * Modern dark-first theme with light-mode token definitions.
+ */
+
+:root {
+  /* WhatsApp Dark Theme Palette */
+  --wa-bg-deep: #111b21;
+  --wa-bg-panel: #202c33;
+  --wa-bg-chat: #0b141a;
+  --wa-bg-input: #2a3942;
+  --wa-bg-incoming: #202c33;
+  --wa-bg-outgoing: #005c4b;
+  --wa-green: #00a884;
+  --wa-green-hover: #029071;
+  --wa-green-light: #25d366;
+  --wa-teal: #0d3930;
+  --wa-text-primary: #e9edef;
+  --wa-text-secondary: #8696a0;
+  --wa-text-muted: #667781;
+  --wa-border: #222d34;
+  --wa-hover: #222e35;
+  --wa-active: #2a3942;
+  --wa-badge: #25d366;
+  --wa-quote-bg: rgba(0, 0, 0, 0.25);
+  --wa-link: #53bdeb;
+
+  /* Status Colors */
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-success: #10b981;
+  --color-info: #3b82f6;
+
+  /* Typography */
+  --font-system: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+
+  /* Sizing & Transitions */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+
+  /* Presenter Panel */
+  --presenter-bg: rgba(17, 27, 33, 0.95);
+  --presenter-border: #2a3942;
+}
+
+[data-theme="light"] {
+  --wa-bg-deep: #f0f2f5;
+  --wa-bg-panel: #ffffff;
+  --wa-bg-chat: #efeae2;
+  --wa-bg-input: #ffffff;
+  --wa-bg-incoming: #ffffff;
+  --wa-bg-outgoing: #d9fdd3;
+  --wa-green: #00a884;
+  --wa-green-hover: #029071;
+  --wa-green-light: #25d366;
+  --wa-teal: #e7f7f3;
+  --wa-text-primary: #111b21;
+  --wa-text-secondary: #667781;
+  --wa-text-muted: #8696a0;
+  --wa-border: #e9edef;
+  --wa-hover: #f5f6f6;
+  --wa-active: #eaebee;
+  --wa-badge: #25d366;
+  --wa-quote-bg: rgba(0, 0, 0, 0.05);
+  --wa-link: #027eb5;
+  --presenter-bg: rgba(255, 255, 255, 0.97);
+  --presenter-border: #d1d7db;
+}

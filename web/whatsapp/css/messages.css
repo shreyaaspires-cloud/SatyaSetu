@@ -1,0 +1,257 @@
+/**
+ * messages.css - Message Stream, Chat Bubbles, Quotes, and Typing Indicator
+ */
+
+.messages-stream {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background-color: var(--wa-bg-chat);
+  background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Date & Encryption Pills */
+.date-pill, .encryption-pill {
+  align-self: center;
+  background-color: var(--wa-bg-panel);
+  color: var(--wa-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: var(--radius-md);
+  margin: 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.encryption-pill {
+  max-width: 480px;
+  text-align: center;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #f7ca5d;
+  background-color: rgba(32, 44, 51, 0.9);
+  text-transform: none;
+  letter-spacing: normal;
+  border-radius: 8px;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Message Rows & Bubbles */
+.msg-row {
+  display: flex;
+  width: 100%;
+}
+
+.msg-row.incoming {
+  justify-content: flex-start;
+}
+
+.msg-row.outgoing {
+  justify-content: flex-end;
+}
+
+.msg-bubble {
+  max-width: 65%;
+  min-width: 120px;
+  padding: 6px 10px 6px 10px;
+  border-radius: 8px;
+  font-size: 14.2px;
+  line-height: 1.45;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.incoming .msg-bubble {
+  background-color: var(--wa-bg-incoming);
+  color: var(--wa-text-primary);
+  border-top-left-radius: 0;
+}
+
+.outgoing .msg-bubble {
+  background-color: var(--wa-bg-outgoing);
+  color: var(--wa-text-primary);
+  border-top-right-radius: 0;
+}
+
+/* Sender Name in Groups */
+.msg-sender {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #35a79c;
+  margin-bottom: 2px;
+}
+
+/* Quoted Messages */
+.msg-quoted {
+  background-color: var(--wa-quote-bg);
+  border-left: 4px solid var(--wa-green);
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  color: var(--wa-text-secondary);
+}
+
+.msg-quoted-title {
+  font-weight: 600;
+  color: var(--wa-text-primary);
+  margin-bottom: 2px;
+}
+
+/* Forward Header */
+.msg-forward-header {
+  font-size: 11px;
+  color: var(--wa-text-secondary);
+  font-style: italic;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Metadata (Time & Ticks) */
+.msg-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--wa-text-secondary);
+  margin-top: 2px;
+  float: right;
+  margin-left: 12px;
+  user-select: none;
+}
+
+.msg-ticks {
+  color: #53bdeb;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Hover Action Icons */
+.msg-hover-actions {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  display: none;
+  background: var(--wa-bg-incoming);
+  border-radius: 12px;
+  padding: 2px 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  gap: 4px;
+  z-index: 5;
+}
+
+.outgoing .msg-hover-actions {
+  background: var(--wa-bg-outgoing);
+}
+
+.msg-bubble:hover .msg-hover-actions {
+  display: flex;
+}
+
+.msg-action-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wa-text-secondary);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: color var(--transition-fast);
+}
+
+.msg-action-icon:hover {
+  color: var(--wa-text-primary);
+}
+
+/* Typing Indicator */
+.typing-container {
+  display: none;
+  align-self: flex-start;
+  margin-bottom: 4px;
+}
+
+.typing-bubble {
+  background-color: var(--wa-bg-incoming);
+  border-radius: 18px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  background-color: var(--wa-text-secondary);
+  border-radius: 50%;
+  animation: typing-bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+.typing-dot:nth-child(3) { animation-delay: 0s; }
+
+@keyframes typing-bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* System Error & Retry */
+.msg-retry-btn {
+  background: var(--wa-bg-input);
+  border: 1px solid var(--wa-text-secondary);
+  color: var(--wa-text-primary);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  cursor: pointer;
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background var(--transition-fast);
+}
+
+.msg-retry-btn:hover {
+  background: var(--wa-hover);
+}
+
+/* Footer disclaimer */
+.simulated-disclaimer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--wa-text-secondary);
+  padding: 12px 16px;
+  user-select: none;
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .msg-bubble {
+    max-width: 85%;
+  }
+}

@@ -1,0 +1,85 @@
+/**
+ * composer.css - Message Input Bar, Send/Mic Controls, and Attachment Buttons
+ */
+
+.chat-composer {
+  min-height: 62px;
+  background-color: var(--wa-bg-panel);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  border-top: 1px solid var(--wa-border);
+  flex-shrink: 0;
+}
+
+.composer-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wa-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.composer-btn:hover {
+  color: var(--wa-text-primary);
+  background-color: var(--wa-hover);
+}
+
+.composer-input-wrapper {
+  flex: 1;
+  background-color: var(--wa-bg-input);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+}
+
+.composer-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--wa-text-primary);
+  font-size: 14.5px;
+  line-height: 20px;
+}
+
+.composer-input::placeholder {
+  color: var(--wa-text-secondary);
+}
+
+/* Mic / Send Action Button */
+.composer-action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wa-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.composer-action-btn.has-text {
+  background-color: var(--wa-green);
+  color: #111b21;
+}
+
+.composer-action-btn.has-text:hover {
+  background-color: var(--wa-green-hover);
+}
+
+.composer-action-btn.recording {
+  color: var(--color-danger);
+  background: rgba(239, 68, 68, 0.25);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+}

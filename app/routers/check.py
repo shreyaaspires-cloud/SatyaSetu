@@ -29,9 +29,10 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["check"])
 
-# Locate static folder at workspace root
-STATIC_DIR = Path(__file__).resolve().parent.parent.parent / "static"
-
+# Locate static and web directories at workspace root
+WORKSPACE_ROOT = Path(__file__).resolve().parent.parent.parent
+STATIC_DIR = WORKSPACE_ROOT / "static"
+WEB_DIR = WORKSPACE_ROOT / "web" / "whatsapp"
 
 
 def _read_html_page(filename: str, fallback_title: str) -> str:
@@ -42,6 +43,16 @@ def _read_html_page(filename: str, fallback_title: str) -> str:
         except Exception as exc:
             logger.error("Failed to read static/%s: %s", filename, exc)
     return f"<!DOCTYPE html><html><head><title>{fallback_title}</title></head><body><h1>{fallback_title}</h1><p>Static file {filename} is loading...</p></body></html>"
+
+
+def _read_whatsapp_page() -> str:
+    index_path = WEB_DIR / "index.html"
+    if index_path.exists():
+        try:
+            return index_path.read_text(encoding="utf-8")
+        except Exception as exc:
+            logger.error("Failed to read web/whatsapp/index.html: %s", exc)
+    return _read_html_page("whatsapp.html", "SatyaSetu — WhatsApp Web AI Fact-Checking Bot")
 
 
 @router.post("/api/check", response_model=CheckAPIResponse, summary="Verify claim JSON endpoint")
@@ -229,7 +240,7 @@ async def pdf_endpoint(file: UploadFile = File(...)):
 @router.get("/demo", response_class=HTMLResponse, summary="WhatsApp Web AI Fact-Checking Demo Screen")
 def whatsapp_portal_page() -> str:
     """Realistic WhatsApp Web Desktop Screen with SatyaSetu AI Bot."""
-    return _read_html_page("whatsapp.html", "SatyaSetu — WhatsApp Web AI Fact-Checking Bot")
+    return _read_whatsapp_page()
 
 
 @router.get("/api/demo/config", summary="Demo configuration & bot message strings")
