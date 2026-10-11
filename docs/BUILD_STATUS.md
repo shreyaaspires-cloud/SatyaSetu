@@ -1,7 +1,7 @@
 # SatyaSetu Build Status and Verification Record
 
 Single source of truth for implementation state, capabilities, and hackathon presentation.
-Last updated: Wave 10 completion.
+Last updated: Phase 2 cleanup (11 October 2026). Tests: 227 passing.
 
 ## 1. Project Identity and Context
 - **Project Name:** SatyaSetu
@@ -28,23 +28,24 @@ Last updated: Wave 10 completion.
 | Phase 10: Presentation and Demo Hardening | In Progress | Refactor & Rebuild Plan v2 | Clean WhatsApp Web demo, native ES modules, fictional seed chats |
 
 ## 3. Verified Metrics (Measured Only, No Invented Statistics)
-- **Unit, Integration, and Abuse Test Suites:** **237 tests collected** (234 passing baseline)
-  - 8 Characterisation (`test_characterisation.py`)
-  - 12 Contracts & Core (`test_contracts.py`)
+- **Unit, Integration, and Abuse Test Suites:** **227 tests passing** (measured after Phase 2 cleanup, 11 Oct 2026)
+  - 11 Contracts & Core (`test_contracts.py`)
   - 29 SSRF Abuse Guard (`test_ssrf.py`)
-  - 7 Ingestion (`test_ingestion_detect.py`)
+  - 8 Ingestion (`test_ingestion_detect.py`)
   - 13 NLP Layer (`test_language.py`, `test_claims.py`, `test_worthiness.py`)
   - 13 Retrieval Layer (`test_retrieval.py`)
   - 12 Verification & Stance (`test_verification.py`)
-  - 12 Explanation & Formatting (`test_explanation.py`)
+  - 10 Explanation & Formatting (`test_explanation.py`)
   - 9 Pipeline Unit (`test_pipeline.py`)
   - 6 Integration Smoke (`test_smoke.py`)
   - 6 Rate Limit Abuse (`test_rate_limit.py`)
+  - 5 Claim Bank (`test_claim_bank.py`)
+  - 5 Screens/API Integration (`test_screens_integration.py`)
 - **End-to-End Latency:** ~1.2s for cached/offline/Wikipedia retrieval (1219ms backend pipeline)
 - **Security Audit:**
   - ✅ **Rate Limiting:** Dual-layer: IP-based sliding window (60 req/min, graceful 429s with `Retry-After: 60`) + Per-hashed-sender rate limiter for WhatsApp inbound webhook.
   - ✅ **Input Sanitization:** Schema-enforced Pydantic v2, HTML tag stripping, zero-width space removal, length bounding.
-  - ✅ **PII Protection:** Phone numbers SHA-256 hashed with salt before logging; regex-based `RedactionFilter` on all logging streams.
+  - ✅ **PII Protection:** Phone numbers SHA-256 hashed before logging; regex-based `RedactionFilter` on all logging streams.
   - ✅ **SSRF Protection:** Strict private IP / link-local / DNS rebinding / redirect guard via `safe_get`.
   - ✅ **Secret Management:** 100% environment-driven via `pydantic-settings`; no hardcoded API keys; secrets excluded from diagnostic endpoints.
   - ✅ **Twilio Webhook Response Timeout & Architecture:**

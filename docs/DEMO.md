@@ -9,13 +9,13 @@ This guide describes how judges and evaluators can verify claims using SatyaSetu
 For live evaluation and judges without access to the WhatsApp sandbox:
 1. Start the server:
    ```bash
-   uvicorn main:app --port 8000
+   uvicorn app.main:app --port 8000
    ```
 2. Open your browser and navigate to:
-   - **`http://localhost:8000/demo`** (or `http://localhost:8000/check`)
-3. Paste any forwarded claim or news snippet into the input area.
-4. Click **"Verify Claim"**.
-5. The UI displays the categorized verdict badge (`SUPPORTED`, `REFUTED`, `PARTIALLY_SUPPORTED`, `OUTDATED`, `UNVERIFIABLE`) and the formatted multilingual response preview.
+   - **`http://localhost:8000/`** or **`http://localhost:8000/demo`**
+3. Paste any forwarded claim or news snippet into the chat input.
+4. Click **Send** or press Enter.
+5. The UI shows a realistic bot acknowledgement, then the final verdict bubble: `SUPPORTED`, `REFUTED`, `MISLEADING`, `UNVERIFIABLE`.
 
 ---
 

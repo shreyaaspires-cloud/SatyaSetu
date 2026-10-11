@@ -5,7 +5,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
-[![Tests](https://img.shields.io/badge/Tests-183%20Passing-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-227%20Passing-brightgreen.svg)](tests/)
 [![Security](https://img.shields.io/badge/Security-OWASP%20Hardened-orange.svg)](app/core/security.py)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](Dockerfile)
 
@@ -27,7 +27,7 @@
   - **Trusted Web Search**: Domain-whitelisted search aggregator.
 - **⚖️ NLI Stance Detection & Credibility Scoring**:
   - Natural Language Inference (NLI) evaluating entailment, contradiction, and neutral stance.
-  - Multi-tier verdict scoring: `TRUE`, `MOSTLY_TRUE`, `MISLEADING`, `FALSE`, `UNVERIFIABLE`.
+  - Canonical ADR-007 verdict scoring: `SUPPORTED`, `REFUTED`, `MISLEADING`, `UNVERIFIABLE`.
 - **📱 WhatsApp-Native Formatting**:
   - Concise bulleted summaries, credibility bars, source links, and clear disclaimers formatted specifically for WhatsApp chat bubbles.
 - **🔒 Enterprise-Grade Security & OWASP Hardening**:
@@ -65,7 +65,8 @@ flowchart TD
 SATYASETU/
 ├── app/                               # Production Modular Application
 │   ├── contracts/                     # Canonical Pydantic schemas & enums
-│   │   └── models.py                  # Claim, Evidence, Verdict, VerificationResult
+│   │   ├── models.py                  # Claim, Evidence, Verdict, VerificationResult
+│   │   └── api.py                     # CheckAPIResponse, CheckRequest, OCRExtractResponse
 │   ├── core/                          # Core foundational utilities
 │   │   ├── config.py                  # Pydantic Settings & environment variables
 │   │   ├── logging.py                 # Structured logging
@@ -79,19 +80,23 @@ SATYASETU/
 │   │   ├── verification/              # NLI stance detection, credibility scoring & aggregation
 │   │   └── explanation/               # Plain-language generator & WhatsApp formatter
 │   ├── routers/                       # FastAPI route controllers
+│   │   ├── check.py                   # POST /api/check, POST /api/ocr, POST /api/pdf
 │   │   ├── health.py                  # GET /health probe
 │   │   └── webhook.py                 # POST /webhook/twilio endpoint
+│   ├── main.py                        # Central application factory (create_app)
 │   └── pipeline.py                    # Master orchestrator connecting all 5 stages
-├── legacy/                            # Archived pre-refactoring prototypes (Waves 1-3)
+├── static/                            # Lightweight Web Assets
+│   └── whatsapp.html                  # Standalone WhatsApp Web interface
+├── web/whatsapp/                      # Modular Native ES WhatsApp Web Frontend
 ├── scripts/
-│   └── demo_cli.py                    # Interactive standalone fact-checking CLI demo
-├── tests/                             # Comprehensive Automated Test Suite (183 Tests)
+│   ├── demo_cli.py                    # Interactive standalone fact-checking CLI demo
+│   └── precache_demo.py               # Demo cache warming script
+├── tests/                             # Comprehensive Automated Test Suite (227 Tests)
 │   ├── abuse/                         # Rate limiting & SSRF attack tests
-│   ├── fixtures/                      # Test sample payloads
+│   ├── fixtures/                      # Test sample payloads & golden claims
 │   ├── integration/                   # End-to-end integration and smoke tests
 │   └── unit/                          # Unit tests for contracts, NLP, retrieval, etc.
-├── app_main.py                        # Modern FastAPI application instance
-├── main.py                            # Unified application entry point
+├── main.py                            # Application entry point shim
 ├── Dockerfile                         # Production multi-stage Docker build
 ├── Procfile                           # Web dyno deployment specification
 └── requirements.txt                   # Production dependencies
@@ -133,13 +138,12 @@ Key variables:
 - `GEMINI_API_KEY`: (Optional) For advanced LLM summary generation.
 
 ### 4. Running the Web Server
-Launch the server using either entry point:
+Launch the unified server:
 ```bash
-uvicorn main:app --reload --port 8000
-# OR
-uvicorn app_main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8000
 ```
-Visit `http://localhost:8000/docs` for the interactive Swagger documentation.
+Visit `http://localhost:8000/demo` for the WhatsApp Web simulation interface and `http://localhost:8000/docs` for the interactive Swagger documentation.
+
 
 ---
 
@@ -184,11 +188,11 @@ _SatyaSetu — AI-powered multilingual fact checking_
 
 ## 🧪 Testing & Verification
 
-SatyaSetu comes with an automated test suite containing **183 tests** covering unit behavior, integration pipelines, abuse cases, and characterisation regression:
+SatyaSetu comes with an automated test suite containing **227 tests** covering unit behavior, integration pipelines, and abuse/security cases:
 
 ```bash
-# Run all 183 tests
-pytest tests/ -q
+# Run all 227 tests
+.venv/Scripts/pytest.exe tests/ -q
 
 # Run abuse and security tests
 pytest tests/abuse/ -v
