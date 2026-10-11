@@ -6,7 +6,10 @@ Produces a human-readable English explanation of the overall verdict by:
   2. Describing the most relevant supporting/refuting snippets.
   3. Optionally using Gemini to write a fluent 2-3 sentence summary.
 
-Falls back to a deterministic template if Gemini is unavailable.
+# Generation Strategy:
+#   1. Tier-1/2 official evidence priority (IFCN, PIB, WHO).
+#   2. High-sensitivity detection for medical/health misinformation keywords.
+#   3. Deterministic template fallback ensuring zero-failure offline mode.
 """
 
 from __future__ import annotations
