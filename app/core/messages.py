@@ -7,10 +7,11 @@ All user-visible text sent by the SatyaSetu bot via Twilio is defined here
 so that copy changes never require touching webhook logic, and the demo UI
 can fetch them via GET /api/demo/config.
 
-Rules:
-- No real personal names or real group names.
-- No invented verdicts or fake confidence values.
-- All strings are plain WhatsApp-safe text (no HTML, no markdown headers).
+# Rules:
+# - No real personal names or real group names.
+# - No invented verdicts or fake confidence values.
+# - All strings are plain WhatsApp-safe text (no HTML, no markdown headers).
+# - Single-source-of-truth: frontend demo and Twilio inbound bot share identical copy.
 """
 
 from __future__ import annotations
