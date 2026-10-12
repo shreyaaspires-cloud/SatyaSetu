@@ -29,6 +29,8 @@ class ASRResult(TypedDict):
     text: str
     language: str
     duration_seconds: float
+    status: str
+    error: str
 
 
 def is_ffmpeg_installed() -> bool:
@@ -63,19 +65,21 @@ def set_whisper_model(model: Any) -> None:
     _whisper_model = model
 
 
-def download_audio(url: str) -> bytes:
+def download_audio(url: str, max_bytes: int = MAX_FILE_BYTES) -> bytes:
     """
     Download audio with SSRF protection and isolated Twilio credentials.
-    Enforces a strict 2 MB limit.
+    Enforces a strict 2 MB limit via streaming.
     """
     auth = get_twilio_media_auth(url)
-    resp = safe_get(url, timeout=10, auth=auth)
+    resp = safe_get(url, timeout=10, auth=auth, stream=True)
     resp.raise_for_status()
 
-    content = resp.content
-    if len(content) > MAX_FILE_BYTES:
-        raise ValueError(f"Audio file too large: {len(content)} bytes (max {MAX_FILE_BYTES})")
-    return content
+    content = bytearray()
+    for chunk in resp.iter_content(chunk_size=65536):
+        content.extend(chunk)
+        if len(content) > max_bytes:
+            raise ValueError(f"Audio file too large: {len(content)} bytes (max {max_bytes})")
+    return bytes(content)
 
 
 def transcribe_audio(url: str, model: Optional[Any] = None) -> ASRResult:
@@ -86,12 +90,24 @@ def transcribe_audio(url: str, model: Optional[Any] = None) -> ASRResult:
     """
     if not is_ffmpeg_installed():
         logger.error("ffmpeg is not installed or not in PATH. Cannot transcribe audio.")
-        return ASRResult(text="", language="unknown", duration_seconds=0.0)
+        return ASRResult(
+            text="",
+            language="unknown",
+            duration_seconds=0.0,
+            status="no_ffmpeg",
+            error="Voice notes need ffmpeg on the server.",
+        )
 
     active_model = model or get_whisper_model()
     if active_model is None:
         logger.warning("Whisper model not loaded. Returning empty result.")
-        return ASRResult(text="", language="unknown", duration_seconds=0.0)
+        return ASRResult(
+            text="",
+            language="unknown",
+            duration_seconds=0.0,
+            status="model_unavailable",
+            error="Speech recognition model is currently unavailable.",
+        )
 
     tmp_path: Optional[str] = None
     try:
@@ -108,36 +124,50 @@ def transcribe_audio(url: str, model: Optional[Any] = None) -> ASRResult:
                     dur = frames / float(rate) if rate else 0.0
                     if dur > MAX_AUDIO_DURATION_SEC:
                         logger.warning("Audio duration %.1fs exceeds max %0.1fs. Rejecting.", dur, MAX_AUDIO_DURATION_SEC)
-                        return ASRResult(text="", language="unknown", duration_seconds=dur)
-            else:
-                try:
-                    from pydub import AudioSegment  # type: ignore
-                    seg = AudioSegment.from_file(io.BytesIO(audio_bytes))
-                    dur = len(seg) / 1000.0
-                    if dur > MAX_AUDIO_DURATION_SEC:
-                        logger.warning("Audio duration %.1fs exceeds max %0.1fs. Rejecting.", dur, MAX_AUDIO_DURATION_SEC)
-                        return ASRResult(text="", language="unknown", duration_seconds=dur)
-                except Exception:
-                    pass
+                        return ASRResult(
+                            text="",
+                            language="unknown",
+                            duration_seconds=dur,
+                            status="too_long",
+                            error=f"Audio duration exceeds maximum {int(MAX_AUDIO_DURATION_SEC)} seconds.",
+                        )
         except Exception as probe_err:
             logger.debug("Audio duration pre-check skipped: %s", probe_err)
 
-        with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as tmp:
+        suffix = ".ogg"
+        if audio_bytes.startswith(b"RIFF"):
+            suffix = ".wav"
+        elif audio_bytes.startswith(b"ID3") or audio_bytes.startswith(b"\xff\xfb"):
+            suffix = ".mp3"
+        elif audio_bytes.startswith(b"\x1a\x45\xdf\xa3"):
+            suffix = ".webm"
+
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
             tmp.write(audio_bytes)
             tmp_path = tmp.name
 
-        result = active_model.transcribe(tmp_path)
-        transcript = (result.get("text") or "").strip()
+        result = active_model.transcribe(tmp_path, fp16=False, condition_on_previous_text=False)
+
+        # Filter out hallucinated silence segments
+        valid_segments = []
+        for seg in result.get("segments") or []:
+            if seg.get("no_speech_prob", 0.0) > 0.6 and seg.get("avg_logprob", 0.0) < -1.0:
+                continue
+            valid_segments.append(seg.get("text", "").strip())
+
+        transcript = " ".join(s for s in valid_segments if s).strip()
         detected_lang = result.get("language") or "unknown"
 
         segments = result.get("segments") or []
         duration = float(segments[-1].get("end", 0.0)) if segments else 0.0
 
-        if duration > MAX_AUDIO_DURATION_SEC:
-            logger.warning(
-                "Audio duration (%.1fs) exceeds limit (%.1fs). Truncating.",
-                duration,
-                MAX_AUDIO_DURATION_SEC,
+        if not transcript:
+            return ASRResult(
+                text="",
+                language=detected_lang,
+                duration_seconds=round(duration, 2),
+                status="empty",
+                error="Could not detect speech in audio clip.",
             )
 
         logger.info(
@@ -150,10 +180,18 @@ def transcribe_audio(url: str, model: Optional[Any] = None) -> ASRResult:
             text=transcript,
             language=detected_lang,
             duration_seconds=round(duration, 2),
+            status="ok",
+            error="",
         )
     except Exception as exc:
         logger.error("Whisper transcription failed: %s", exc, exc_info=True)
-        return ASRResult(text="", language="unknown", duration_seconds=0.0)
+        return ASRResult(
+            text="",
+            language="unknown",
+            duration_seconds=0.0,
+            status="error",
+            error=str(exc),
+        )
     finally:
         if tmp_path and os.path.exists(tmp_path):
             try:

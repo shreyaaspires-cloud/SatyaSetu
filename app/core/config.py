@@ -91,10 +91,10 @@ class Settings(BaseSettings):
         description="Minimum relevance match score for Google Fact Check reviews (0.0 to 1.0)",
     )
 
-    # Web Search Provider (Brave or Tavily)
+    # Web Search Provider (google_news_rss, brave, or tavily)
     search_provider: str = Field(
-        default="brave",
-        description="Web search engine provider: 'brave' or 'tavily'",
+        default="google_news_rss",
+        description="Web search engine provider: 'google_news_rss', 'brave', or 'tavily'",
     )
     search_api_key: str = Field(
         default="",

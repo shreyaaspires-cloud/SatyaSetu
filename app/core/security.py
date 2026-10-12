@@ -133,11 +133,13 @@ def safe_get(
     timeout: int = 10,
     headers: Optional[dict] = None,
     auth: Optional[Tuple[str, str]] = None,
+    stream: bool = False,
     **kwargs,
 ) -> requests.Response:
     """
     Perform an HTTP GET request with SSRF validation on the initial URL
     and after every redirect hop (up to max_redirects).
+    Supports stream=True for bounded memory chunk downloads.
     """
     current_url = url
     session = requests.Session()
@@ -166,7 +168,7 @@ def safe_get(
             **kwargs,
         )
         prep = session.prepare_request(req)
-        resp = session.send(prep, allow_redirects=False, timeout=timeout)
+        resp = session.send(prep, allow_redirects=False, timeout=timeout, stream=stream)
 
         if resp.is_redirect or resp.status_code in (301, 302, 303, 307, 308):
             location = resp.headers.get("Location")

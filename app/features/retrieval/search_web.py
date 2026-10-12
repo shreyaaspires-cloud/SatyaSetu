@@ -185,35 +185,88 @@ def _search_tavily(query: str, api_key: str) -> List[EvidenceItem]:
     return items
 
 
+def _search_google_news_rss(query: str, window: str = "7d") -> List[EvidenceItem]:
+    """
+    Keyless search provider using Google News RSS.
+    Retrieves recent headlines and articles with publication dates and domain classification.
+    """
+    import xml.etree.ElementTree as ET
+    from urllib.parse import quote_plus, urlparse
+
+    q = quote_plus(f"{query} when:{window}") if window else quote_plus(query)
+    url = f"https://news.google.com/rss/search?q={q}&hl=en-IN&gl=IN&ceid=IN:en"
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) SatyaSetu/1.0"}
+
+    try:
+        resp = requests.get(url, headers=headers, timeout=5.0)
+        resp.raise_for_status()
+        root = ET.fromstring(resp.content)
+    except Exception as exc:
+        logger.warning("Google News RSS retrieval failed: %s", exc)
+        return []
+
+    items: List[EvidenceItem] = []
+    for it in root.findall("./channel/item")[:7]:
+        src = it.find("source")
+        domain = (urlparse(src.get("url")).hostname or "").lower() if src is not None and src.get("url") else ""
+        if domain.startswith("www."):
+            domain = domain[4:]
+
+        title = it.findtext("title", "").strip()
+        link = it.findtext("link", "").strip()
+        pub = it.findtext("pubDate", "").strip()
+
+        if not domain and link:
+            domain = (urlparse(link).hostname or "").lower()
+            if domain.startswith("www."):
+                domain = domain[4:]
+
+        tier = classify_domain(domain or link)
+        items.append(
+            EvidenceItem(
+                url=link,
+                title=title,
+                snippet=title,
+                source_domain=domain or "news.google.com",
+                tier=tier,
+                rating=Rating.UNVERIFIED,
+                publish_date=pub,
+                score=0.75,
+            )
+        )
+    return items
+
+
 def search_web(query: str) -> List[EvidenceItem]:
     """
-    Search the web for claims or evidence using the configured provider (Brave or Tavily).
-    Returns a list of structured EvidenceItem objects. Never raises exceptions.
-
-    Caller contract: this function is safe to call unconditionally.  An absent
-    API key, network timeout, or provider error all return an empty list so the
-    pipeline can continue with partial evidence rather than aborting.
+    Search the web for claims or evidence using the configured provider.
+    Supports Brave, Tavily, and keyless Google News RSS.
+    Never raises exceptions.
     """
-    if not settings.search_api_key:
-        logger.debug("Search API key not configured. Skipping web search.")
-        return []
-
     if not query or not query.strip():
         return []
+
+    provider = (settings.search_provider or "google_news_rss").lower().strip()
+
+    # If provider requires an API key but none is configured, gracefully fall back to Google News RSS
+    if provider in ("brave", "tavily") and not settings.search_api_key:
+        logger.debug("Search API key not configured for %s. Using google_news_rss fallback.", provider)
+        provider = "google_news_rss"
 
     # Redact PII from query before sending to external search provider.
     from app.core.redaction import redact_for_external
     cleaned_query = redact_for_external(query.strip())
 
     try:
-        provider = (settings.search_provider or "brave").lower().strip()
-        if provider == "brave":
+        if provider == "google_news_rss":
+            return _search_google_news_rss(cleaned_query)
+        elif provider == "brave":
             return _search_brave(cleaned_query, settings.search_api_key)
         elif provider == "tavily":
             return _search_tavily(cleaned_query, settings.search_api_key)
         else:
-            logger.warning("Unsupported search provider: %s", provider)
-            return []
+            logger.warning("Unsupported search provider: %s, falling back to google_news_rss", provider)
+            return _search_google_news_rss(cleaned_query)
     except Exception as exc:
         logger.warning("Web search failed for query '%s': %s", query, exc)
         return []

@@ -57,8 +57,13 @@ def ingest(
         metadata["reply_to"] = reply_to
 
     try:
-        if input_type == InputType.TEXT:
+        if input_type == InputType.UNSUPPORTED:
+            metadata["ingest_status"] = "unsupported"
+            raw_text = "This file format is not supported. Please send text, a photo/screenshot, a PDF document, or a voice note."
+
+        elif input_type == InputType.TEXT:
             raw_text = sanitize_text(original_body)
+            metadata["ingest_status"] = "ok"
 
         elif input_type == InputType.SCREENSHOT:
             if media_url:
@@ -66,6 +71,9 @@ def ingest(
                 raw_text = sanitize_text(ocr_result["text"])
                 ocr_confidence = ocr_result["confidence"]
                 metadata["ocr_confidence"] = ocr_confidence
+                metadata["ingest_status"] = ocr_result.get("status", "ok")
+                if ocr_result.get("error"):
+                    metadata["ingest_error"] = ocr_result["error"]
 
         elif input_type == InputType.VOICE:
             if media_url:
@@ -74,6 +82,9 @@ def ingest(
                 audio_duration = asr_result["duration_seconds"]
                 metadata["asr_language"] = asr_result["language"]
                 metadata["audio_duration_sec"] = audio_duration
+                metadata["ingest_status"] = asr_result.get("status", "ok")
+                if asr_result.get("error"):
+                    metadata["ingest_error"] = asr_result["error"]
 
         elif input_type == InputType.PDF:
             if media_url:
@@ -81,6 +92,9 @@ def ingest(
                 raw_text = sanitize_text(pdf_result["text"])
                 metadata["pdf_pages"] = pdf_result["page_count"]
                 metadata["pdf_method"] = pdf_result["extraction_method"]
+                metadata["ingest_status"] = pdf_result.get("status", "ok")
+                if pdf_result.get("error"):
+                    metadata["ingest_error"] = pdf_result["error"]
 
         elif input_type == InputType.URL:
             target_url = original_body
@@ -89,6 +103,7 @@ def ingest(
             raw_text = sanitize_text(url_result["text"])
             metadata["url_title"] = url_result["title"]
             metadata["url_method"] = url_result["extraction_method"]
+            metadata["ingest_status"] = "ok"
 
         # Append caption sent with media attachment (FR requirement)
         if original_body and input_type in (InputType.SCREENSHOT, InputType.VOICE, InputType.PDF):

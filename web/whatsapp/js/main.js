@@ -30,14 +30,14 @@ const VERDICT_CONFIG = {
 };
 
 const VERDICT_EMOJI = {
-  SUPPORTED: '✅', REFUTED: '❌', PARTIALLY_SUPPORTED: 'â ï¸', OUTDATED: 'ðŸ•', UNVERIFIABLE: 'â„¹ï¸',
+  SUPPORTED: '\u2705', REFUTED: '\u274C', PARTIALLY_SUPPORTED: '\u26A0\uFE0F', OUTDATED: '\uD83D\uDD57', UNVERIFIABLE: '\u2139\uFE0F',
 };
 
 // ── Build fact-check card ─────────────────────────────────────────────────────
 function buildFactCheckCard(data) {
   const key = (data.verdict || data.overall_verdict || 'UNVERIFIABLE').toUpperCase();
   const cfg = VERDICT_CONFIG[key] || VERDICT_CONFIG.UNVERIFIABLE;
-  const emoji = VERDICT_EMOJI[key] || 'â„¹ï¸';
+  const emoji = VERDICT_EMOJI[key] || '\u2139\uFE0F';
 
   // Verdict chip
   const chipHtml = `
@@ -322,7 +322,7 @@ async function toggleVoiceRecording() {
       speechRecognizer.continuous = false;
       speechRecognizer.interimResults = true;
       speechRecognizer.lang = navigator.language || 'en-IN';
-      speechRecognizer.onstart  = () => { isRecording = true; micBtn?.classList.add('recording'); showToast('ðŸŽ™ï¸ Listening... Speak your claim'); };
+      speechRecognizer.onstart  = () => { isRecording = true; micBtn?.classList.add('recording'); showToast('\uD83C\uDF99\uFE0F Listening... Speak your claim'); };
       speechRecognizer.onresult = (e) => {
         let t = '';
         for (let i = e.resultIndex; i < e.results.length; ++i) t += e.results[i][0].transcript;
@@ -352,7 +352,7 @@ async function startMediaRecorderFallback() {
     const mimeType  = preferred.find(t => MediaRecorder.isTypeSupported(t)) || '';
     mediaRecorder   = new MediaRecorder(stream, mimeType ? { mimeType } : {});
 
-    mediaRecorder.onstart = () => { isRecording = true; micBtn?.classList.add('recording'); showToast('ðŸŽ™ï¸ Recording... Click mic again when done'); };
+    mediaRecorder.onstart = () => { isRecording = true; micBtn?.classList.add('recording'); showToast('\uD83C\uDF99\uFE0F Recording... Click mic again when done'); };
     mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
     mediaRecorder.onstop = async () => {
       stream.getTracks().forEach(t => t.stop());
@@ -362,10 +362,10 @@ async function startMediaRecorderFallback() {
       const blob = new Blob(audioChunks, { type: actualMime });
       if (blob.size < 100) return;
       if (blob.size > 2_000_000) { showToast('Voice note too large (max 2 MB). Please record a shorter clip.'); return; }
-      showToast('Transcribing voice note... ðŸŽ™ï¸');
+      showToast('Transcribing voice note... \uD83C\uDF99\uFE0F');
       try {
         const data = await uploadVoiceAudio(blob, `voice_note.${ext}`);
-        if (data?.success && data.text) { store.setActiveChat('bot'); sendMessage(data.text.trim()); showToast('Voice claim captured! âœ"'); }
+        if (data?.success && data.text) { store.setActiveChat('bot'); sendMessage(data.text.trim()); showToast('Voice claim captured! \u2713'); }
         else showToast('Could not transcribe voice note.');
       } catch (err) { console.error('Audio error:', err); showToast(err.message || 'Audio transcription failed.'); }
     };
@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtn = e.target.closest('.copy-card-btn');
     if (copyBtn) {
       e.stopPropagation();
-      navigator.clipboard.writeText(copyBtn.getAttribute('data-text') || '').then(() => showToast('Copied to clipboard âœ"')); return;
+      navigator.clipboard.writeText(copyBtn.getAttribute('data-text') || '').then(() => showToast('Copied to clipboard \u2713')); return;
     }
     const ctxBtn = e.target.closest('.context-menu-btn');
     if (ctxBtn) { e.stopPropagation(); openContextMenuAt(e, ctxBtn.getAttribute('data-msgid')); }
@@ -482,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('presenterCloseBtn')?.addEventListener('click', () => store.togglePresenter(false));
   document.getElementById('presenterCopyBtn')?.addEventListener('click', () => {
     const t = document.getElementById('presenterJson')?.textContent;
-    if (t) navigator.clipboard.writeText(t).then(() => showToast('Presenter JSON copied âœ"'));
+    if (t) navigator.clipboard.writeText(t).then(() => showToast('Presenter JSON copied \u2713'));
   });
 
   // Keyboard shortcuts
@@ -519,7 +519,7 @@ function handleContextAction(action) {
     openForwardModal(msg);
   } else if (action === 'copy') {
     const text = msg.text || (msg.cardData ? `${msg.cardData.plain_verdict}: ${msg.cardData.short_reason}` : '');
-    navigator.clipboard.writeText(text).then(() => showToast('Message copied âœ"'));
+    navigator.clipboard.writeText(text).then(() => showToast('Message copied \u2713'));
   } else if (action === 'reply') {
     const input = document.getElementById('messageInput');
     if (input) { input.value = `> Replying to ${msg.sender}: "${(msg.text||'').substring(0,50)}..."\n`; input.focus(); }
@@ -527,6 +527,6 @@ function handleContextAction(action) {
     store.deleteMessage(store.activeChatId, contextTargetMessageId);
     showToast('Message deleted');
   } else if (action === 'star') {
-    showToast('Message starred â­');
+    showToast('Message starred \u2B50');
   }
 }

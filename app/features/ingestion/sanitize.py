@@ -10,6 +10,8 @@ rather than instruction text.
 """
 
 
+import unicodedata
+
 # LOOPHOLE-02: Known prompt injection markers to strip from user input
 _INJECTION_MARKERS = [
     "IGNORE PREVIOUS",
@@ -30,28 +32,30 @@ _INJECTION_MARKERS = [
 def sanitize_text(text: str, max_chars: int = 10_000) -> str:
     """
     Sanitize text by:
-    1. Removing null bytes and non-printable control characters (preserving \\n and \\t).
-    2. Stripping common prompt-injection markers (LOOPHOLE-02).
-    3. Truncating to max_chars to prevent memory/regex DOS attacks.
-
-    Defense-in-depth:
-    - Pre-filter: Cleanses text before NLP and retrieval queries.
-    - Structural delimitation: Subsequent LLM prompts quote untrusted input in delimiters.
+    1. NFC normalizing unicode text (canonical composition).
+    2. Removing null bytes and non-printable control characters while
+       strictly preserving newlines, tabs, and Indic ligatures (ZWNJ \\u200C, ZWJ \\u200D).
+    3. Stripping common prompt-injection markers on a casefolded copy without index drift.
+    4. Truncating to max_chars to prevent memory/regex DOS attacks.
     """
     if not text:
         return ""
 
-    # Remove null bytes and non-printable control characters while preserving \\n and \\t
-    cleaned = "".join(ch for ch in text if ch.isprintable() or ch in "\n\t")
+    # 1. NFC normalization
+    normalized = unicodedata.normalize("NFC", text)
 
-    # Strip prompt injection markers (case-insensitive)
-    cleaned_upper = cleaned.upper()
+    # 2. Preserve printable chars + whitespace + Indic joiners (U+200C ZWNJ, U+200D ZWJ)
+    indic_joiners = {"\u200C", "\u200D", "\n", "\t"}
+    cleaned = "".join(ch for ch in normalized if ch.isprintable() or ch in indic_joiners)
+
+    # 3. Strip prompt injection markers safely without index drift
     for marker in _INJECTION_MARKERS:
-        idx = cleaned_upper.find(marker)
-        while idx != -1:
-            cleaned = cleaned[:idx] + cleaned[idx + len(marker):]
-            cleaned_upper = cleaned.upper()
-            idx = cleaned_upper.find(marker)
+        marker_len = len(marker)
+        while True:
+            idx = cleaned.upper().find(marker)
+            if idx == -1:
+                break
+            cleaned = cleaned[:idx] + cleaned[idx + marker_len:]
 
-    # Enforce hard length limit
+    # 4. Enforce hard length limit
     return cleaned[:max_chars].strip()

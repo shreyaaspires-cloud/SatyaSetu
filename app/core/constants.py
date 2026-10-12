@@ -18,6 +18,7 @@ class InputType(str, Enum):
     VOICE = "voice"
     PDF = "pdf"
     URL = "url"
+    UNSUPPORTED = "unsupported"
 
 
 

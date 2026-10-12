@@ -175,10 +175,10 @@ def search_official_sources(
     if not claim or not claim.strip() or not domains:
         return []
 
-    active_provider = (provider or settings.search_provider or "brave").lower().strip()
+    active_provider = (provider or settings.search_provider or "google_news_rss").lower().strip()
     api_key = settings.search_api_key
-    if not api_key:
-        return []
+    if active_provider in ("brave", "tavily") and not api_key:
+        active_provider = "google_news_rss"
 
     from app.core.redaction import redact_for_external
     cleaned_claim = redact_for_external(claim.strip())
@@ -188,15 +188,18 @@ def search_official_sources(
 
     items: List[EvidenceItem] = []
     try:
-        if active_provider == "brave":
+        if active_provider == "google_news_rss":
+            from app.features.retrieval.search_web import _search_google_news_rss
+            items = _search_google_news_rss(query, window="30d")
+        elif active_provider == "brave" and api_key:
             from app.features.retrieval.search_web import _search_brave
             items = _search_brave(query, api_key)
-        elif active_provider == "tavily":
+        elif active_provider == "tavily" and api_key:
             from app.features.retrieval.search_web import _search_tavily
             items = _search_tavily(query, api_key)
         else:
-            logger.warning("Unsupported official search provider: %s", active_provider)
-            return []
+            from app.features.retrieval.search_web import _search_google_news_rss
+            items = _search_google_news_rss(query, window="30d")
     except Exception as exc:
         logger.warning("Official source search failed for '%s': %s", claim, exc)
         return []

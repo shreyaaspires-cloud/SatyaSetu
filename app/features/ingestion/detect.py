@@ -31,6 +31,9 @@ def detect_input_type(
         if base_ct == "application/pdf" or base_ct.endswith("/pdf"):
             return InputType.PDF
 
+        # Media attached but not image, audio, or PDF -> UNSUPPORTED
+        return InputType.UNSUPPORTED
+
     cleaned_body = (body or "").strip()
     if cleaned_body.lower().startswith(("http://", "https://")):
         return InputType.URL
