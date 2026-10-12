@@ -134,7 +134,7 @@ cp .env.example .env
 ```
 Key variables:
 - `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN`: For WhatsApp messaging.
-- `FACT_CHECK_API_KEY`: Google Fact Check Tools API key.
+- `GOOGLE_FACT_CHECK_API_KEY`: Google Fact Check Tools API key.
 - `GEMINI_API_KEY`: (Optional) For advanced LLM summary generation.
 
 ### 4. Running the Web Server

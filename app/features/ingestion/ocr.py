@@ -52,7 +52,18 @@ def load_ocr_reader(extra_langs: Optional[str] = None) -> Any:
                     langs.append(lang)
 
         logger.info("Loading EasyOCR reader with languages: %s", langs)
-        _ocr_reader = easyocr.Reader(langs, gpu=False, verbose=False)
+        try:
+            _ocr_reader = easyocr.Reader(langs, gpu=False, verbose=False)
+        except Exception as ocr_init_err:
+            logger.warning(
+                "Could not initialize EasyOCR with langs %s (%s). Falling back to ['en', 'hi', 'mr'].",
+                langs,
+                ocr_init_err,
+            )
+            try:
+                _ocr_reader = easyocr.Reader(["en", "hi", "mr"], gpu=False, verbose=False)
+            except Exception:
+                _ocr_reader = easyocr.Reader(["en"], gpu=False, verbose=False)
         logger.info("EasyOCR reader loaded successfully.")
     return _ocr_reader
 

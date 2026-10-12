@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WhatsApp Web · SatyaSetu AI Bot</title>
+  <title>SatyaSetu</title>
   <link rel="stylesheet" href="/web/whatsapp/css/tokens.css">
   <link rel="stylesheet" href="/web/whatsapp/css/base.css">
   <link rel="stylesheet" href="/web/whatsapp/css/app-shell.css">
@@ -18,21 +18,7 @@
 <body>
 
   <div class="app-window">
-    <!-- Desktop Window Header -->
-    <header class="window-header">
-      <div class="window-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--wa-green)"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.46-4.45-9.92-9.91-9.92z"/></svg>
-        <span>WhatsApp Web · SatyaSetu Bot Edition</span>
-      </div>
-      <div class="window-controls">
-        <span class="win-btn" title="Presenter Mode (Ctrl+Shift+D)" id="presenterToolbarBtn">🔍 Presenter</span>
-        <span class="win-btn" title="Minimize">─</span>
-        <span class="win-btn" title="Maximize">□</span>
-        <span class="win-btn" title="Close">✕</span>
-      </div>
-    </header>
-
-    <!-- Main Container -->
+    <!-- Main Container (Full Viewport) -->
     <div class="main-container">
       <!-- Left Navigation Rail -->
       <nav class="side-rail" aria-label="WhatsApp Navigation">
@@ -122,7 +108,7 @@
         </header>
 
         <!-- Message Stream -->
-        <section class="messages-stream" id="messagesStream" aria-live="polite">
+        <section class="messages-stream" id="messagesStream" role="log" aria-live="polite">
           <!-- Populated dynamically by main.js -->
         </section>
 
@@ -154,19 +140,19 @@
           </button>
 
           <!-- Hidden Upload Handlers -->
-          <input type="file" id="imageUploadInput" accept="image/*" style="display:none;">
-          <input type="file" id="docUploadInput" accept=".pdf,.doc,.docx" style="display:none;">
+          <input type="file" id="imageUploadInput" accept="image/jpeg,image/png,image/webp" style="display:none;">
+          <input type="file" id="docUploadInput" accept=".pdf" style="display:none;">
         </footer>
 
         <!-- Attachment Menu Popup -->
         <div class="attachment-popup" id="attachmentPopup">
           <div class="attachment-item" onclick="document.getElementById('imageUploadInput').click()">
             <div class="attachment-icon" style="background:#bf59cf;">🖼️</div>
-            <span>Photos & Videos</span>
+            <span>Photos & Screenshots</span>
           </div>
           <div class="attachment-item" onclick="document.getElementById('docUploadInput').click()">
             <div class="attachment-icon" style="background:#5157ae;">📄</div>
-            <span>Document / Circular PDF</span>
+            <span>PDF document</span>
           </div>
         </div>
       </main>
@@ -265,8 +251,8 @@
         <span>🛡️</span> SatyaSetu Telemetry & Inspector
       </div>
       <div>
-        <button class="win-btn" id="presenterCopyBtn" title="Copy JSON">📋 Copy</button>
-        <button class="win-btn" id="presenterCloseBtn" title="Close Panel">✕</button>
+        <button class="win-btn panel-btn" id="presenterCopyBtn" title="Copy JSON">📋 Copy</button>
+        <button class="win-btn panel-btn" id="presenterCloseBtn" title="Close Panel">✕</button>
       </div>
     </div>
     <div class="presenter-meta-bar">
@@ -292,11 +278,8 @@
     </div>
   </aside>
 
-  <!-- Presenter Toolbar Button Listener & Theme Toggle -->
+  <!-- Theme Toggle Listener -->
   <script>
-    document.getElementById("presenterToolbarBtn")?.addEventListener("click", () => {
-      window.dispatchEvent(new KeyboardEvent("keydown", { key: "D", ctrlKey: true, shiftKey: true }));
-    });
     document.getElementById("themeToggleBtn")?.addEventListener("click", () => {
       const current = document.documentElement.getAttribute("data-theme");
       document.documentElement.setAttribute("data-theme", current === "light" ? "dark" : "light");

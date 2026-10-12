@@ -42,22 +42,54 @@ export async function fetchDemoConfig() {
 
 export async function uploadOcrImage(file) {
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("file", file, file.name || "screenshot.png");
   const res = await fetch("/api/ocr", {
     method: "POST",
     body: formData
   });
-  if (!res.ok) throw new Error(`OCR error HTTP ${res.status}`);
+  if (!res.ok) {
+    let msg = `OCR error HTTP ${res.status}`;
+    try {
+      const j = await res.json();
+      if (j.detail) msg = j.detail;
+    } catch (_) {}
+    throw new Error(msg);
+  }
   return await res.json();
 }
 
-export async function uploadVoiceAudio(file) {
+export async function uploadVoiceAudio(blob, filename = "voice_note.webm") {
   const formData = new FormData();
-  formData.append("file", file, "voice_note.wav");
+  formData.append("file", blob, filename);
   const res = await fetch("/api/voice", {
     method: "POST",
     body: formData
   });
-  if (!res.ok) throw new Error(`Voice error HTTP ${res.status}`);
+  if (!res.ok) {
+    let msg = `Voice error HTTP ${res.status}`;
+    try {
+      const j = await res.json();
+      if (j.detail) msg = j.detail;
+    } catch (_) {}
+    throw new Error(msg);
+  }
+  return await res.json();
+}
+
+export async function uploadPdf(file) {
+  const formData = new FormData();
+  formData.append("file", file, file.name || "document.pdf");
+  const res = await fetch("/api/pdf", {
+    method: "POST",
+    body: formData
+  });
+  if (!res.ok) {
+    let msg = `PDF error HTTP ${res.status}`;
+    try {
+      const j = await res.json();
+      if (j.detail) msg = j.detail;
+    } catch (_) {}
+    throw new Error(msg);
+  }
   return await res.json();
 }

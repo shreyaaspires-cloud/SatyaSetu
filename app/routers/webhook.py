@@ -151,7 +151,10 @@ async def _validate_twilio_signature(request: Request) -> None:
 
     signature = request.headers.get("X-Twilio-Signature", "")
     form_data: Dict[str, Any] = dict(await request.form())
-    url = str(request.url)
+    if settings.public_webhook_url:
+        url = settings.public_webhook_url.rstrip("/") + "/webhook/twilio"
+    else:
+        url = str(request.url)
 
     validator = RequestValidator(settings.twilio_auth_token)
     if not validator.validate(url, form_data, signature):
@@ -235,13 +238,9 @@ async def twilio_webhook(
         logger.error("[%s] Ingestion error: %s", request_id, exc, exc_info=True)
         return _twiml_error("Could not process your message. Please try again.")
 
-    # ── Step 1: Immediate acknowledgement ─────────────────────────────────────
+    # ── Step 1: Immediate acknowledgement via TwiML ───────────────────────────
     ack_message = "Checking this, one moment..."
-    threading.Thread(
-        target=send_twilio_message,
-        args=(payload.From, ack_message),
-        daemon=True,
-    ).start()
+    # (Removed redundant REST ack thread that sent duplicate "Checking this...")
 
     # ── Step 2: Offload pipeline to non-blocking background task ──────────────
     def _execute_pipeline_and_reply(ingested_msg: IngestedMessage, to_number: str, req_id: str) -> None:

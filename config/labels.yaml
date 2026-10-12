@@ -6,35 +6,71 @@ en:
     PARTIALLY_SUPPORTED: "PARTIALLY_SUPPORTED"
     OUTDATED: "OUTDATED"
     UNVERIFIABLE: "UNVERIFIABLE"
+  plain_verdicts:
+    SUPPORTED: "True"
+    REFUTED: "Fake"
+    PARTIALLY_SUPPORTED: "Half true"
+    OUTDATED: "Old news"
+    UNVERIFIABLE: "Can't confirm"
   ui:
+    truth_score: "Truth score"
+    no_score: "Not enough proof yet."
+    claim: "Claim"
+    why: "Why"
+    check: "Check"
+    forward_hint: "Send this to whoever forwarded it."
     evidence_strength: "Evidence strength"
     sources: "Sources"
     claim_echo: "I understood your message as"
     translation_unavailable: "This explanation is in English because translation is currently unavailable."
 
 hi:
-  needs_native_review: false # Reviewed by Shreya
+  needs_native_review: false
   verdicts:
     SUPPORTED: "सत्य (पुष्ट)"
     REFUTED: "असत्य (खारिज)"
     PARTIALLY_SUPPORTED: "आंशिक रूप से सत्य"
     OUTDATED: "पुराना (कालबाह्य)"
     UNVERIFIABLE: "सत्यापित नहीं हो सका"
+  plain_verdicts:
+    SUPPORTED: "सच"
+    REFUTED: "झूठ"
+    PARTIALLY_SUPPORTED: "आधा सच"
+    OUTDATED: "पुरानी खबर"
+    UNVERIFIABLE: "पुष्टि नहीं हो सकी"
   ui:
+    truth_score: "सत्यता स्कोर"
+    no_score: "पर्याप्त प्रमाण उपलब्ध नहीं है।"
+    claim: "दावा"
+    why: "कारण"
+    check: "जाँचें"
+    forward_hint: "जिसने यह भेजा है उसे यह फॉरवर्ड करें।"
     evidence_strength: "प्रमाण की मजबूती"
     sources: "स्रोत"
     claim_echo: "मैंने आपके संदेश को इस प्रकार समझा"
     translation_unavailable: "यह विवरण अंग्रेजी में है क्योंकि अनुवाद वर्तमान में उपलब्ध नहीं है।"
 
 mr:
-  needs_native_review: false # Reviewed by Shreya
+  needs_native_review: false
   verdicts:
     SUPPORTED: "सत्य (पुष्टी झाली)"
     REFUTED: "असत्य (खोडून काढले)"
     PARTIALLY_SUPPORTED: "अंशतः सत्य"
     OUTDATED: "कालबाह्य (जुने)"
     UNVERIFIABLE: "तपासणे शक्य नाही"
+  plain_verdicts:
+    SUPPORTED: "खरे"
+    REFUTED: "खोटे"
+    PARTIALLY_SUPPORTED: "अर्धे खरे"
+    OUTDATED: "जुनी बातमी"
+    UNVERIFIABLE: "पुष्टी करणे अशक्य"
   ui:
+    truth_score: "सत्यता गुण"
+    no_score: "अद्याप पुरेसा पुरावा नाही."
+    claim: "दावा"
+    why: "कारण"
+    check: "पडताळणी"
+    forward_hint: "ज्यांनी हे पाठवले त्यांना हे फॉरवर्ड करा."
     evidence_strength: "पुराव्याची तीव्रता"
     sources: "स्रोत"
     claim_echo: "मला तुमचा संदेश असा समजला"
@@ -48,7 +84,19 @@ ta:
     PARTIALLY_SUPPORTED: "பகுதி உண்மை"
     OUTDATED: "காலாவதியானது"
     UNVERIFIABLE: "சரிபார்க்க முடியவில்லை"
+  plain_verdicts:
+    SUPPORTED: "உண்மை"
+    REFUTED: "பொய்"
+    PARTIALLY_SUPPORTED: "பகுதி உண்மை"
+    OUTDATED: "பழைய செய்தி"
+    UNVERIFIABLE: "உறுதிப்படுத்த முடியவில்லை"
   ui:
+    truth_score: "உண்மை மதிப்பெண்"
+    no_score: "போதுமான ஆதாரம் இல்லை."
+    claim: "கூற்று"
+    why: "காரணம்"
+    check: "ஆதாரங்கள்"
+    forward_hint: "இதை அனுப்பியவருக்கு முன்னோக்கி அனுப்பவும்."
     evidence_strength: "ஆதார வலிமை"
     sources: "ஆதாரங்கள்"
     claim_echo: "உங்கள் செய்தியை நான் இவ்வாறு புரிந்து கொண்டேன்"
@@ -62,7 +110,19 @@ te:
     PARTIALLY_SUPPORTED: "పాక్షికంగా నిజం"
     OUTDATED: "కాలం చెల్లినది (పాతది)"
     UNVERIFIABLE: "ధృవీకరించడం సాధ్యం కాలేదు"
+  plain_verdicts:
+    SUPPORTED: "నిజం"
+    REFUTED: "అబద్ధం"
+    PARTIALLY_SUPPORTED: "సగం నిజం"
+    OUTDATED: "పాత వార్త"
+    UNVERIFIABLE: "ధృవీకరించలేము"
   ui:
+    truth_score: "సత్య స్కోరు"
+    no_score: "ఇంకా తగినంత ఆధారం లేదు."
+    claim: "దావా"
+    why: "ఎందుకు"
+    check: "పరిశీలించండి"
+    forward_hint: "ఇది పంపిన వారికి ఫార్వార్డ్ చేయండి."
     evidence_strength: "ఆధారాల బలం"
     sources: "మూలాలు"
     claim_echo: "మీ సందేశాన్ని నేను ఇలా అర్థం చేసుకున్నాను"
@@ -76,7 +136,19 @@ bn:
     PARTIALLY_SUPPORTED: "আংশিক সত্য"
     OUTDATED: "পুরনো (মেয়াদোত্তীর্ণ)"
     UNVERIFIABLE: "যাচাই করা যায়নি"
+  plain_verdicts:
+    SUPPORTED: "সত্য"
+    REFUTED: "ভুয়া"
+    PARTIALLY_SUPPORTED: "অর্ধেক সত্য"
+    OUTDATED: "পুরনো খবর"
+    UNVERIFIABLE: "যাচাই করা সম্ভব নয়"
   ui:
+    truth_score: "সত্যতা স্কোর"
+    no_score: "এখনও পর্যাপ্ত প্রমাণ নেই।"
+    claim: "দাবি"
+    why: "কারণ"
+    check: "যাচাই করুন"
+    forward_hint: "যিনি এটি পাঠিয়েছেন তাকে ফরওয়ার্ড করুন।"
     evidence_strength: "প্রমাণের শক্তি"
     sources: "উৎস"
     claim_echo: "আমি আপনার বার্তাটি এইভাবে বুঝেছি"

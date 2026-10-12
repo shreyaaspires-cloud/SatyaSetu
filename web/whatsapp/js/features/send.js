@@ -3,14 +3,14 @@
  */
 
 import { store } from '../state.js';
-import { checkClaim, uploadOcrImage } from '../api.js';
+import { checkClaim, uploadOcrImage, uploadPdf } from '../api.js';
 import { showTypingIndicator, hideTypingIndicator } from './typing.js';
 
 export async function sendMessage(textToSend, extraData = {}) {
   const input = document.getElementById("messageInput");
   const text = (textToSend !== undefined ? textToSend : (input ? input.value : "")).trim();
 
-  if (!text && !extraData.image) return;
+  if (!text && !extraData.image && !extraData.file) return;
 
   if (textToSend === undefined && input) {
     input.value = "";
@@ -29,6 +29,7 @@ export async function sendMessage(textToSend, extraData = {}) {
     isMe: true,
     text: text,
     image: extraData.image || null,
+    file: extraData.file || null,
     time: timeStr,
     status: "✓✓"
   };
@@ -49,27 +50,87 @@ export async function runBotLifecycle(claimText, extraData = {}) {
     .replace(/^Forwarded:\s*/i, "")
     .trim();
 
-  // If user sent image screenshot and query is brief, attempt OCR
-  if (extraData.rawFile && (!queryText || queryText.length < 5)) {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase();
+
+  // ── Image Attachment Handling ──
+  if (extraData.rawFile) {
+    showTypingIndicator();
     try {
       const ocrResult = await uploadOcrImage(extraData.rawFile);
-      if (ocrResult && ocrResult.text && ocrResult.text.trim()) {
-        queryText = ocrResult.text.trim();
+      hideTypingIndicator();
+      if (!ocrResult || !ocrResult.success || !ocrResult.text || !ocrResult.text.trim()) {
+        const botFailMsg = {
+          id: "bot-ocr-fail-" + Date.now(),
+          sender: "SatyaSetu",
+          isMe: false,
+          text: "I couldn't read any text in this image. Try a clearer screenshot.",
+          time: timeStr,
+          status: ""
+        };
+        store.addMessage("bot", botFailMsg);
+        return;
       }
+      queryText = ocrResult.text.trim();
     } catch (ocrErr) {
-      console.warn("OCR fallback note:", ocrErr);
+      hideTypingIndicator();
+      const botErrMsg = {
+        id: "bot-ocr-err-" + Date.now(),
+        sender: "SatyaSetu",
+        isMe: false,
+        text: ocrErr.message || "Failed to process image.",
+        isError: true,
+        time: timeStr,
+        status: ""
+      };
+      store.addMessage("bot", botErrMsg);
+      return;
     }
   }
 
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase();
+  // ── PDF Attachment Handling ──
+  let pdfNote = "";
+  if (extraData.pdfFile) {
+    showTypingIndicator();
+    try {
+      const pdfResult = await uploadPdf(extraData.pdfFile);
+      hideTypingIndicator();
+      if (!pdfResult || !pdfResult.success || !pdfResult.text || !pdfResult.text.trim()) {
+        const botFailMsg = {
+          id: "bot-pdf-fail-" + Date.now(),
+          sender: "SatyaSetu",
+          isMe: false,
+          text: "I couldn't read any text in this PDF. Please check the document.",
+          time: timeStr,
+          status: ""
+        };
+        store.addMessage("bot", botFailMsg);
+        return;
+      }
+      queryText = pdfResult.text.trim();
+      pdfNote = `📄 Document checked (${pdfResult.page_count} pages, ${pdfResult.extraction_method})`;
+    } catch (pdfErr) {
+      hideTypingIndicator();
+      const botErrMsg = {
+        id: "bot-pdf-err-" + Date.now(),
+        sender: "SatyaSetu",
+        isMe: false,
+        text: pdfErr.message || "Failed to process PDF file.",
+        isError: true,
+        time: timeStr,
+        status: ""
+      };
+      store.addMessage("bot", botErrMsg);
+      return;
+    }
+  }
 
   // Step 1: Immediate acknowledgement bubble
   const ackMsg = {
     id: "bot-ack-" + Date.now(),
     sender: "SatyaSetu",
     isMe: false,
-    text: "Received! Checking this claim… 🔍",
+    text: pdfNote ? `${pdfNote}\nChecking claims… 🔍` : "Received! Checking this claim… 🔍",
     time: timeStr,
     status: ""
   };
@@ -87,14 +148,14 @@ export async function runBotLifecycle(claimText, extraData = {}) {
     // Update Presenter panel with real-time inspection data
     store.setPresenterData({
       query: queryText,
-      verdict: data.overall_verdict || data.verdict || "UNKNOWN",
+      verdict: data.verdict || data.overall_verdict || "UNKNOWN",
       evidence_strength: data.evidence_strength || "N/A",
       latencyMs: latencyMs,
       timestamp: new Date().toISOString(),
       rawResponse: data
     });
 
-    // Step 4: Bot formatted reply text bubble (parity with Twilio webhook)
+    // Step 4: Bot card reply
     const replyContent = data.formatted_reply || data.explanation || "No verdict returned by backend.";
     const respTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase();
 
@@ -103,6 +164,7 @@ export async function runBotLifecycle(claimText, extraData = {}) {
       sender: "SatyaSetu",
       isMe: false,
       text: replyContent,
+      cardData: data,
       time: respTimeStr,
       status: ""
     };
@@ -112,7 +174,7 @@ export async function runBotLifecycle(claimText, extraData = {}) {
     console.error("Fact check request failed:", err);
     hideTypingIndicator();
 
-    // Truthful system failure notice (F1, F2) - never invent verdicts
+    // Truthful system failure notice
     const errTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase();
     const botErrMsg = {
       id: "bot-err-" + Date.now(),

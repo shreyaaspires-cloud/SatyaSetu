@@ -25,33 +25,74 @@
   --wa-quote-bg: rgba(0, 0, 0, 0.25);
   --wa-link: #53bdeb;
 
-  /* Status Colors */
+  /* Card and Tint Status Colors */
   --color-danger: #ef4444;
+  --color-danger-bg: rgba(239, 68, 68, 0.15);
   --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.15);
   --color-success: #10b981;
+  --color-success-bg: rgba(16, 185, 129, 0.15);
   --color-info: #3b82f6;
+  --color-info-bg: rgba(59, 130, 246, 0.15);
+  --color-neutral: #94a3b8;
+  --color-neutral-bg: rgba(148, 163, 184, 0.15);
 
-  /* Typography */
+  /* Typography Scales */
   --font-system: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 15px;
+  --text-lg: 17px;
+  --text-xl: 20px;
+  --leading-tight: 1.3;
+  --leading-body: 1.5;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
 
-  /* Sizing & Transitions */
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Sizing, Radii & Layout */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
+  --radius-bubble: 10px;
+  --radius-card: 12px;
+  --radius-pill: 999px;
   --radius-full: 9999px;
+  --sidebar-width: 380px;
+  --bubble-max: 560px;
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s ease;
 
   /* Presenter Panel */
   --presenter-bg: rgba(17, 27, 33, 0.95);
   --presenter-border: #2a3942;
+
+  /* Fact-check verdict chip tokens */
+  --chip-true-bg:  rgba(16, 185, 129, 0.18);  /* green tint  */
+  --chip-true-fg:  #34d399;
+  --chip-fake-bg:  rgba(239,  68,  68, 0.18);  /* red tint    */
+  --chip-fake-fg:  #f87171;
+  --chip-half-bg:  rgba(245, 158,  11, 0.18);  /* amber tint  */
+  --chip-half-fg:  #fbbf24;
+  --chip-old-bg:   rgba(148, 163, 184, 0.18);  /* slate tint  */
+  --chip-old-fg:   #94a3b8;
+  --chip-none-bg:  rgba( 59, 130, 246, 0.18);  /* blue tint   */
+  --chip-none-fg:  #60a5fa;
 }
 
 [data-theme="light"] {
   --wa-bg-deep: #f0f2f5;
   --wa-bg-panel: #ffffff;
   --wa-bg-chat: #efeae2;
-  --wa-bg-input: #ffffff;
+  --wa-bg-input: #f0f2f5;
   --wa-bg-incoming: #ffffff;
   --wa-bg-outgoing: #d9fdd3;
   --wa-green: #00a884;
@@ -67,6 +108,25 @@
   --wa-badge: #25d366;
   --wa-quote-bg: rgba(0, 0, 0, 0.05);
   --wa-link: #027eb5;
+
+  --color-danger-bg: rgba(239, 68, 68, 0.1);
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-success-bg: rgba(16, 185, 129, 0.1);
+  --color-info-bg: rgba(59, 130, 246, 0.1);
+  --color-neutral-bg: rgba(148, 163, 184, 0.1);
+
   --presenter-bg: rgba(255, 255, 255, 0.97);
   --presenter-border: #d1d7db;
+
+  /* Fact-check chip light overrides */
+  --chip-true-bg:  rgba(16, 185, 129, 0.12);
+  --chip-true-fg:  #059669;
+  --chip-fake-bg:  rgba(239,  68,  68, 0.12);
+  --chip-fake-fg:  #dc2626;
+  --chip-half-bg:  rgba(245, 158,  11, 0.12);
+  --chip-half-fg:  #d97706;
+  --chip-old-bg:   rgba(100, 116, 139, 0.12);
+  --chip-old-fg:   #475569;
+  --chip-none-bg:  rgba( 59, 130, 246, 0.12);
+  --chip-none-fg:  #2563eb;
 }

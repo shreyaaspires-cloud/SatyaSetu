@@ -157,8 +157,7 @@ def test_at15_hallucinated_explanation_replaced_by_template():
         "Multiple peer-reviewed studies published in Nature support this cheese hypothesis conclusively."
     )
 
-    with _patch("app.features.explanation.generator._gemini_explanation", return_value=hallucinated), \
-         _patch("app.features.explanation.generator._gemini_quick_context", return_value=None):
+    with _patch("app.features.explanation.generator._gemini_explanation", return_value=hallucinated):
         explanation = generate_explanation(claim_result)
 
     # The hallucinated text must NOT appear in the output

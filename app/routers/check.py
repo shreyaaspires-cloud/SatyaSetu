@@ -3,9 +3,9 @@ API Check endpoint & Web demo interface.
 
 Provides:
 - POST /api/check: Synchronous claim verification through the complete multi-stage pipeline.
-- POST /api/ocr: Tesseract/EasyOCR fallback image text extraction.
+- POST /api/ocr: EasyOCR image text extraction with 2MB limit.
 - POST /api/voice: Whisper ASR with in-memory WAV decoding and tempfile fallbacks.
-- POST /api/pdf: Hybrid text extraction (pdfplumber + OCR).
+- POST /api/pdf: Hybrid text extraction (pdfplumber + OCR) with 2MB limit.
 - GET /api/demo/config: Localized copy, verdict configurations, and supported languages.
 - Web routes serving the interactive WhatsApp Web emulator.
 
@@ -17,13 +17,18 @@ Architecture & Security:
 
 from __future__ import annotations
 
+import io
 import logging
+import os
 from pathlib import Path
+import shutil
+import tempfile
 from typing import Any, Dict, List, Optional
+import wave
+import numpy as np
 
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from fastapi.responses import HTMLResponse, JSONResponse
-from pydantic import BaseModel, ConfigDict, Field
 
 from app.contracts.api import CheckAPIResponse, CheckRequest
 from app.contracts.models import IngestedMessage
@@ -32,6 +37,8 @@ from app.core.messages import DEMO_CONFIG
 from app.features.explanation.formatter import (
     VERDICT_EMOJI,
     compute_evidence_strength,
+    compute_truth_score,
+    get_plain_verdict_label,
     get_verdict_label,
 )
 from app.pipeline import run_pipeline
@@ -45,6 +52,16 @@ WORKSPACE_ROOT = Path(__file__).resolve().parent.parent.parent
 STATIC_DIR = WORKSPACE_ROOT / "static"
 WEB_DIR = WORKSPACE_ROOT / "web" / "whatsapp"
 
+
+async def read_limited(file: UploadFile, max_bytes: int = 2_000_000) -> bytes:
+    """Read upload stream up to max_bytes, raising HTTP 413 if exceeded."""
+    content = await file.read(max_bytes + 1)
+    if len(content) > max_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File exceeds maximum allowed size of {max_bytes // 1_000_000} MB.",
+        )
+    return content
 
 
 def _read_html_page(filename: str, fallback_title: str) -> str:
@@ -108,6 +125,26 @@ def check_claim_api(req: CheckRequest) -> CheckAPIResponse:
     v_str = v_enum.value if hasattr(v_enum, "value") else str(v_enum)
     v_emoji = VERDICT_EMOJI.get(v_enum, "❓")
     label_en = get_verdict_label(v_enum, "en")
+    lang = result.language or "en"
+
+    # Deterministic truth score & plain-language label
+    confidence = 0.85
+    if result.claim_results:
+        confidence = result.claim_results[0].confidence
+
+    t_score = compute_truth_score(v_enum, confidence)
+    p_verdict = get_plain_verdict_label(v_enum, lang)
+    short_reason = result.explanation
+
+    # Sources list for structured card display [{domain, url}]
+    sources_list: List[Dict[str, str]] = []
+    seen_domains = set()
+    for ev in all_raw_evidence:
+        dom = getattr(ev, "source_domain", "") or ""
+        u = getattr(ev, "url", "") or ""
+        if dom and dom.lower() not in seen_domains:
+            seen_domains.add(dom.lower())
+            sources_list.append({"domain": dom, "url": u})
 
     # Authentic evidence strength computed strictly from tiers and evidence count
     strength_label, strength_detail = compute_evidence_strength(all_raw_evidence)
@@ -116,6 +153,10 @@ def check_claim_api(req: CheckRequest) -> CheckAPIResponse:
         verdict=v_str,
         verdict_label=label_en,
         verdict_emoji=v_emoji,
+        plain_verdict=p_verdict,
+        truth_score=t_score,
+        short_reason=short_reason,
+        sources=sources_list,
         evidence_strength=strength_label,
         evidence_strength_detail=strength_detail,
         explanation=result.explanation,
@@ -125,7 +166,7 @@ def check_claim_api(req: CheckRequest) -> CheckAPIResponse:
         evidence=evidence_list,
         flags=result.flags,
         timings_ms=result.timings_ms,
-        language=result.language or "en",
+        language=lang,
     )
 
 
@@ -133,13 +174,31 @@ def check_claim_api(req: CheckRequest) -> CheckAPIResponse:
 async def ocr_endpoint(file: UploadFile = File(...)):
     """Extract text from uploaded screenshot or image using EasyOCR."""
     try:
-        content = await file.read()
+        content = await read_limited(file, 2_000_000)
         if not content:
             return {"success": False, "error": "Empty file uploaded.", "text": ""}
 
+        # Validate image format (PNG, JPEG, WebP)
+        ct = (file.content_type or "").lower().split(";")[0].strip()
+        filename_ext = os.path.splitext(file.filename or "")[1].lower()
+        valid_exts = {".jpg", ".jpeg", ".png", ".webp"}
+        valid_cts = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
+
+        if (ct and ct not in valid_cts) and (filename_ext and filename_ext not in valid_exts):
+            return {"success": False, "error": "Only JPEG, PNG, and WebP images are supported.", "text": ""}
+
         from app.features.ingestion.ocr import extract_text_from_bytes
         ocr_result = extract_text_from_bytes(content)
-        return {"success": bool(ocr_result.get("text")), "text": ocr_result.get("text", "")}
+        extracted = (ocr_result.get("text") or "").strip()
+        if not extracted:
+            return {
+                "success": False,
+                "error": "I couldn't read any text in this image. Try a clearer screenshot.",
+                "text": "",
+            }
+        return {"success": True, "text": extracted}
+    except HTTPException:
+        raise
     except Exception as exc:
         logger.warning("OCR processing error: %s", exc)
         return {"success": False, "error": str(exc), "text": ""}
@@ -148,14 +207,8 @@ async def ocr_endpoint(file: UploadFile = File(...)):
 @router.post("/api/voice", summary="Transcribe uploaded voice note or audio file")
 async def voice_endpoint(file: UploadFile = File(...)):
     """Transcribe uploaded audio file into text for verification."""
-    import tempfile
-    import os
-    import io
-    import wave
-    import numpy as np
-
     try:
-        content = await file.read()
+        content = await read_limited(file, 2_000_000)
         if not content:
             return {"success": False, "error": "Empty audio file uploaded.", "text": ""}
 
@@ -177,7 +230,6 @@ async def voice_endpoint(file: UploadFile = File(...)):
                     if channels > 1:
                         audio_np = audio_np.reshape(-1, channels).mean(axis=1)
 
-                    # Resample to 16000Hz if needed
                     if framerate != 16000 and len(audio_np) > 0:
                         target_len = int(len(audio_np) * 16000 / framerate)
                         indices = np.linspace(0, len(audio_np) - 1, target_len)
@@ -190,8 +242,29 @@ async def voice_endpoint(file: UploadFile = File(...)):
             except Exception as wav_err:
                 logger.warning("WAV in-memory decode warning: %s", wav_err)
 
-        # 2. Disk file decode with whisper (works when ffmpeg or codecs are installed)
-        suffix = os.path.splitext(file.filename or "")[1].lower() or ".ogg"
+        # 2. Check ffmpeg availability for non-WAV / compressed audio
+        if not shutil.which("ffmpeg"):
+            return {
+                "success": False,
+                "error": "Voice notes need ffmpeg on the server",
+                "text": "",
+            }
+
+        # 3. Disk file decode with whisper
+        ct = (file.content_type or "").lower().split(";")[0].strip()
+        ct_suffix_map = {
+            "audio/ogg": ".ogg",
+            "audio/opus": ".opus",
+            "audio/webm": ".webm",
+            "audio/mpeg": ".mp3",
+            "audio/mp3": ".mp3",
+            "audio/wav": ".wav",
+            "audio/x-wav": ".wav",
+            "audio/aac": ".aac",
+            "audio/mp4": ".m4a",
+        }
+        suffix = ct_suffix_map.get(ct) or os.path.splitext(file.filename or "")[1].lower() or ".webm"
+
         with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
             tmp.write(content)
             tmp_path = tmp.name
@@ -211,6 +284,8 @@ async def voice_endpoint(file: UploadFile = File(...)):
                     pass
 
         return {"success": False, "error": "Could not decode audio. Please use the microphone button or submit text.", "text": ""}
+    except HTTPException:
+        raise
     except Exception as exc:
         logger.warning("Voice endpoint error: %s", exc)
         return {"success": False, "error": str(exc), "text": ""}
@@ -220,9 +295,13 @@ async def voice_endpoint(file: UploadFile = File(...)):
 async def pdf_endpoint(file: UploadFile = File(...)):
     """Extract text from uploaded PDF document for verification."""
     try:
-        content = await file.read()
+        content = await read_limited(file, 2_000_000)
         if not content:
             return {"success": False, "error": "Empty PDF file uploaded.", "text": ""}
+
+        # Validate PDF signature
+        if not content.startswith(b"%PDF"):
+            return {"success": False, "error": "Corrupt or invalid PDF document.", "text": ""}
 
         from app.features.ingestion.pdf import extract_text_from_pdf_bytes
         from app.features.ingestion.ocr import get_ocr_reader
@@ -236,13 +315,11 @@ async def pdf_endpoint(file: UploadFile = File(...)):
             "page_count": result.get("page_count", 0),
             "extraction_method": result.get("extraction_method", "empty"),
         }
+    except HTTPException:
+        raise
     except Exception as exc:
         logger.warning("PDF endpoint error: %s", exc)
-        return {"success": False, "error": str(exc), "text": ""}
-
-
-
-
+        return {"success": False, "error": "Corrupt or invalid PDF document.", "text": ""}
 
 
 # ── Frontend Web Routes ─────────────────────────────────────────────────────────

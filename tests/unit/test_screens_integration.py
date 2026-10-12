@@ -31,7 +31,7 @@ def test_root_screen_serves_whatsapp_portal(client):
     assert resp.status_code == 200
     assert "text/html" in resp.headers["content-type"]
     assert "chat-input" in resp.text
-    assert "SatyaSetu Bot" in resp.text
+    assert "SatyaSetu" in resp.text
 
 
 def test_whatsapp_screen_served(client):
@@ -41,7 +41,7 @@ def test_whatsapp_screen_served(client):
         assert resp.status_code == 200
         assert "text/html" in resp.headers["content-type"]
         assert "chat-input" in resp.text
-        assert "SatyaSetu Bot" in resp.text
+        assert "SatyaSetu" in resp.text
 
 
 def test_sample_claims_endpoint_removed(client):

@@ -6,7 +6,7 @@
 - **Precision:** 146.2%
 - **Confident wrong rate:** 0.0% (target: 0% on adversarial set)
 - **Latency (p50):** 0.3 ms
-- **Latency (p95):** 0.6 ms
+- **Latency (p95):** 1.0 ms
 
 ## Per-Verdict Breakdown
 

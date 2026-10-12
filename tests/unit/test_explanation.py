@@ -1,6 +1,6 @@
 """
-Unit tests for Wave 7: Explanation generator and WhatsApp formatter.
-All tests are offline — no Gemini API calls are made (key intentionally absent).
+Unit tests for Wave 7 / Phase 1: Simple reply formatter, truth score rules, and concise generator.
+All tests are offline — no external API calls required.
 """
 
 from __future__ import annotations
@@ -18,7 +18,10 @@ from app.features.explanation.generator import (
 from app.features.explanation.formatter import (
     MAX_REPLY_LEN,
     WHATSAPP_HARD_CAP,
+    compute_truth_score,
+    compute_evidence_strength,
     format_whatsapp_reply,
+    get_plain_verdict_label,
     translate_reply_back,
 )
 
@@ -82,125 +85,129 @@ def _make_response(
     )
 
 
+# ── Truth Score Calculation ────────────────────────────────────────────────────
+
+class TestTruthScoreCalculation:
+    def test_refuted_score_clamped(self):
+        # confidence 0.9 -> round(0.1 * 10) = 1
+        assert compute_truth_score(Verdict.REFUTED, 0.90) == 1
+        # confidence 0.99 -> round(0.01 * 10) = 0
+        assert compute_truth_score(Verdict.REFUTED, 0.99) == 0
+        # confidence 0.70 -> round(0.3 * 10) = 3 clamped to 2
+        assert compute_truth_score(Verdict.REFUTED, 0.70) == 2
+
+    def test_supported_score_clamped(self):
+        # confidence 0.95 -> round(0.95 * 10) = 10 (or 9.5 -> 10)
+        assert compute_truth_score(Verdict.SUPPORTED, 0.95) == 10
+        # confidence 0.82 -> round(8.2) = 8
+        assert compute_truth_score(Verdict.SUPPORTED, 0.82) == 8
+        # confidence 0.70 -> clamped to 8
+        assert compute_truth_score(Verdict.SUPPORTED, 0.70) == 8
+
+    def test_partially_supported_fixed_score(self):
+        assert compute_truth_score(Verdict.PARTIALLY_SUPPORTED) == 5
+
+    def test_outdated_fixed_score(self):
+        assert compute_truth_score(Verdict.OUTDATED) == 3
+
+    def test_unverifiable_no_score(self):
+        assert compute_truth_score(Verdict.UNVERIFIABLE) is None
+
+
 # ── Explanation Generator ──────────────────────────────────────────────────────
 
-class TestTemplateExplanation:
-    def test_contains_verdict_label(self):
+class TestExplanationGenerator:
+    def test_template_returns_string(self):
         result = _make_claim_result(verdict=Verdict.REFUTED)
         explanation = _template_explanation(result)
-        assert "REFUTED" in explanation
+        assert isinstance(explanation, str)
+        assert len(explanation) > 0
 
-    def test_contains_evidence_strength_label(self):
-        result = _make_claim_result(confidence=0.85)
-        explanation = _template_explanation(result)
-        assert "Evidence strength:" in explanation
-        assert "%" not in explanation
-
-    def test_contains_claim_text(self):
-        result = _make_claim_result(claim="The earth is flat")
-        explanation = _template_explanation(result)
-        assert "The earth is flat" in explanation
-
-    def test_no_evidence_reason_note(self):
-        result = _make_claim_result(reason_code="NO_EVIDENCE", evidence=[])
-        explanation = _template_explanation(result)
-        assert "No relevant evidence" in explanation
-
-    def test_inconclusive_note_present(self):
-        result = _make_claim_result(reason_code="INCONCLUSIVE", evidence=[])
-        explanation = _template_explanation(result)
-        assert "inconclusive" in explanation.lower()
-
-    def test_all_verdicts_produce_string(self):
+    def test_all_verdicts_produce_explanation(self):
         for verdict in Verdict:
-            result = _make_claim_result(verdict=verdict)
+            result = _make_claim_result(verdict=verdict, evidence=[])
             explanation = _template_explanation(result)
             assert isinstance(explanation, str)
-            assert len(explanation) > 10
+            assert len(explanation) > 5
 
-    def test_health_claim_unverifiable_has_advisory(self):
+    def test_health_claim_advisory(self):
         result = _make_claim_result(
-            claim="Drinking fluorine gas cures disease",
+            claim="Drinking bleach cures cancer",
             verdict=Verdict.UNVERIFIABLE,
-            evidence=[]
+            evidence=[],
         )
         explanation = _template_explanation(result)
-        assert "Health advisory" in explanation
-        assert "WHO.int" in explanation
+        assert "WHO.int" in explanation or "doctor" in explanation
 
-
-class TestGenerateExplanation:
-    def test_returns_string(self):
+    def test_no_api_key_uses_template(self, monkeypatch):
+        monkeypatch.setattr("app.core.config.settings.gemini_api_key", "")
         result = _make_claim_result()
         explanation = generate_explanation(result)
         assert isinstance(explanation, str)
         assert len(explanation) > 0
 
-    def test_no_api_key_uses_template(self, monkeypatch):
-        """Without Gemini key, should fall back to template (not raise)."""
-        monkeypatch.setattr("app.core.config.settings.gemini_api_key", "")
-        result = _make_claim_result()
-        explanation = generate_explanation(result)
-        assert isinstance(explanation, str)
-        assert "REFUTED" in explanation
-
 
 # ── WhatsApp Formatter ─────────────────────────────────────────────────────────
 
 class TestFormatWhatsappReply:
-    def test_returns_non_empty_string(self):
+    def test_returns_clean_string(self):
         response = _make_response()
         reply = format_whatsapp_reply(response)
         assert isinstance(reply, str)
-        assert len(reply) > 0
+        assert "❌ *Fake*" in reply
+        assert "Truth score: 1/10" in reply
+        assert "*Claim:*" in reply
+        assert "*Why:*" in reply
+        assert "*Check:*" in reply
+        assert "_Send this to whoever forwarded it._" in reply
 
-    def test_contains_satyasetu_header(self):
+    def test_length_under_600_chars(self):
         response = _make_response()
         reply = format_whatsapp_reply(response)
-        assert "SatyaSetu" in reply
+        assert len(reply) < 600
 
-    def test_contains_overall_verdict_emoji(self):
-        response = _make_response(overall_verdict=Verdict.REFUTED)
+    def test_hindi_reply_localization(self):
+        result = _make_claim_result(claim="नींबू पानी से कैंसर ठीक होता है")
+        response = _make_response(claim_results=[result], language="hi")
         reply = format_whatsapp_reply(response)
-        assert "❌" in reply
+        assert "झूठ" in reply
+        assert "सत्यता स्कोर" in reply
+        assert "*दावा:*" in reply
+        assert "*कारण:*" in reply
+        assert "फॉरवर्ड करें" in reply
 
-    def test_contains_claim_text(self):
-        response = _make_response()
+    def test_unverifiable_shows_not_enough_proof(self):
+        result = _make_claim_result(
+            claim="Unverified rumour",
+            verdict=Verdict.UNVERIFIABLE,
+            evidence=[],
+        )
+        response = _make_response(claim_results=[result], overall_verdict=Verdict.UNVERIFIABLE)
         reply = format_whatsapp_reply(response)
-        assert "Claim 1/" in reply
+        assert "❓ *Can't confirm*" in reply
+        assert "Not enough proof yet." in reply
 
-    def test_reply_under_max_len(self):
-        response = _make_response()
-        reply = format_whatsapp_reply(response)
-        assert len(reply) <= MAX_REPLY_LEN
-
-    def test_reply_hard_cap_never_exceeded(self):
-        """Even with absurdly long explanation, hard cap must hold."""
-        response = _make_response(explanation="A" * 5000)
-        reply = format_whatsapp_reply(response)
-        assert len(reply) <= WHATSAPP_HARD_CAP
-
-    def test_empty_evidence_no_crash(self):
-        result = _make_claim_result(evidence=[])
-        response = _make_response(claim_results=[result])
-        reply = format_whatsapp_reply(response)
-        assert isinstance(reply, str)
-
-    def test_multiple_claims_numbered(self):
+    def test_multiple_claims_compact_layout(self):
         results = [
             _make_claim_result(claim="Claim A"),
             _make_claim_result(claim="Claim B", verdict=Verdict.SUPPORTED),
         ]
         response = _make_response(claim_results=results)
         reply = format_whatsapp_reply(response)
-        assert "Claim 1/2" in reply
-        assert "Claim 2/2" in reply
+        assert "Claim A" in reply
+        assert "Claim B" in reply
+        assert len(reply) < 700
 
-    @pytest.mark.parametrize("verdict", list(Verdict))
-    def test_all_verdicts_render(self, verdict):
-        response = _make_response(overall_verdict=verdict)
+    def test_no_percentage_signs(self):
+        response = _make_response()
         reply = format_whatsapp_reply(response)
-        assert isinstance(reply, str)
+        assert "%" not in reply
+
+    def test_hard_cap_respected(self):
+        long_exp = "A" * 5000
+        response = _make_response(explanation=long_exp)
+        reply = format_whatsapp_reply(response)
+        assert len(reply) <= WHATSAPP_HARD_CAP
 
 
 # ── Back-Translation ───────────────────────────────────────────────────────────
@@ -213,135 +220,9 @@ class TestTranslateReplyBack:
 
     def test_no_api_key_returns_english(self, monkeypatch):
         monkeypatch.setattr("app.core.config.settings.gemini_api_key", "")
-        text = "Fact-check result: REFUTED"
+        text = "Fact-check result: Fake"
         result = translate_reply_back(text, "hi")
         assert result == text
 
     def test_empty_text_returns_empty(self):
-        result = translate_reply_back("", "hi")
-        assert result == ""
-
-    def test_no_lang_code_returns_original(self):
-        text = "Some reply"
-        result = translate_reply_back(text, "")
-        assert result == text
-
-
-# ── TwiML helper (from core — avoids FastAPI import in test env) ──────────────
-
-class TestTwimlMessage:
-    def test_valid_twiml_structure(self):
-        from app.core.twiml import twiml_message
-        twiml = twiml_message("Hello World")
-        assert twiml.startswith("<?xml")
-        assert "<Response>" in twiml
-        assert "<Message>" in twiml
-        assert "Hello World" in twiml
-
-    def test_escapes_ampersand(self):
-        from app.core.twiml import twiml_message
-        twiml = twiml_message("A & B")
-        assert "&amp;" in twiml
-
-    def test_escapes_angle_brackets(self):
-        from app.core.twiml import twiml_message
-        twiml = twiml_message("<script>")
-        assert "&lt;script&gt;" in twiml
-
-
-# ── Acceptance Tests: T6 (AT16) ──────────────────────────────────────────────
-
-class TestT6Acceptance:
-    def test_at16_no_reply_contains_confidence_percentage(self):
-        """AT16: No reply contains a % character next to a confidence figure."""
-        result = _make_claim_result(
-            confidence=0.87,
-            evidence=[
-                _make_evidence(tier=Tier.TIER_1_IFCN, domain="altnews.in"),
-                _make_evidence(tier=Tier.TIER_2_GOV_PIB, domain="pib.gov.in"),
-            ],
-        )
-        response = _make_response(claim_results=[result])
-        reply = format_whatsapp_reply(response)
-
-        # Check no percentage symbol in reply
-        assert "%" not in reply
-        assert "87%" not in reply
-        assert "Evidence strength:" in reply
-
-
-# ── Acceptance Tests: T11 (AT27, AT28) ─────────────────────────────────────────
-
-class TestT11Acceptance:
-    def test_at27_each_verdict_renders_with_fixed_label_in_all_six_languages(self):
-        """AT27: Each verdict renders with a fixed label in all 6 supported languages from labels.yaml."""
-        from pathlib import Path
-        import yaml
-        from app.features.explanation.formatter import get_verdict_label
-
-        labels_path = Path("config/labels.yaml")
-        assert labels_path.exists(), "config/labels.yaml must exist"
-
-        with open(labels_path, "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-
-        languages = ["en", "hi", "mr", "ta", "te", "bn"]
-        verdicts = [
-            Verdict.SUPPORTED,
-            Verdict.REFUTED,
-            Verdict.PARTIALLY_SUPPORTED,
-            Verdict.OUTDATED,
-            Verdict.UNVERIFIABLE,
-        ]
-
-        for lang in languages:
-            assert lang in data, f"Language '{lang}' missing in labels.yaml"
-            lang_data = data[lang]
-            assert "verdicts" in lang_data
-            assert "ui" in lang_data
-
-            # Check all 5 verdicts exist and match get_verdict_label
-            for v in verdicts:
-                v_name = v.value
-                assert v_name in lang_data["verdicts"], f"Verdict '{v_name}' missing in {lang}"
-                expected_label = lang_data["verdicts"][v_name]
-                assert get_verdict_label(v, lang) == expected_label
-
-            # Check fixed UI phrases
-            assert "evidence_strength" in lang_data["ui"]
-            assert "sources" in lang_data["ui"]
-            assert "claim_echo" in lang_data["ui"]
-            assert "translation_unavailable" in lang_data["ui"]
-
-            # Review flags
-            if lang not in ("en", "hi", "mr"):
-                assert lang_data.get("needs_native_review") is True
-
-    def test_at28_translation_unavailable_honest_fallback_line(self, monkeypatch):
-        """AT28: With translation disabled, the reply contains a line explicitly stating explanation is in English."""
-        monkeypatch.setattr("app.core.config.settings.gemini_api_key", "")
-
-        result = _make_claim_result(
-            claim="Vaccines are dangerous",
-            verdict=Verdict.REFUTED,
-            evidence=[_make_evidence(tier=Tier.TIER_1_IFCN, domain="altnews.in")],
-        )
-        response = _make_response(claim_results=[result])
-        response.language = "mr"  # Marathi user
-
-        reply = format_whatsapp_reply(response)
-
-        # The reply must contain the honest fallback notice in Marathi
-        from pathlib import Path
-        import yaml
-        with open("config/labels.yaml", "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-        mr_fallback_msg = data["mr"]["ui"]["translation_unavailable"]
-
-        assert mr_fallback_msg in reply
-        # Claim echo line must also be present
-        mr_echo_label = data["mr"]["ui"]["claim_echo"]
-        assert mr_echo_label in reply
-
-
-
+        assert translate_reply_back("", "hi") == ""

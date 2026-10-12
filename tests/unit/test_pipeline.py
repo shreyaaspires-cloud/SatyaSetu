@@ -140,7 +140,7 @@ class TestRunPipeline:
 class TestT7Acceptance:
     def test_at17_greetings_receive_non_claim_message(self):
         """AT17: 'Hello' and 'Good morning' receive the non-claim message, not a fact check reply."""
-        non_claim_msg = "Only factual claims can be verified. Please share a forwarded message to check."
+        non_claim_msg = "That doesn't look like a claim I can check. Forward a message that states something as fact."
         for text in ("Hello", "Good morning"):
             msg = _make_message(text)
             resp = run_pipeline(msg)
@@ -150,7 +150,7 @@ class TestT7Acceptance:
 
     def test_at18_opinion_skipped_with_non_claim_message(self):
         """AT18: 'This is the best phone' (opinion) is skipped with the non-claim message."""
-        non_claim_msg = "Only factual claims can be verified. Please share a forwarded message to check."
+        non_claim_msg = "That doesn't look like a claim I can check. Forward a message that states something as fact."
         msg = _make_message("This is the best phone")
         resp = run_pipeline(msg)
         assert resp.formatted_reply == non_claim_msg

@@ -1,5 +1,5 @@
 /**
- * app-shell.css - Main layout structure, desktop window bar, and navigation rail
+ * app-shell.css - Main layout structure, full-height viewport, and navigation rail
  */
 
 .app-window {
@@ -11,53 +11,30 @@
   overflow: hidden;
 }
 
-/* Desktop Window Bar */
-.window-header {
-  height: 38px;
-  background-color: var(--wa-bg-panel);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 14px;
-  border-bottom: 1px solid var(--wa-border);
-  user-select: none;
-  flex-shrink: 0;
-}
-
-.window-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--wa-text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.window-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  color: var(--wa-text-secondary);
-}
-
-.win-btn {
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-  padding: 4px;
-  transition: color var(--transition-fast);
-}
-
-.win-btn:hover {
-  color: var(--wa-text-primary);
-}
-
-/* Main Split Container */
+/* Main Split Container (Full 100% viewport) */
 .main-container {
   display: flex;
   flex: 1;
-  height: calc(100vh - 38px);
+  height: 100%;
   overflow: hidden;
+}
+
+/* Panel / Dialog Action Buttons */
+.win-btn, .panel-btn {
+  cursor: pointer;
+  font-size: var(--text-sm);
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--wa-text-secondary);
+  border: 1px solid transparent;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.win-btn:hover, .panel-btn:hover {
+  color: var(--wa-text-primary);
+  background: var(--wa-hover);
 }
 
 /* Far-Left Vertical Icon Rail */
@@ -91,6 +68,8 @@
   color: var(--wa-text-secondary);
   cursor: pointer;
   position: relative;
+  border: none;
+  background: transparent;
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
@@ -99,33 +78,89 @@
   color: var(--wa-text-primary);
 }
 
+.rail-btn:focus-visible {
+  outline: 2px solid var(--wa-green);
+  outline-offset: 2px;
+}
+
 .rail-btn.active {
-  background-color: var(--wa-active);
+  background-color: var(--wa-hover);
   color: var(--wa-green);
 }
 
 .rail-badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 4px;
+  right: 4px;
   background-color: var(--wa-badge);
   color: #111b21;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  border-radius: 10px;
-  padding: 1px 5px;
-  line-height: 1.2;
+  min-width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
 }
 
-/* Responsive Mobile Layout */
+/* Chat Main Layout Split */
+.chats-sidebar {
+  width: var(--sidebar-width);
+  min-width: 300px;
+  max-width: 440px;
+  background-color: var(--wa-bg-deep);
+  border-right: 1px solid var(--wa-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--wa-bg-chat);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Responsive Mobile Rules */
 @media (max-width: 768px) {
-  .window-header {
-    display: none;
-  }
-  .main-container {
-    height: 100vh;
-  }
   .side-rail {
     display: none;
+  }
+
+  .main-container {
+    position: relative;
+  }
+
+  .chats-sidebar {
+    width: 100%;
+    max-width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 10;
+    transition: transform 0.25s ease;
+  }
+
+  .chat-area {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5;
+  }
+
+  body.chat-active .chats-sidebar {
+    transform: translateX(-100%);
+  }
+
+  body.chat-active .chat-area {
+    z-index: 20;
   }
 }

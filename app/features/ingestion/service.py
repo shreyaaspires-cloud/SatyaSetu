@@ -90,6 +90,12 @@ def ingest(
             metadata["url_title"] = url_result["title"]
             metadata["url_method"] = url_result["extraction_method"]
 
+        # Append caption sent with media attachment (FR requirement)
+        if original_body and input_type in (InputType.SCREENSHOT, InputType.VOICE, InputType.PDF):
+            sanitized_caption = sanitize_text(original_body)
+            if sanitized_caption:
+                raw_text = f"{raw_text}\n{sanitized_caption}".strip() if raw_text else sanitized_caption
+
     except Exception as exc:
         logger.error("Ingestion failed unexpectedly for %s: %s", input_type, exc, exc_info=True)
         raw_text = ""

@@ -34,7 +34,8 @@ class CheckAPIResponse(BaseModel):
     Public response model for POST /api/check.
     Decoupled Contract Rules:
     - Truthfulness: Does not invent fake confidence scores or synthetic fallbacks.
-    - ADR-007 Enforced: Verdict adheres strictly to SUPPORTED/REFUTED/MISLEADING/UNVERIFIABLE.
+    - ADR-007 Enforced: Verdict adheres strictly to SUPPORTED/REFUTED/PARTIALLY_SUPPORTED/OUTDATED/UNVERIFIABLE.
+    - Plain Verdict & Truth Score: 0-10 score and plain language verdict label.
     - Evidence Strength: Derived from verified source tiers (Strong, Moderate, Limited, Insufficient).
     - Parity: formatted_reply strictly mirrors WhatsApp webhook message layout.
     """
@@ -42,6 +43,10 @@ class CheckAPIResponse(BaseModel):
     verdict: str
     verdict_label: str = ""
     verdict_emoji: str = ""
+    plain_verdict: str = ""
+    truth_score: Optional[int] = None
+    short_reason: str = ""
+    sources: List[Dict[str, str]] = Field(default_factory=list)
     evidence_strength: str = "Insufficient"
     evidence_strength_detail: str = ""
     explanation: str = ""

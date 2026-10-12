@@ -133,7 +133,7 @@ def run_pipeline(message: IngestedMessage) -> CheckResponse:
     if not claims or is_non_claim(english_text):
         logger.info("Non-claim detected — returning standard prompt reply.")
         timings["total_ms"] = round((time.monotonic() - t_start) * 1000, 1)
-        reply = "Only factual claims can be verified. Please share a forwarded message to check."
+        reply = "That doesn't look like a claim I can check. Forward a message that states something as fact."
         return CheckResponse(
             claim_results=[],
             overall_verdict=Verdict.UNVERIFIABLE,
@@ -149,11 +149,12 @@ def run_pipeline(message: IngestedMessage) -> CheckResponse:
     if worthiness_score < 0.30 and not claims:
         logger.info("Low check-worthiness (%.2f) with no claims — short-circuiting.", worthiness_score)
         timings["total_ms"] = round((time.monotonic() - t_start) * 1000, 1)
+        reply = "That doesn't look like a claim I can check. Forward a message that states something as fact."
         return CheckResponse(
             claim_results=[],
             overall_verdict=Verdict.UNVERIFIABLE,
-            explanation="This message doesn't appear to contain a verifiable factual claim.",
-            formatted_reply="❓ No verifiable claim found in this message. Please forward a factual claim to check.",
+            explanation=reply,
+            formatted_reply=reply,
             language=lang_code,
             timings_ms=timings,
             cached=False,

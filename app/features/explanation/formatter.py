@@ -1,11 +1,10 @@
 """
-WhatsApp reply formatter (Wave 7).
+WhatsApp reply formatter (Wave 7 / Simplified Card Layout).
 
-Converts the overall CheckResponse data into a tightly-formatted WhatsApp
-message string, then translates it back to the user's source language.
-
-WhatsApp character limit: 4096 chars per message (hard cap respected here).
-Max safe reply length we target: 1500 chars (comfortable on mobile screens).
+Converts CheckResponse into a clean, human-readable WhatsApp message:
+- One verdict word, truth score (0-10), one claim line, 1-2 sentence why, at most two source domains.
+- Total length under 600 characters.
+- Multi-lingual localization via labels.yaml.
 """
 
 from __future__ import annotations
@@ -38,11 +37,7 @@ def _load_labels() -> Dict[str, Any]:
 
 
 def get_verdict_label(verdict: Verdict, lang: str = "en") -> str:
-    """
-    Return hardcoded localized verdict label from labels.yaml.
-    Guarantees ADR-007 verdict compliance across English, Hindi, and regional Indic languages
-    without hallucinating intermediate confidence grades.
-    """
+    """Return localized canonical verdict label."""
     labels = _load_labels()
     lang_code = lang.split("-")[0].lower() if lang else "en"
     lang_dict = labels.get(lang_code, labels.get("en", {}))
@@ -50,8 +45,17 @@ def get_verdict_label(verdict: Verdict, lang: str = "en") -> str:
     return verdicts.get(verdict.value, VERDICT_LABEL.get(verdict, verdict.value))
 
 
+def get_plain_verdict_label(verdict: Verdict, lang: str = "en") -> str:
+    """Return plain-language verdict word (e.g. Fake, True, Half true)."""
+    labels = _load_labels()
+    lang_code = lang.split("-")[0].lower() if lang else "en"
+    lang_dict = labels.get(lang_code, labels.get("en", {}))
+    plain_verdicts = lang_dict.get("plain_verdicts", {})
+    return plain_verdicts.get(verdict.value, PLAIN_VERDICT_LABEL.get(verdict, verdict.value))
+
+
 def get_ui_string(key: str, lang: str = "en") -> str:
-    """Return hardcoded localized UI phrase from labels.yaml."""
+    """Return localized UI string from labels.yaml."""
     labels = _load_labels()
     lang_code = lang.split("-")[0].lower() if lang else "en"
     lang_dict = labels.get(lang_code, labels.get("en", {}))
@@ -78,19 +82,46 @@ VERDICT_LABEL: dict = {
     Verdict.UNVERIFIABLE: "UNVERIFIABLE",
 }
 
-MAX_REPLY_LEN = 3000          # Raised from 1400 — allows detailed explanations
-WHATSAPP_HARD_CAP = 4096      # Hard WhatsApp limit
+PLAIN_VERDICT_LABEL: dict = {
+    Verdict.SUPPORTED: "True",
+    Verdict.REFUTED: "Fake",
+    Verdict.PARTIALLY_SUPPORTED: "Half true",
+    Verdict.OUTDATED: "Old news",
+    Verdict.UNVERIFIABLE: "Can't confirm",
+}
+
+MAX_REPLY_LEN = 1200
+WHATSAPP_HARD_CAP = 4096
+
+
+def compute_truth_score(verdict: Verdict, confidence: float = 0.85) -> Optional[int]:
+    """
+    Compute deterministic truth score (0 to 10):
+    | REFUTED | round((1 - confidence) * 10), clamped to 0 to 2 |
+    | SUPPORTED | round(confidence * 10), clamped to 8 to 10 |
+    | PARTIALLY_SUPPORTED | 5 |
+    | OUTDATED | 3 |
+    | UNVERIFIABLE | None |
+    """
+    if verdict == Verdict.REFUTED:
+        raw = round((1.0 - confidence) * 10)
+        return max(0, min(2, raw))
+    elif verdict == Verdict.SUPPORTED:
+        raw = round(confidence * 10)
+        return max(8, min(10, raw))
+    elif verdict == Verdict.PARTIALLY_SUPPORTED:
+        return 5
+    elif verdict == Verdict.OUTDATED:
+        return 3
+    elif verdict == Verdict.UNVERIFIABLE:
+        return None
+    return None
 
 
 def compute_evidence_strength(evidence: List[Any]) -> tuple[str, str]:
     """
     Computes (strength_label, detail_str) based on evidence tiers and count.
-
-    | Label | Condition |
-    | Strong | >= 2 independent Tier 1-3 sources agree |
-    | Moderate | 1 Tier 1-3 source, or >= 2 Tier 4 sources |
-    | Limited | Only Tier 4-5 sources, or 1 source total |
-    | Insufficient | No decisive sources found |
+    Preserved for web API backwards compatibility.
     """
     from app.core.constants import Tier
 
@@ -102,16 +133,17 @@ def compute_evidence_strength(evidence: List[Any]) -> tuple[str, str]:
     tier5_domains = set()
 
     for item in evidence:
-        domain = getattr(item, "source_domain", "") or getattr(item, "url", "")
-        if not domain:
-            continue
+        domain = getattr(item, "source_domain", "") or ""
         tier = getattr(item, "tier", None)
         if tier in (Tier.TIER_1_IFCN, Tier.TIER_2_GOV_PIB, Tier.TIER_3_MAINSTREAM):
-            tier1_3_domains.add(domain)
+            if domain:
+                tier1_3_domains.add(domain)
         elif tier == Tier.TIER_4_WIKIPEDIA:
-            tier4_domains.add(domain)
-        else:
-            tier5_domains.add(domain)
+            if domain:
+                tier4_domains.add(domain)
+        elif tier == Tier.TIER_5_GENERAL_WEB:
+            if domain:
+                tier5_domains.add(domain)
 
     t13_count = len(tier1_3_domains)
     t4_count = len(tier4_domains)
@@ -131,131 +163,99 @@ def compute_evidence_strength(evidence: List[Any]) -> tuple[str, str]:
         return "Insufficient", "No decisive sources found"
 
 
-def _format_single_claim(result: ClaimResult, idx: int, total: int, lang: str = "en") -> str:
-    """Format one ClaimResult as a readable block using fixed labels."""
-    emoji = VERDICT_EMOJI.get(result.verdict, "❓")
-    label = get_verdict_label(result.verdict, lang)
-    strength_label, strength_detail = compute_evidence_strength(result.evidence)
-    ev_strength_prefix = get_ui_string("evidence_strength", lang)
-
-    header = f"*Claim {idx}/{total}:* {result.claim[:120].strip()}"
-    verdict_line = f"{emoji} *{label}*"
-    strength_line = f"{ev_strength_prefix}: {strength_label} · {strength_detail}"
-
-    # Pick the top evidence items as source cites
-    sources: List[str] = []
-    if result.evidence:
-        top = sorted(result.evidence, key=lambda e: -e.score)
-        for ev in top[:2]:
-            if ev.url and ev.source_domain:
-                sources.append(f"• {ev.source_domain}: {ev.url[:80]}")
-
-    source_block = "\n".join(sources) if sources else f"• {get_ui_string('sources', lang)}: N/A"
-
-    parts = [header, verdict_line, strength_line, source_block]
-    return "\n".join(parts)
-
-
-def translate_explanation_paragraph(text: str, target_lang: str) -> str:
-    """
-    Translate only the free-text explanation paragraph using Gemini.
-    Verdict labels, fixed phrases, and citations NEVER pass through machine translation.
-    """
-    if not target_lang or target_lang.startswith("en") or not text.strip():
-        return text
-
-    if not settings.gemini_api_key:
-        return text
-
-    try:
-        from google import genai
-        from app.core.redaction import redact_for_external
-
-        client = genai.Client(api_key=settings.gemini_api_key)
-        prompt = (
-            f"Translate the following fact-check explanation into language '{target_lang}'. "
-            "Output ONLY the translated paragraph text without commentary or markdown headers:\n\n"
-            f"{redact_for_external(text)}"
-        )
-        response = client.models.generate_content(
-            model=settings.gemini_model,
-            contents=prompt,
-        )
-        if response and response.text:
-            return response.text.strip()
-    except Exception as exc:
-        logger.warning("Explanation paragraph translation failed for '%s': %s", target_lang, exc)
-
-    return text
-
-
 def format_whatsapp_reply(response: CheckResponse) -> str:
     """
-    Build a complete WhatsApp reply string from a CheckResponse.
-    Uses hardcoded labels from labels.yaml and provides honest translation fallback.
+    Build concise WhatsApp reply (under 600 chars in standard cases).
+
+    Example layout:
+    ❌ *Fake*   Truth score: 1/10
+
+    *Claim:* Lemon juice cures cancer in 48 hours
+
+    *Why:* No study shows this. Skipping real treatment can be dangerous.
+
+    *Check:* boomlive.in, who.int
+
+    _Send this to whoever forwarded it._
     """
     lang = (getattr(response, "language", "") or "en").split("-")[0].lower()
-    divider = "─" * 25
+    verdict = response.overall_verdict
+    emoji = VERDICT_EMOJI.get(verdict, "❓")
+    plain_label = get_plain_verdict_label(verdict, lang)
 
-    header_parts = [
-        "🔍 *SatyaSetu Fact Check*",
-        divider,
-    ]
-
-    # Claim echo line
+    # Calculate truth score from primary claim result
+    confidence = 0.85
     if response.claim_results:
-        echo_label = get_ui_string("claim_echo", lang)
-        claim_snippet = response.claim_results[0].claim[:120].strip()
-        header_parts.append(f"*{echo_label}:* \"{claim_snippet}\"")
-        header_parts.append(divider)
+        confidence = response.claim_results[0].confidence
 
-    claim_blocks: List[str] = []
-    total = len(response.claim_results)
-    for idx, result in enumerate(response.claim_results, 1):
-        claim_blocks.append(_format_single_claim(result, idx, total, lang=lang))
+    score = compute_truth_score(verdict, confidence)
 
-    overall_emoji = VERDICT_EMOJI.get(response.overall_verdict, "❓")
-    overall_label = get_verdict_label(response.overall_verdict, lang)
-
-    # Free-text explanation handling (allow up to 2000 chars without mid-word truncation)
-    explanation_raw = response.explanation[:2000].strip()
-    if len(response.explanation) > 2000:
-        explanation_raw += "…"
-
-    translation_unavailable_line: Optional[str] = None
-    if lang != "en":
-        if settings.gemini_api_key:
-            explanation_excerpt = translate_explanation_paragraph(explanation_raw, lang)
-        else:
-            explanation_excerpt = explanation_raw
-            translation_unavailable_line = get_ui_string("translation_unavailable", lang)
+    # 1. Header line: Verdict + Score
+    if score is not None:
+        score_text = f"{get_ui_string('truth_score', lang)}: {score}/10"
     else:
-        explanation_excerpt = explanation_raw
+        score_text = get_ui_string("no_score", lang)
 
-    footer_parts = [
-        divider,
-        f"*Overall:* {overall_emoji} {overall_label}",
-        explanation_excerpt,
-    ]
+    header = f"{emoji} *{plain_label}*   {score_text}"
 
-    if translation_unavailable_line:
-        footer_parts.append(f"ℹ️ {translation_unavailable_line}")
+    # 2. Claim block
+    claim_label = get_ui_string("claim", lang)
+    why_label = get_ui_string("why", lang)
+    check_label = get_ui_string("check", lang)
+    forward_hint = get_ui_string("forward_hint", lang)
 
-    footer_parts.extend([
-        divider,
-        "_SatyaSetu — AI-powered multilingual fact checking_",
-    ])
+    lines = [header, ""]
 
-    # BUG-17: was wrapping claim_blocks in a list which caused no leading/trailing
-    # newlines around the claim section, making it run into dividers.
-    claim_section = ("\n\n" + divider + "\n\n").join(claim_blocks)
-    all_lines = header_parts + [claim_section] + footer_parts
-    reply = "\n".join(all_lines)
+    # Multi-claim handling or single claim
+    if len(response.claim_results) > 1:
+        lines.append(f"*{claim_label}:* {response.claim_results[0].claim[:120].strip()}")
+        for idx, cr in enumerate(response.claim_results[:2], 1):
+            cr_emoji = VERDICT_EMOJI.get(cr.verdict, "❓")
+            cr_plain = get_plain_verdict_label(cr.verdict, lang)
+            lines.append(f"• {cr.claim[:70].strip()} ({cr_emoji} {cr_plain})")
+    elif response.claim_results:
+        lines.append(f"*{claim_label}:* {response.claim_results[0].claim[:140].strip()}")
+    else:
+        echo_label = get_ui_string("claim_echo", lang)
+        lines.append(f"*{echo_label}:* \"{response.explanation[:120]}\"")
 
-    # Safety trim
-    if len(reply) > MAX_REPLY_LEN:
-        reply = reply[:MAX_REPLY_LEN - 3] + "…"
+    lines.append("")
 
+    # 3. Why (concise reason)
+    reason = response.explanation.strip()
+    # Strip any residual verbose prefixes
+    for prefix in ["Verdict:", "Evidence strength:", "Evidence summary:"]:
+        if prefix in reason:
+            reason = reason.split("\n")[-1].strip()
+    if not reason:
+        reason = get_ui_string("no_score", lang)
+    lines.append(f"*{why_label}:* {reason}")
+
+    # 4. Check (domains)
+    domains: List[str] = []
+    seen = set()
+    for cr in response.claim_results:
+        for ev in cr.evidence:
+            domain = ev.source_domain or ""
+            if domain and domain.lower() not in seen:
+                seen.add(domain.lower())
+                domains.append(domain)
+            if len(domains) >= 2:
+                break
+        if len(domains) >= 2:
+            break
+
+    if domains:
+        lines.append("")
+        lines.append(f"*{check_label}:* {', '.join(domains)}")
+
+    # 5. Footer
+    lines.append("")
+    lines.append(f"_{forward_hint}_")
+
+    reply = "\n".join(lines)
+
+    # WhatsApp hard cap guard
     if len(reply) > WHATSAPP_HARD_CAP:
         reply = reply[:WHATSAPP_HARD_CAP - 3] + "…"
 
@@ -267,19 +267,8 @@ def translate_reply_back(
     target_lang: str,
 ) -> str:
     """
-    Translate a formatted English reply back to the user's source language.
-
-    Only structural text (non-URL, non-emoji, non-domain lines) is translated.
-    WhatsApp bold markers (*word*) are preserved.
-
-    Falls back to the English reply if translation is unavailable.
-
-    Args:
-        english_reply: The English-formatted reply string.
-        target_lang:   BCP-47 language code (e.g. 'hi', 'mr', 'ta').
-
-    Returns:
-        Translated reply string, or the original English if translation fails.
+    Translate a formatted reply back to the user's source language.
+    WhatsApp bold markers (*word*) and URLs are preserved.
     """
     if not target_lang or target_lang.startswith("en"):
         return english_reply
@@ -288,11 +277,9 @@ def translate_reply_back(
         return english_reply
 
     try:
-        # English → Indic translation uses Gemini only (M2M100 is Indic→English only)
         from app.core.config import settings as cfg
 
         if not cfg.gemini_api_key:
-            logger.info("No Gemini key — returning English reply.")
             return english_reply
 
         from google import genai
@@ -302,7 +289,8 @@ def translate_reply_back(
         client = genai.Client(api_key=cfg.gemini_api_key)
         prompt = (
             f"Translate the following WhatsApp fact-check reply into language code '{target_lang}'. "
-            "Preserve all *bold* markers, emojis, and URLs exactly as-is. "
+            "Keep the reply concise, natural, and under 500 characters. "
+            "Preserve all *bold* markers, emojis, domain names, and URLs exactly as-is. "
             "Output ONLY the translated text:\n\n"
             f"{redacted_reply}"
         )
@@ -312,7 +300,6 @@ def translate_reply_back(
         )
         if response and response.text:
             translated = response.text.strip()
-            # Respect WhatsApp hard cap after translation
             if len(translated) > WHATSAPP_HARD_CAP:
                 translated = translated[:WHATSAPP_HARD_CAP - 3] + "…"
             return translated
