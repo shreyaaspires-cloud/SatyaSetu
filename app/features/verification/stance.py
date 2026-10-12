@@ -278,7 +278,13 @@ def score_stance(
             except Exception:
                 pass
 
-    # 1. Try local NLI model
+    # 1. Try Gemini batch stance (sub-second batch inference for all items in 1 network call)
+    if settings.gemini_api_key and _gemini_stance_batch(claim, _to_score):
+        for item in _to_score:
+            _apply_recency_weight(item)
+        return evidence_items
+
+    # 2. Try local NLI model (CPU fallback if Gemini unavailable)
     model_tuple = _load_nli_model(settings.nli_model_name)
     if model_tuple is not None:
         tokenizer, model = model_tuple
@@ -292,12 +298,6 @@ def score_stance(
             else:
                 item.stance = "NEUTRAL"
             item.score = round(confidence, 3)
-            _apply_recency_weight(item)
-        return evidence_items
-
-    # 2. Try Gemini batch stance (only on non-mismatched items)
-    if _gemini_stance_batch(claim, _to_score):
-        for item in _to_score:
             _apply_recency_weight(item)
         return evidence_items
 

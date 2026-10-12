@@ -132,12 +132,18 @@ def translate_to_english(
     if not cleaned or lang_code == "en":
         return cleaned, False
 
-    # Handle Hinglish translation directly via Gemini.
-    # M2M100 has no explicit hi-Latn source language token.
+    # FAST PATH: Try Gemini first if API key configured (<800ms vs multi-second local weights).
+    # Handles Hinglish (hi-Latn) and all Indic languages natively and accurately.
+    if settings.gemini_api_key:
+        try:
+            gemini_result = translate_with_gemini(cleaned, lang_code)
+            if gemini_result:
+                return gemini_result, False
+        except Exception as g_exc:
+            logger.warning("Gemini-first translation attempt failed: %s; trying local fallback.", g_exc)
+
+    # Handle Hinglish if Gemini didn't succeed (M2M100 has no hi-Latn source token)
     if lang_code == "hi-Latn":
-        gemini_result = translate_with_gemini(cleaned, "hi-Latn")
-        if gemini_result:
-            return gemini_result, False
         logger.info("Hinglish translation fallback to original text.")
         return cleaned, True
 
@@ -176,14 +182,14 @@ def translate_to_english(
                 **inputs,
                 forced_bos_token_id=active_tokenizer.get_lang_id("en"),
                 max_length=256,
-                num_beams=4,
+                num_beams=1,
             )
 
         decoded = active_tokenizer.decode(translated_tokens[0], skip_special_tokens=True)
         if isinstance(decoded, str) and decoded.strip():
             return decoded.strip(), False
 
-        # Fallback to Gemini if local output was empty (degenerate beam search result).
+        # Fallback to Gemini if local output was empty.
         gemini_result = translate_with_gemini(cleaned, lang_code)
         if gemini_result:
             return gemini_result, False

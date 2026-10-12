@@ -189,8 +189,8 @@ def search_official_sources(
     items: List[EvidenceItem] = []
     try:
         if active_provider in ("hybrid", "parallel", "all"):
-            from app.features.retrieval.search_web import _search_parallel_hybrid
-            items = _search_parallel_hybrid(query)
+            from app.features.retrieval.search_web import _search_google_news_rss
+            items = _search_google_news_rss(query, window="30d")
         elif active_provider == "google_news_rss":
             from app.features.retrieval.search_web import _search_google_news_rss
             items = _search_google_news_rss(query, window="30d")

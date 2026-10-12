@@ -220,11 +220,11 @@ def generate_explanation(result: ClaimResult) -> str:
             import concurrent.futures
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
                 future = pool.submit(_gemini_explanation, result)
-                gemini_text = future.result(timeout=4.0)
+                gemini_text = future.result(timeout=2.0)
                 if gemini_text and len(gemini_text) > 10:
                     return gemini_text
         except concurrent.futures.TimeoutError:
-            logger.warning("Gemini explanation timed out after 4.0s; using deterministic template fallback.")
+            logger.warning("Gemini explanation timed out after 2.0s; using deterministic template fallback.")
         except Exception as exc:
             logger.warning("Explanation generation encountered error: %s", exc)
 

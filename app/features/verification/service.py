@@ -340,7 +340,16 @@ def verify_claim(
                     logger.info("Gemini evidence-based override: verdict=%s conf=%.2f", verdict, confidence)
 
         # Pass 2: If still UNVERIFIABLE, ask Gemini using its own parametric knowledge
-        if verdict == Verdict.UNVERIFIABLE and settings.gemini_api_key:
+        # Latency gate: Only fire Pass 2 for high-stakes public interest topics
+        # to avoid an extra serial API call (~1.5s) on generic or low-risk claims.
+        HIGH_STAKES_TOPICS = (
+            "cancer", "vaccine", "upi", "scheme", "government", "cure",
+            "virus", "yojana", "fee", "tax", "election", "aadhaar", "modi",
+            "pib", "rbi", "bank", "scam", "hospital", "doctor"
+        )
+        is_high_stakes = any(kw in claim.lower() for kw in HIGH_STAKES_TOPICS)
+
+        if verdict == Verdict.UNVERIFIABLE and settings.gemini_api_key and is_high_stakes:
             gemini_kb_result = _gemini_knowledge_verify(claim.strip())
             if gemini_kb_result:
                 verdict, confidence, reason_code = gemini_kb_result

@@ -10,11 +10,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class CheckRequest(BaseModel):
-    """Payload for POST /api/check."""
-    model_config = ConfigDict(extra="ignore")
-    text: Optional[str] = None
-    claim: Optional[str] = None
-    language: Optional[str] = "en"
+    """Payload for POST /api/check with strict schema, length limits, and extra field rejection."""
+    model_config = ConfigDict(extra="forbid")
+    text: Optional[str] = Field(default=None, max_length=5000, description="Input text to verify")
+    claim: Optional[str] = Field(default=None, max_length=5000, description="Explicit claim to verify")
+    language: Optional[str] = Field(default="en", max_length=10, description="Optional ISO language code")
 
 
 class EvidenceItemAPI(BaseModel):

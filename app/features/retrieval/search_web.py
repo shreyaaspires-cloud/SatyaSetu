@@ -137,12 +137,12 @@ def _search_tavily(query: str, api_key: str) -> List[EvidenceItem]:
     payload = {
         "api_key": api_key,
         "query": search_q,
-        "search_depth": "advanced",
-        "max_results": 7,
+        "search_depth": "basic",
+        "max_results": 5,
         "include_answer": True,
     }
     try:
-        resp = requests.post(TAVILY_SEARCH_URL, json=payload, timeout=7.0)
+        resp = requests.post(TAVILY_SEARCH_URL, json=payload, timeout=3.5)
         resp.raise_for_status()
         data = resp.json()
     except Exception as exc:
@@ -150,7 +150,7 @@ def _search_tavily(query: str, api_key: str) -> List[EvidenceItem]:
         logger.debug("Biased search failed (%s), trying raw query.", exc)
         payload["query"] = query
         payload["search_depth"] = "basic"
-        resp = requests.post(TAVILY_SEARCH_URL, json=payload, timeout=5.0)
+        resp = requests.post(TAVILY_SEARCH_URL, json=payload, timeout=3.0)
         resp.raise_for_status()
         data = resp.json()
 
@@ -207,7 +207,7 @@ def _search_google_news_rss(query: str, window: str = "7d") -> List[EvidenceItem
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) SatyaSetu/1.0"}
 
     try:
-        resp = requests.get(url, headers=headers, timeout=5.0)
+        resp = requests.get(url, headers=headers, timeout=2.5)
         resp.raise_for_status()
         root = ET.fromstring(resp.content)
     except Exception as exc:
@@ -215,7 +215,7 @@ def _search_google_news_rss(query: str, window: str = "7d") -> List[EvidenceItem
         return []
 
     items: List[EvidenceItem] = []
-    for it in root.findall("./channel/item")[:7]:
+    for it in root.findall("./channel/item")[:5]:
         src = it.find("source")
         domain = (urlparse(src.get("url")).hostname or "").lower() if src is not None and src.get("url") else ""
         if domain.startswith("www."):
@@ -298,7 +298,7 @@ def _search_parallel_hybrid(query: str) -> List[EvidenceItem]:
             tasks[executor.submit(_search_brave, query, settings.search_api_key)] = "brave"
 
         try:
-            for future in concurrent.futures.as_completed(tasks, timeout=4.5):
+            for future in concurrent.futures.as_completed(tasks, timeout=2.2):
                 prov_name = tasks[future]
                 try:
                     items = future.result()
@@ -308,7 +308,7 @@ def _search_parallel_hybrid(query: str) -> List[EvidenceItem]:
                 except Exception as exc:
                     logger.warning("Provider '%s' failed during hybrid search: %s", prov_name, exc)
         except concurrent.futures.TimeoutError:
-            logger.warning("Hybrid search reached 4.5s timeout; proceeding with available results.")
+            logger.warning("Hybrid search reached 2.2s timeout; proceeding with available results.")
 
     if not collected:
         return []
@@ -334,7 +334,7 @@ def _search_parallel_hybrid(query: str) -> List[EvidenceItem]:
 
     deduped = list(seen.values())
     deduped.sort(key=lambda it: (TIER_PRIORITY.get(it.tier, 99), -it.score))
-    return deduped[:8]
+    return deduped[:5]
 
 
 def search_web(query: str) -> List[EvidenceItem]:
