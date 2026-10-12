@@ -79,16 +79,22 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         app.state.whisper_model = None
         model_status["asr"] = f"failed: {type(exc).__name__}"
 
-    # NLI model — non-fatal
-    try:
-        from app.features.verification.stance import _load_nli_model
-        app.state.nli_model = _load_nli_model(settings.nli_model_name)
-        model_status["nli"] = "ok"
-        logger.info("[OK] NLI model '%s' loaded", settings.nli_model_name)
-    except Exception as exc:
-        logger.error("[ERROR] NLI model failed to load: %s", exc)
-        app.state.nli_model = None
-        model_status["nli"] = f"failed: {type(exc).__name__}"
+    # NLI model — non-fatal (warmed in background thread so server starts immediately)
+    import threading
+    app.state.nli_model = None
+    model_status["nli"] = "warming_up"
+
+    def _warm_nli_background():
+        try:
+            from app.features.verification.stance import _load_nli_model
+            app.state.nli_model = _load_nli_model(settings.nli_model_name)
+            model_status["nli"] = "ok"
+            logger.info("[OK] NLI model '%s' loaded in background", settings.nli_model_name)
+        except Exception as exc:
+            logger.warning("[WARN] NLI model background load: %s", exc)
+            model_status["nli"] = f"fallback: {type(exc).__name__}"
+
+    threading.Thread(target=_warm_nli_background, daemon=True, name="nli_warmer").start()
 
     # fastText LID model — non-fatal
     import os
