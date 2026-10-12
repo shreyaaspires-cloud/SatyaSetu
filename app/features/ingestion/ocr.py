@@ -230,21 +230,3 @@ def extract_text_from_bytes(image_bytes: bytes, reader: Optional[Any] = None) ->
     except Exception as exc:
         logger.error("EasyOCR inference failed on bytes: %s", exc, exc_info=True)
         return OCRResult(text="", confidence=0.0, language="unknown", status="error", error=str(exc))
-            for (_bbox, text, conf) in raw_results
-            if conf >= CONFIDENCE_THRESHOLD and text.strip()
-        ]
-        full_text = " ".join(filtered_lines).strip()
-
-        confidences = [
-            conf for (_bbox, _text, conf) in raw_results if conf >= CONFIDENCE_THRESHOLD
-        ]
-        avg_confidence = sum(confidences) / len(confidences) if confidences else 0.0
-
-        return OCRResult(
-            text=full_text,
-            confidence=round(avg_confidence, 3),
-            language="auto",
-        )
-    except Exception as exc:
-        logger.error("EasyOCR inference failed on image bytes: %s", exc, exc_info=True)
-        return OCRResult(text="", confidence=0.0, language="unknown")
