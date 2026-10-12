@@ -143,16 +143,22 @@ def _gemini_explanation(result: ClaimResult) -> str | None:
 
 
 def generate_explanation(result: ClaimResult) -> str:
-    """Generate concise explanation for a ClaimResult."""
+    """Generate concise explanation for a ClaimResult with resilient timeout."""
     # When there is no evidence and verdict is UNVERIFIABLE, do not hallucinate an explanation
     if not result.evidence and result.verdict == Verdict.UNVERIFIABLE:
         return _template_explanation(result)
 
-    try:
-        gemini_text = _gemini_explanation(result)
-        if gemini_text and len(gemini_text) > 10:
-            return gemini_text
-    except Exception as exc:
-        logger.warning("Explanation generation encountered error: %s", exc)
+    if settings.gemini_api_key:
+        try:
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(_gemini_explanation, result)
+                gemini_text = future.result(timeout=4.0)
+                if gemini_text and len(gemini_text) > 10:
+                    return gemini_text
+        except concurrent.futures.TimeoutError:
+            logger.warning("Gemini explanation timed out after 4.0s; using deterministic template fallback.")
+        except Exception as exc:
+            logger.warning("Explanation generation encountered error: %s", exc)
 
     return _template_explanation(result)

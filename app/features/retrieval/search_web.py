@@ -42,14 +42,14 @@ pathological values from dominating the upstream ranking stage.
 from __future__ import annotations
 
 import logging
-from typing import List
-from urllib.parse import urlparse
+from typing import Dict, List, Optional
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import requests
 
 from app.contracts.models import EvidenceItem
 from app.core.config import settings
-from app.core.constants import Rating
+from app.core.constants import Rating, Tier
 from app.core.security import is_public_http_url
 from app.features.retrieval.sources import classify_domain
 
@@ -58,6 +58,15 @@ logger = logging.getLogger(__name__)
 # API base URLs — parameterised here for easy mocking in integration tests.
 BRAVE_SEARCH_URL = "https://api.search.brave.com/res/v1/web/search"
 TAVILY_SEARCH_URL = "https://api.tavily.com/search"
+
+# Numerical priority for sorting tiers (lower number = higher trust)
+TIER_PRIORITY: Dict[Tier, int] = {
+    Tier.TIER_1_IFCN: 1,
+    Tier.TIER_2_GOV_PIB: 2,
+    Tier.TIER_3_MAINSTREAM: 3,
+    Tier.TIER_4_WIKIPEDIA: 4,
+    Tier.TIER_5_GENERAL_WEB: 5,
+}
 
 
 def _search_brave(query: str, api_key: str) -> List[EvidenceItem]:
@@ -237,36 +246,141 @@ def _search_google_news_rss(query: str, window: str = "7d") -> List[EvidenceItem
     return items
 
 
+def _canonicalize_url(raw_url: str) -> str:
+    """
+    Canonicalize a URL for reliable deduplication:
+    - Lowercases scheme and domain.
+    - Strips 'www.' prefixes and trailing slashes.
+    - Strips analytics / tracking query parameters (utm_*, ref, fbclid, etc.).
+    """
+    if not raw_url:
+        return ""
+    try:
+        parsed = urlparse(raw_url.strip())
+        netloc = (parsed.netloc or "").lower()
+        if netloc.startswith("www."):
+            netloc = netloc[4:]
+        path = (parsed.path or "").rstrip("/")
+        qs = parse_qsl(parsed.query)
+        cleaned_qs = [
+            (k, v) for k, v in qs
+            if not k.lower().startswith("utm_")
+            and k.lower() not in ("ref", "fbclid", "gclid", "ocid", "ved", "source", "feature", "output")
+        ]
+        new_query = urlencode(cleaned_qs)
+        return urlunparse((parsed.scheme.lower() or "https", netloc, path, "", new_query, ""))
+    except Exception:
+        return raw_url.strip().lower()
+
+
+def _search_parallel_hybrid(query: str) -> List[EvidenceItem]:
+    """
+    Execute concurrent multi-provider search across Tavily, Google News RSS, and Brave.
+    - Dispatches tasks in parallel using ThreadPoolExecutor.
+    - Bounded per-future timeout prevents slow engines from blocking the pipeline.
+    - Canonicalizes and deduplicates URLs, combining snippets and ranking by trust tier.
+    """
+    import concurrent.futures
+
+    tasks: dict[concurrent.futures.Future, str] = {}
+    collected: List[EvidenceItem] = []
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3, thread_name_prefix="search_hybrid") as executor:
+        # 1. Google News RSS is keyless and zero-cost
+        tasks[executor.submit(_search_google_news_rss, query)] = "google_news_rss"
+
+        # 2. Tavily if key is available
+        if settings.search_api_key and not settings.search_api_key.startswith("BSA"):
+            tasks[executor.submit(_search_tavily, query, settings.search_api_key)] = "tavily"
+
+        # 3. Brave if key is configured (Brave keys start with BSA)
+        if settings.search_api_key and settings.search_api_key.startswith("BSA"):
+            tasks[executor.submit(_search_brave, query, settings.search_api_key)] = "brave"
+
+        try:
+            for future in concurrent.futures.as_completed(tasks, timeout=4.5):
+                prov_name = tasks[future]
+                try:
+                    items = future.result()
+                    if items:
+                        logger.debug("Provider '%s' retrieved %d items in hybrid search", prov_name, len(items))
+                        collected.extend(items)
+                except Exception as exc:
+                    logger.warning("Provider '%s' failed during hybrid search: %s", prov_name, exc)
+        except concurrent.futures.TimeoutError:
+            logger.warning("Hybrid search reached 4.5s timeout; proceeding with available results.")
+
+    if not collected:
+        return []
+
+    # Deduplicate by canonical URL, preserving higher trust tier and longer snippet
+    seen: dict[str, EvidenceItem] = {}
+    for item in collected:
+        canon_key = _canonicalize_url(item.url) or item.title.strip().lower()
+        if not canon_key:
+            continue
+        if canon_key not in seen:
+            seen[canon_key] = item
+        else:
+            existing = seen[canon_key]
+            curr_pri = TIER_PRIORITY.get(item.tier, 99)
+            exist_pri = TIER_PRIORITY.get(existing.tier, 99)
+            if curr_pri < exist_pri or (curr_pri == exist_pri and item.score > existing.score):
+                if len(existing.snippet) > len(item.snippet):
+                    item.snippet = existing.snippet
+                seen[canon_key] = item
+            elif len(item.snippet) > len(existing.snippet):
+                existing.snippet = item.snippet
+
+    deduped = list(seen.values())
+    deduped.sort(key=lambda it: (TIER_PRIORITY.get(it.tier, 99), -it.score))
+    return deduped[:8]
+
+
 def search_web(query: str) -> List[EvidenceItem]:
     """
-    Search the web for claims or evidence using the configured provider.
-    Supports Brave, Tavily, and keyless Google News RSS.
+    Search the web for claims or evidence using configured provider(s).
+    Supports:
+    - 'hybrid' / 'parallel' / 'all': Parallel concurrent Tavily + Google News RSS (+ Brave).
+    - 'tavily': Tavily primary with automatic Google News RSS fallback.
+    - 'brave': Brave primary with automatic Google News RSS fallback.
+    - 'google_news_rss': Keyless Google News RSS only.
     Never raises exceptions.
     """
     if not query or not query.strip():
         return []
 
-    provider = (settings.search_provider or "google_news_rss").lower().strip()
+    provider = (settings.search_provider or "hybrid").lower().strip()
 
-    # If provider requires an API key but none is configured, gracefully fall back to Google News RSS
+    # If a keyed provider was requested but no key exists, default to hybrid or google_news_rss
     if provider in ("brave", "tavily") and not settings.search_api_key:
         logger.debug("Search API key not configured for %s. Using google_news_rss fallback.", provider)
         provider = "google_news_rss"
 
-    # Redact PII from query before sending to external search provider.
+    # Redact PII from query before sending to external search providers
     from app.core.redaction import redact_for_external
     cleaned_query = redact_for_external(query.strip())
 
     try:
-        if provider == "google_news_rss":
-            return _search_google_news_rss(cleaned_query)
-        elif provider == "brave":
-            return _search_brave(cleaned_query, settings.search_api_key)
+        if provider in ("hybrid", "parallel", "all"):
+            return _search_parallel_hybrid(cleaned_query)
         elif provider == "tavily":
-            return _search_tavily(cleaned_query, settings.search_api_key)
-        else:
-            logger.warning("Unsupported search provider: %s, falling back to google_news_rss", provider)
+            items = _search_tavily(cleaned_query, settings.search_api_key)
+            if not items:
+                logger.info("Tavily returned 0 results; falling back to Google News RSS")
+                items = _search_google_news_rss(cleaned_query)
+            return items
+        elif provider == "brave":
+            items = _search_brave(cleaned_query, settings.search_api_key)
+            if not items:
+                logger.info("Brave returned 0 results; falling back to Google News RSS")
+                items = _search_google_news_rss(cleaned_query)
+            return items
+        elif provider == "google_news_rss":
             return _search_google_news_rss(cleaned_query)
+        else:
+            logger.warning("Unsupported search provider: %s, using hybrid search", provider)
+            return _search_parallel_hybrid(cleaned_query)
     except Exception as exc:
         logger.warning("Web search failed for query '%s': %s", query, exc)
         return []

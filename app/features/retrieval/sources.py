@@ -124,7 +124,10 @@ def classify_domain(url: str) -> Tier:
         return Tier.TIER_5_GENERAL_WEB
 
     try:
-        parsed = urlparse(url)
+        raw = url.strip()
+        if not (raw.startswith("http://") or raw.startswith("https://")):
+            raw = f"https://{raw}"
+        parsed = urlparse(raw)
         netloc = (parsed.netloc or "").lower()
         if netloc.startswith("www."):
             netloc = netloc[4:]
